@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Autonomous Intralogistics Facility - 3D QR</title>
+    <!-- Stable CDNs -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
@@ -64,7 +65,7 @@
         box-shadow: 0 0 8px #38bdf8;
       }
 
-      /* UI Control Stack */
+      /* Bottom Control Panel Stack */
       .bottom-control-panel {
         position: absolute;
         bottom: 18px;
@@ -214,12 +215,15 @@
   <body>
     <div id="toast" class="toast">Snapshot saved & link copied!</div>
 
+    <!-- Floating Hint Badge -->
     <div id="tap-badge" class="tap-badge">
       <span class="pulse-dot"></span>
       <span id="badge-text">Tap the warehouse to see QR code</span>
     </div>
 
+    <!-- Bottom Control Stack -->
     <div class="bottom-control-panel">
+      <!-- Input & Action Bar -->
       <div class="bottom-bar">
         <input id="qr-input" class="bottom-input" type="text" value="https://yongming.vorky.fyi/" placeholder="Type any link or text..." />
         <button id="submit-btn" class="action-btn" title="Update Facility">
@@ -237,6 +241,7 @@
         </button>
       </div>
 
+      <!-- Mode Switcher Row + Audio Button -->
       <div class="mode-row">
         <div class="mode-selector">
           <button class="mode-tab active" data-mode="day">☀️ Day Shift</button>
@@ -260,7 +265,14 @@
     <div id="webgl-container"></div>
 
     <script>
-      // --- OPERATIONAL PALETTES (RAL & THEMATIC STANDARDS) ---
+      // ==========================================
+      // 1. STATE & THEMES (DEFINED AT THE VERY TOP)
+      // ==========================================
+      let isFlat = false;
+      let soundEnabled = false;
+      let audioCtx = null;
+      let activeMode = 'day';
+
       const THEMES = {
         day: {
           floorCenter3D:  new THREE.Color('#475263'),
@@ -321,23 +333,19 @@
         }
       };
 
-      let activeMode = 'day';
-      let PALETTE = THEMES[activeMode];
-
-      // --- URL QUERY PARAMETER INITIALIZATION ---
+      // Query param initialization
       const urlParams = new URLSearchParams(window.location.search);
       const initialText = urlParams.get('url') || 'https://yongming.vorky.fyi/';
       const initialMode = urlParams.get('mode');
       if (initialMode && THEMES[initialMode]) {
         activeMode = initialMode;
-        PALETTE = THEMES[activeMode];
       }
+      let PALETTE = THEMES[activeMode];
       document.getElementById('qr-input').value = initialText;
 
-      // --- SYNTHETIC WEB AUDIO ENGINE (ZERO EXTERNAL MP3s) ---
-      let audioCtx = null;
-      let soundEnabled = false;
-
+      // ==========================================
+      // 2. SYNTHETIC AUDIO ENGINE
+      // ==========================================
       function initAudio() {
         if (!audioCtx) {
           audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -402,7 +410,9 @@
         } catch (e) {}
       }
 
-      // --- THREE.JS SCENE SETUP ---
+      // ==========================================
+      // 3. THREE.JS SCENE, CAMERAS & RENDERER
+      // ==========================================
       const container = document.getElementById('webgl-container');
       const scene = new THREE.Scene();
       scene.background = new THREE.Color('#080b12');
@@ -463,7 +473,7 @@
       fillLight.position.set(-30, 20, -30);
       scene.add(fillLight);
 
-      // --- ATMOSPHERIC DUST PARTICLES ---
+      // Dust Particles
       const dustCount = 140;
       const dustGeo = new THREE.BufferGeometry();
       const dustPositions = new Float32Array(dustCount * 3);
@@ -483,7 +493,7 @@
       const dustParticles = new THREE.Points(dustGeo, dustMat);
       scene.add(dustParticles);
 
-      // --- LIDAR SCANNING LASER PLANE ---
+      // Lidar Laser Plane
       const laserGeo = new THREE.PlaneGeometry(36, 0.45);
       const laserMat = new THREE.MeshBasicMaterial({
         color: PALETTE.laserColor,
@@ -497,15 +507,18 @@
       laserPlane.position.y = 0.35;
       scene.add(laserPlane);
 
-      // --- INSTANCED RENDERING SYSTEM ---
+      // Instanced System State
       let instancedMesh = null;
       const dummy = new THREE.Object3D();
       const tempColor = new THREE.Color();
       let currentInstance = 0;
-
       let floorData = [];
       let dynamicFleet = [];
+      const contrastState = { progress: 0 };
 
+      // ==========================================
+      // 4. GENERATOR FUNCTIONS
+      // ==========================================
       function addBlock(x, y, z, sx, sy, sz, colorHex) {
         if (!instancedMesh) return -1;
         const idx = currentInstance;
@@ -632,7 +645,31 @@
         addBlock(x + offset, 0.05, z + offset, 0.14, 0.70, 0.14, PALETTE.bollardYellow);
       }
 
-      // --- FACILITY GENERATOR ---
+      function updateFloorTransition(progress) {
+        if (!instancedMesh) return;
+        const scratch = new THREE.Color();
+        for (let i = 0; i < floorData.length; i++) {
+          const item = floorData[i];
+          scratch.lerpColors(item.col3D, item.colScan, progress);
+          instancedMesh.setColorAt(item.idx, scratch);
+        }
+        if (instancedMesh.instanceColor) instancedMesh.instanceColor.needsUpdate = true;
+      }
+
+      function triggerLidarSweep() {
+        laserPlane.position.z = -17;
+        laserMat.opacity = 0.85;
+        gsap.to(laserPlane.position, {
+          z: 17,
+          duration: 1.1,
+          ease: "power2.inOut",
+          onComplete: () => {
+            gsap.to(laserMat, { opacity: 0.0, duration: 0.3 });
+            playScanChime();
+          }
+        });
+      }
+
       function generateFacility(text) {
         if (instancedMesh) {
           scene.remove(instancedMesh);
@@ -649,7 +686,6 @@
         const size = qr.getModuleCount();
         const center = size / 2;
         const maxRadius = size * 0.707;
-        
         const highBayRadius = size * 0.18;
         const rackRadius = size * 0.37;
 
@@ -723,42 +759,11 @@
         updateFloorTransition(isFlat ? 1 : 0);
       }
 
-      const input = document.getElementById('qr-input');
-      generateFacility(input.value.trim());
-
-      // --- FLOOR TRANSITION ---
-      const contrastState = { progress: 0 };
-
-      function updateFloorTransition(progress) {
-        if (!instancedMesh) return;
-        const scratch = new THREE.Color();
-
-        for (let i = 0; i < floorData.length; i++) {
-          const item = floorData[i];
-          scratch.lerpColors(item.col3D, item.colScan, progress);
-          instancedMesh.setColorAt(item.idx, scratch);
-        }
-        if (instancedMesh.instanceColor) instancedMesh.instanceColor.needsUpdate = true;
-      }
-
-      // --- VIEW TOGGLE & CAMERA CENTERING ---
-      let isFlat = false;
+      // ==========================================
+      // 5. VIEW TOGGLE & CAMERA CENTERING
+      // ==========================================
       const tapBadge = document.getElementById('tap-badge');
       const badgeText = document.getElementById('badge-text');
-
-      function triggerLidarSweep() {
-        laserPlane.position.z = -17;
-        laserMat.opacity = 0.85;
-        gsap.to(laserPlane.position, {
-          z: 17,
-          duration: 1.1,
-          ease: "power2.inOut",
-          onComplete: () => {
-            gsap.to(laserMat, { opacity: 0.0, duration: 0.3 });
-            playScanChime();
-          }
-        });
-      }
 
       function toggleView() {
         initAudio();
@@ -843,6 +848,7 @@
       });
 
       // Submit URL
+      const input = document.getElementById('qr-input');
       const submitBtn = document.getElementById('submit-btn');
       function handleUpdate() {
         initAudio();
@@ -856,9 +862,8 @@
         if (e.key === 'Enter') handleUpdate();
       });
 
-      // --- FEATURE 1: MODE SWITCHER ---
+      // Mode Switcher Buttons
       const modeTabs = document.querySelectorAll('.mode-tab');
-      // Set initial active state from query param if provided
       modeTabs.forEach(t => {
         if (t.dataset.mode === activeMode) t.classList.add('active');
         else t.classList.remove('active');
@@ -876,7 +881,7 @@
         });
       });
 
-      // --- FEATURE 2: SNAPSHOT & SHARE TOOL ---
+      // Snapshot & Share Tool
       const shareBtn = document.getElementById('share-btn');
       const toast = document.getElementById('toast');
 
@@ -890,7 +895,6 @@
         initAudio();
         playClick();
 
-        // 1. Download PNG Snapshot
         renderer.render(scene, camera);
         const dataURL = renderer.domElement.toDataURL('image/png');
         const link = document.createElement('a');
@@ -898,7 +902,6 @@
         link.href = dataURL;
         link.click();
 
-        // 2. Build & Copy Shareable URL
         const shareUrl = new URL(window.location.origin + window.location.pathname);
         shareUrl.searchParams.set('url', input.value.trim());
         shareUrl.searchParams.set('mode', activeMode);
@@ -909,7 +912,7 @@
         });
       });
 
-      // --- FEATURE 5: AUDIO TOGGLE ---
+      // Audio Toggle Button
       const audioBtn = document.getElementById('audio-btn');
       const audioIconOn = document.getElementById('audio-icon-on');
       const audioIconOff = document.getElementById('audio-icon-off');
@@ -937,7 +940,11 @@
         renderer.setSize(width, height);
       });
 
-      // --- ANIMATION LOOP ---
+      // ==========================================
+      // 6. INITIALIZATION & RENDER LOOP
+      // ==========================================
+      generateFacility(input.value.trim());
+
       const clock = new THREE.Clock();
 
       function animate() {
@@ -948,7 +955,7 @@
           controls.update();
         }
 
-        // Feature 4: Atmospheric Dust Drift
+        // Dust Particle Drift
         if (dustParticles) {
           const positions = dustGeo.attributes.position.array;
           for (let i = 1; i < dustPositions.length; i += 3) {
@@ -959,7 +966,7 @@
           dustParticles.rotation.y = elapsedTime * 0.03;
         }
 
-        // Active large cruising motion in 3D
+        // Active Cruising Motion in 3D
         if (instancedMesh && !isFlat) {
           for (let f = 0; f < dynamicFleet.length; f++) {
             const unit = dynamicFleet[f];

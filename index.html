@@ -13,14 +13,14 @@
     <style>
       * { box-sizing: border-box; margin: 0; padding: 0; }
       body {
-        background: #0a0402;
+        background: #1c1412;
         color: #f8fafc;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
         overflow: hidden;
         user-select: none;
       }
 
-      /* Fluid Abstract Mesh Gradient Backdrop */
+      /* Fluid Ambient Pastel Mesh Backdrop */
       #abstract-bg {
         position: fixed;
         inset: 0;
@@ -29,76 +29,76 @@
         z-index: 0;
         pointer-events: none;
         overflow: hidden;
-        background-color: #0a0402;
+        background-color: #1c1412;
         transition: background-color 1.4s cubic-bezier(0.16, 1, 0.3, 1);
       }
 
       .glow-blob {
         position: absolute;
         border-radius: 50%;
-        filter: blur(100px);
-        opacity: 0.68;
+        filter: blur(120px);
+        opacity: 0.65;
         will-change: transform;
         transition: background 1.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.4s ease;
       }
 
+      /* Blob 1: Large primary studio light pool */
       .blob-1 {
-        width: 65vw;
-        height: 65vw;
-        min-width: 520px;
-        min-height: 520px;
+        width: 68vw;
+        height: 68vw;
+        min-width: 540px;
+        min-height: 540px;
         bottom: -15%;
-        right: -10%;
-        background: radial-gradient(circle, #ff5400 0%, #ea580c 45%, transparent 75%);
-        animation: floatBlob1 20s infinite alternate ease-in-out;
+        right: -8%;
+        animation: floatBlob1 22s infinite alternate ease-in-out;
       }
 
+      /* Blob 2: Secondary top-right pastel accent flare */
       .blob-2 {
-        width: 58vw;
-        height: 58vw;
-        min-width: 440px;
-        min-height: 440px;
-        top: -12%;
-        right: 12%;
-        background: radial-gradient(circle, #f97316 0%, #c2410c 45%, transparent 75%);
-        animation: floatBlob2 25s infinite alternate ease-in-out;
+        width: 60vw;
+        height: 60vw;
+        min-width: 460px;
+        min-height: 460px;
+        top: -14%;
+        right: 15%;
+        animation: floatBlob2 26s infinite alternate ease-in-out;
       }
 
+      /* Blob 3: Deep ambient fill warmth */
       .blob-3 {
-        width: 72vw;
-        height: 72vw;
-        min-width: 560px;
-        min-height: 560px;
-        bottom: -10%;
-        left: -18%;
-        background: radial-gradient(circle, #9a3412 0%, #7c2d12 40%, transparent 70%);
-        animation: floatBlob3 28s infinite alternate ease-in-out;
+        width: 75vw;
+        height: 75vw;
+        min-width: 580px;
+        min-height: 580px;
+        bottom: -12%;
+        left: -16%;
+        animation: floatBlob3 30s infinite alternate ease-in-out;
       }
 
+      /* Soft Diffused Studio Vignette (No harsh black cuts!) */
       .bg-vignette {
         position: absolute;
         inset: 0;
-        background: radial-gradient(ellipse at 50% 45%, transparent 35%, rgba(6, 3, 2, 0.70) 80%, rgba(6, 3, 2, 0.95) 100%);
         pointer-events: none;
         transition: background 1.4s ease;
       }
 
       @keyframes floatBlob1 {
         0% { transform: translate3d(0, 0, 0) scale(1); }
-        50% { transform: translate3d(-16vw, -14vh, 0) scale(1.14); }
+        50% { transform: translate3d(-16vw, -14vh, 0) scale(1.15); }
         100% { transform: translate3d(-8vw, 6vh, 0) scale(0.92); }
       }
 
       @keyframes floatBlob2 {
         0% { transform: translate3d(0, 0, 0) scale(0.92); }
-        50% { transform: translate3d(14vw, 15vh, 0) scale(1.16); }
+        50% { transform: translate3d(14vw, 15vh, 0) scale(1.18); }
         100% { transform: translate3d(-12vw, 8vh, 0) scale(1.02); }
       }
 
       @keyframes floatBlob3 {
         0% { transform: translate3d(0, 0, 0) scale(1.05); }
         50% { transform: translate3d(18vw, -14vh, 0) scale(0.88); }
-        100% { transform: translate3d(8vw, -5vh, 0) scale(1.12); }
+        100% { transform: translate3d(8vw, -5vh, 0) scale(1.14); }
       }
 
       #webgl-container {
@@ -119,15 +119,15 @@
         bottom: 136px;
         left: 50%;
         transform: translateX(-50%);
-        background: rgba(20, 26, 38, 0.90);
-        backdrop-filter: blur(12px);
+        background: rgba(20, 26, 38, 0.88);
+        backdrop-filter: blur(14px);
         color: #cbd5e1;
         font-size: 13px;
         font-weight: 500;
         padding: 7px 18px;
         border-radius: 9999px;
-        border: 1px solid rgba(255, 255, 255, 0.14);
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
         cursor: pointer;
         transition: all 0.2s ease;
         z-index: 10;
@@ -136,9 +136,9 @@
         gap: 8px;
       }
       .tap-badge:hover {
-        background: rgba(37, 99, 235, 0.9);
+        background: rgba(37, 99, 235, 0.92);
         color: #ffffff;
-        border-color: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.35);
         transform: translateX(-50%) translateY(-2px);
       }
       .pulse-dot {
@@ -168,17 +168,17 @@
         width: 100%;
         display: flex;
         gap: 8px;
-        background: rgba(14, 18, 28, 0.94);
-        backdrop-filter: blur(16px);
+        background: rgba(14, 18, 28, 0.92);
+        backdrop-filter: blur(18px);
         padding: 7px 9px;
         border-radius: 20px;
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        box-shadow: 0 25px 40px -10px rgba(0, 0, 0, 0.9);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        box-shadow: 0 25px 40px -10px rgba(0, 0, 0, 0.6);
       }
       .bottom-input {
         flex: 1;
         background: rgba(255, 255, 255, 0.06);
-        border: 1px solid rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.14);
         padding: 11px 16px;
         border-radius: 14px;
         color: #ffffff;
@@ -188,7 +188,7 @@
       }
       .bottom-input:focus {
         border-color: #3b82f6;
-        background: rgba(255, 255, 255, 0.09);
+        background: rgba(255, 255, 255, 0.10);
       }
       .action-btn {
         background: #2563eb;
@@ -207,7 +207,7 @@
       .action-btn:active { transform: scale(0.95); }
 
       .share-btn {
-        background: rgba(217, 119, 6, 0.9);
+        background: rgba(217, 119, 6, 0.92);
       }
       .share-btn:hover { background: rgb(180, 83, 9); }
 
@@ -220,12 +220,12 @@
       .mode-selector {
         flex: 1;
         display: flex;
-        background: rgba(14, 18, 28, 0.92);
-        backdrop-filter: blur(14px);
+        background: rgba(14, 18, 28, 0.90);
+        backdrop-filter: blur(16px);
         padding: 4px;
         border-radius: 16px;
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.5);
       }
       .mode-tab {
         flex: 1;
@@ -242,18 +242,18 @@
         white-space: nowrap;
       }
       .mode-tab.active {
-        background: rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.14);
         color: #ffffff;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
       }
       .mode-tab:hover:not(.active) {
         color: #f1f5f9;
-        background: rgba(255, 255, 255, 0.05);
+        background: rgba(255, 255, 255, 0.06);
       }
       .audio-btn {
-        background: rgba(14, 18, 28, 0.92);
-        backdrop-filter: blur(14px);
-        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(14, 18, 28, 0.90);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.14);
         color: #94a3b8;
         width: 44px;
         height: 44px;
@@ -266,7 +266,7 @@
       }
       .audio-btn:hover {
         color: #ffffff;
-        border-color: rgba(255, 255, 255, 0.25);
+        border-color: rgba(255, 255, 255, 0.3);
       }
       .audio-btn.active {
         color: #38bdf8;
@@ -284,7 +284,7 @@
         font-weight: 600;
         padding: 9px 20px;
         border-radius: 9999px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
         opacity: 0;
         pointer-events: none;
         transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -297,7 +297,7 @@
     </style>
   </head>
   <body>
-    <!-- Fluid Abstract Gradient Mesh Layer -->
+    <!-- Fluid Abstract Pastel Mesh Layer -->
     <div id="abstract-bg">
       <div id="blob-1" class="glow-blob blob-1"></div>
       <div id="blob-2" class="glow-blob blob-2"></div>
@@ -358,7 +358,7 @@
 
     <script>
       // ==========================================
-      // 1. STATE & COMPLETE PALETTES
+      // 1. STATE & PASTEL STUDIO PALETTES
       // ==========================================
       let isFlat = false;
       let soundEnabled = false;
@@ -367,18 +367,19 @@
 
       const THEMES = {
         day: {
-          bgBase: '#0a0402',
-          blob1:  'radial-gradient(circle, #ff5400 0%, #ea580c 45%, transparent 75%)',
-          blob2:  'radial-gradient(circle, #f97316 0%, #c2410c 45%, transparent 75%)',
-          blob3:  'radial-gradient(circle, #9a3412 0%, #7c2d12 40%, transparent 70%)',
-          vignette: 'radial-gradient(ellipse at 50% 45%, transparent 35%, rgba(6, 3, 2, 0.70) 80%, rgba(6, 3, 2, 0.95) 100%)',
-          dustColor: 0xffedd5,
+          // Warm Pastel Terracotta & Peach Studio (Matches reference image)
+          bgBase: '#1c1412',
+          blob1:  'radial-gradient(circle, rgba(251, 146, 60, 0.55) 0%, rgba(244, 114, 182, 0.28) 48%, transparent 75%)',
+          blob2:  'radial-gradient(circle, rgba(253, 186, 116, 0.50) 0%, rgba(254, 215, 170, 0.22) 50%, transparent 75%)',
+          blob3:  'radial-gradient(circle, rgba(225, 29, 72, 0.32) 0%, rgba(159, 18, 57, 0.18) 45%, transparent 70%)',
+          vignette: 'radial-gradient(ellipse at 50% 45%, transparent 40%, rgba(22, 15, 14, 0.55) 85%, rgba(15, 10, 9, 0.92) 100%)',
+          dustColor: 0xfde68a, // Soft warm golden bokeh
 
-          sunIntensity: 1.8,
-          ambientIntensity: 0.85,
+          sunIntensity: 1.85,
+          ambientIntensity: 0.88,
           sunColor: '#fffbf0',
 
-          // Authentic Slate Grey Concrete Floor!
+          // Medium Slate-Grey Concrete Floor
           floorCenter3D:  new THREE.Color('#3f4854'), 
           floorEdge3D:    new THREE.Color('#252d36'), 
           floorScanLight: new THREE.Color('#ffffff'),
@@ -412,18 +413,19 @@
           laserColor:     0x38bdf8
         },
         cold: {
-          bgBase: '#020713',
-          blob1:  'radial-gradient(circle, #0284c7 0%, #0369a1 45%, transparent 75%)',
-          blob2:  'radial-gradient(circle, #06b6d4 0%, #0284c7 45%, transparent 75%)',
-          blob3:  'radial-gradient(circle, #1e3a8a 0%, #0f172a 40%, transparent 70%)',
-          vignette: 'radial-gradient(ellipse at 50% 45%, transparent 35%, rgba(2, 5, 15, 0.72) 80%, rgba(2, 5, 15, 0.96) 100%)',
-          dustColor: 0xe0f2fe,
+          // Frosty Powder-Blue & Lavender Mist Pastel
+          bgBase: '#0c1522',
+          blob1:  'radial-gradient(circle, rgba(125, 211, 252, 0.50) 0%, rgba(56, 189, 248, 0.28) 48%, transparent 75%)',
+          blob2:  'radial-gradient(circle, rgba(165, 243, 252, 0.52) 0%, rgba(34, 211, 238, 0.22) 50%, transparent 75%)',
+          blob3:  'radial-gradient(circle, rgba(199, 210, 254, 0.38) 0%, rgba(129, 140, 248, 0.18) 45%, transparent 70%)',
+          vignette: 'radial-gradient(ellipse at 50% 45%, transparent 40%, rgba(8, 15, 26, 0.55) 85%, rgba(5, 10, 18, 0.92) 100%)',
+          dustColor: 0xbae6fd, // Soft frosty powder-blue motes
 
-          sunIntensity: 1.8,
-          ambientIntensity: 0.85,
+          sunIntensity: 1.85,
+          ambientIntensity: 0.88,
           sunColor: '#f0f9ff',
 
-          // Cool Bluish-Grey Concrete Floor for Cold Storage!
+          // Cool Bluish-Grey Concrete Floor
           floorCenter3D:  new THREE.Color('#334454'), 
           floorEdge3D:    new THREE.Color('#1e2a36'), 
           floorScanLight: new THREE.Color('#ffffff'),
@@ -457,15 +459,16 @@
           laserColor:     0x67e8f9
         },
         night: {
-          bgBase: '#020806',
-          blob1:  'radial-gradient(circle, #10b981 0%, #047857 45%, transparent 75%)',
-          blob2:  'radial-gradient(circle, #f59e0b 0%, #b45309 45%, transparent 75%)',
-          blob3:  'radial-gradient(circle, #064e3b 0%, #022c22 40%, transparent 70%)',
-          vignette: 'radial-gradient(ellipse at 50% 45%, transparent 30%, rgba(2, 6, 23, 0.75) 85%, rgba(2, 6, 23, 0.96) 100%)',
-          dustColor: 0x6ee7b7,
+          // Moody Twilight Emerald & Hazard Amber Pastel
+          bgBase: '#090e17',
+          blob1:  'radial-gradient(circle, rgba(110, 231, 183, 0.42) 0%, rgba(16, 185, 129, 0.22) 48%, transparent 75%)',
+          blob2:  'radial-gradient(circle, rgba(253, 224, 71, 0.35) 0%, rgba(245, 158, 11, 0.18) 50%, transparent 75%)',
+          blob3:  'radial-gradient(circle, rgba(147, 197, 253, 0.32) 0%, rgba(59, 130, 246, 0.16) 45%, transparent 70%)',
+          vignette: 'radial-gradient(ellipse at 50% 45%, transparent 40%, rgba(5, 9, 16, 0.60) 85%, rgba(2, 5, 10, 0.94) 100%)',
+          dustColor: 0xa7f3d0, // Soft pastel emerald motes
 
-          sunIntensity: 1.6,
-          ambientIntensity: 0.65,
+          sunIntensity: 1.65,
+          ambientIntensity: 0.70,
           sunColor: '#fffbeb',
 
           // Dark Charcoal Concrete Floor
@@ -656,7 +659,7 @@
       fillLight.position.set(-30, 20, -30);
       scene.add(fillLight);
 
-      // --- PROCEDURAL SOFT GAUSSIAN CIRCULAR TEXTURE ---
+      // --- PROCEDURAL SOFT GAUSSIAN TEXTURE ---
       function createSoftParticleTexture() {
         const canvas = document.createElement('canvas');
         canvas.width = 64;
@@ -664,15 +667,15 @@
         const ctx = canvas.getContext('2d');
         const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
         grad.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
-        grad.addColorStop(0.35, 'rgba(255, 255, 255, 0.55)');
-        grad.addColorStop(0.7, 'rgba(255, 255, 255, 0.12)');
+        grad.addColorStop(0.35, 'rgba(255, 255, 255, 0.50)');
+        grad.addColorStop(0.7, 'rgba(255, 255, 255, 0.10)');
         grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
         ctx.fillStyle = grad;
         ctx.fillRect(0, 0, 64, 64);
         return new THREE.CanvasTexture(canvas);
       }
 
-      // --- SUBTLE, TRANSPARENT ATMOSPHERIC DUST MOTES ---
+      // --- SUBTLE, ATMOSPHERIC PARTICLES ---
       const dustCount = 130;
       const dustGeo = new THREE.BufferGeometry();
       const dustPositions = new Float32Array(dustCount * 3);
@@ -683,11 +686,11 @@
       }
       dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPositions, 3));
       const dustMat = new THREE.PointsMaterial({
-        size: 0.48, // Subtle, realistic, and non-intrusive!
+        size: 0.48, // Subtle, refined scale
         map: createSoftParticleTexture(),
         color: PALETTE.dustColor,
         transparent: true,
-        opacity: 0.25, // Extremely soft & transparent
+        opacity: 0.28,
         blending: THREE.AdditiveBlending,
         depthWrite: false
       });
@@ -779,11 +782,9 @@
           parts.push({ ox: rx, oy: oy, oz: rz, sx: rsx, sy: sy, sz: rsz, idx });
         }
 
-        // Yellow Chassis & Counterweight
         addPart(0, 0.08, 0.12, 0.52, 0.45, 0.42, PALETTE.forkliftBody);
         addPart(0, 0.05, 0.30, 0.50, 0.28, 0.14, PALETTE.forkliftCab);
 
-        // 4-Pillar Safety Cage (Y=1.60)
         addPart(-0.20, 0.53, -0.04, 0.05, 1.05, 0.05, PALETTE.forkliftCab);
         addPart(0.20, 0.53, -0.04, 0.05, 1.05, 0.05, PALETTE.forkliftCab);
         addPart(-0.20, 0.53, 0.22, 0.05, 1.05, 0.05, PALETTE.forkliftCab);
@@ -791,12 +792,10 @@
         addPart(0, 1.58, 0.09, 0.46, 0.05, 0.42, PALETTE.forkliftCab);
         addPart(0, 1.63, 0.09, 0.12, 0.10, 0.12, PALETTE.forkliftBeacon);
 
-        // Twin Vertical Lifting Rails (Y=1.80)
         addPart(-0.15, 0.05, -0.16, 0.06, 1.80, 0.06, PALETTE.forkliftMast);
         addPart(0.15, 0.05, -0.16, 0.06, 1.80, 0.06, PALETTE.forkliftMast);
         addPart(0, 1.40, -0.16, 0.30, 0.06, 0.04, PALETTE.forkliftMast);
 
-        // Forks, Euro Pallet & Cargo Carton
         addPart(0, 0.20, -0.22, 0.42, 0.06, 0.10, PALETTE.forkliftCab);
         addPart(0, 0.22, -0.32, 0.44, 0.08, 0.32, PALETTE.woodPallet);
         addPart(0, 0.30, -0.32, 0.38, 0.44, 0.28, PALETTE.cargoKraft);

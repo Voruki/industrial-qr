@@ -32,7 +32,7 @@
       /* Floating Hint Badge */
       .tap-badge {
         position: absolute;
-        bottom: 90px;
+        bottom: 92px;
         left: 50%;
         transform: translateX(-50%);
         background: rgba(20, 26, 38, 0.90);
@@ -136,30 +136,31 @@
     <div id="webgl-container"></div>
 
     <script>
-      // --- INDUSTRIAL COLOR PALETTE (RAL STANDARDS) ---
+      // --- VIBRANT INDUSTRIAL RAL PALETTE ---
       const PALETTE = {
-        // Floor (3D Mode)
-        floorCenter3D:  new THREE.Color('#4d5766'),
-        floorEdge3D:    new THREE.Color('#11151e'),
+        // Concrete Floor (3D Gradient -> Bright Clean Cream in Top View)
+        floorCenter3D:  new THREE.Color('#4c5666'),
+        floorEdge3D:    new THREE.Color('#121620'),
+        floorScanLight: new THREE.Color('#EDEDEA'), // Clean scan contrast ground
+
+        // Dark Floor Tracks
         trackCenter3D:  new THREE.Color('#222834'),
         trackEdge3D:    new THREE.Color('#0a0d14'),
+        trackScanDark:  new THREE.Color('#1A2230'),
 
-        // Scan Mode Targets (Clean Black & White Contrast)
-        scanLight:      new THREE.Color('#ffffff'), // Pure white floor in scan
-        scanDarkCore:   new THREE.Color('#2d0606'), // Deep contrast dark red for AS/RS core
-        scanDarkModule: new THREE.Color('#0f172a'), // Solid dark slate for racks & fleet
+        // Racks & Equipment Keep Their Exact Colors
+        rackUpright: '#1E3A8A',    // RAL 5010 Industrial Blue
+        rackBeam:    '#EA580C',    // RAL 2004 Pure Orange
+        woodPallet:  '#854D0E',    // Euro Pallet Timber
 
-        // 3D Equipment Palette
-        rackUpright: '#1E3A8A',    // RAL 5010 Blue
-        rackBeam:    '#EA580C',    // RAL 2004 Orange
-        woodPallet:  '#854D0E',
-
-        cargoBox:    '#94A3B8',    // Standard cargo box
+        cargoBox:    '#94A3B8',    // Standard stretch-wrap parcel
         cargoBoxAlt: '#A16207',    // Corrugated kraft carton
 
+        // High-Bay Center Containers
         highBayCargo:    '#B91C1C', // RAL 3001 Signal Red
         highBayCargoAlt: '#991B1B', // RAL 3000 Flame Red
 
+        // Mobile Fleet
         forkliftBody: '#EAB308',   // Safety Yellow
         forkliftCab:  '#0F172A',
         forkliftMast: '#475569',
@@ -183,11 +184,14 @@
       let height = window.innerHeight;
 
       const camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 1000);
-      const isoPos = new THREE.Vector3(38, 44, 38);
-      // Positioned at Y=96 and shifted along Z=+6.5 to lift QR code cleanly above bottom bar
-      const flatPos = new THREE.Vector3(0, 96, 6.501);
+      
+      // Target offset (Z = +3.5) centers the model vertically above the bottom bar
+      const defaultTarget = new THREE.Vector3(0, 0, 3.5);
+      const isoPos = new THREE.Vector3(38, 44, 41.5);
+      const flatPos = new THREE.Vector3(0, 92, 3.501);
+
       camera.position.copy(isoPos);
-      camera.lookAt(0, 0, 0);
+      camera.lookAt(defaultTarget);
 
       const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
       renderer.setSize(width, height);
@@ -196,14 +200,14 @@
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       container.appendChild(renderer.domElement);
 
-      // Smooth Orbit Navigation in 3D
+      // Smooth Orbit Controls
       const controls = new THREE.OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
       controls.dampingFactor = 0.06;
       controls.maxPolarAngle = Math.PI / 2 - 0.05;
       controls.minDistance = 16;
-      controls.maxDistance = 120;
-      controls.target.set(0, 0, 0);
+      controls.maxDistance = 125;
+      controls.target.copy(defaultTarget);
 
       // Material: Rich reflections in 3D, matte in scan view
       const boxGeo = new THREE.BoxGeometry(1, 1, 1);
@@ -235,17 +239,16 @@
       fillLight.position.set(-30, 20, -30);
       scene.add(fillLight);
 
-      // --- INSTANCED ENGINE & DYNAMIC INSTANCES ---
+      // --- INSTANCED RENDERING SYSTEM ---
       let instancedMesh = null;
       const dummy = new THREE.Object3D();
       const tempColor = new THREE.Color();
       let currentInstance = 0;
 
-      // Color mapping for smooth contrast transition
-      let instanceColorData = [];
+      let floorData = [];
       let dynamicFleet = [];
 
-      function addBlock(x, y, z, sx, sy, sz, col3DHex, colScanTarget = PALETTE.scanDarkModule) {
+      function addBlock(x, y, z, sx, sy, sz, col3DHex) {
         if (!instancedMesh) return -1;
         const idx = currentInstance;
         dummy.position.set(x, y + sy / 2, z);
@@ -257,33 +260,29 @@
         const col3D = (col3DHex instanceof THREE.Color) ? col3DHex.clone() : new THREE.Color(col3DHex);
         instancedMesh.setColorAt(idx, col3D);
 
-        instanceColorData.push({ idx, col3D, colScan: colScanTarget });
         currentInstance++;
         return idx;
       }
 
-      // 1. Racking Bays (Flat uniform tiers)
       function spawnAlignedRackBay(x, z, tiers, isHighBay = false) {
         const tierHeight = 0.88;
         const totalHeight = tiers * tierHeight;
         const postW = 0.08;
         const offset = 0.42;
 
-        const scanTarget = isHighBay ? PALETTE.scanDarkCore : PALETTE.scanDarkModule;
-
-        addBlock(x - offset, 0, z - offset, postW, totalHeight, postW, PALETTE.rackUpright, scanTarget);
-        addBlock(x + offset, 0, z - offset, postW, totalHeight, postW, PALETTE.rackUpright, scanTarget);
-        addBlock(x - offset, 0, z + offset, postW, totalHeight, postW, PALETTE.rackUpright, scanTarget);
-        addBlock(x + offset, 0, z + offset, postW, totalHeight, postW, PALETTE.rackUpright, scanTarget);
+        addBlock(x - offset, 0, z - offset, postW, totalHeight, postW, PALETTE.rackUpright);
+        addBlock(x + offset, 0, z - offset, postW, totalHeight, postW, PALETTE.rackUpright);
+        addBlock(x - offset, 0, z + offset, postW, totalHeight, postW, PALETTE.rackUpright);
+        addBlock(x + offset, 0, z + offset, postW, totalHeight, postW, PALETTE.rackUpright);
 
         for (let t = 0; t < tiers; t++) {
           const y = t * tierHeight;
-          addBlock(x, y, z - offset, 0.92, 0.06, postW, PALETTE.rackBeam, scanTarget);
-          addBlock(x, y, z + offset, 0.92, 0.06, postW, PALETTE.rackBeam, scanTarget);
-          addBlock(x - offset, y, z, postW, 0.06, 0.92, PALETTE.rackBeam, scanTarget);
-          addBlock(x + offset, y, z, postW, 0.06, 0.92, PALETTE.rackBeam, scanTarget);
+          addBlock(x, y, z - offset, 0.92, 0.06, postW, PALETTE.rackBeam);
+          addBlock(x, y, z + offset, 0.92, 0.06, postW, PALETTE.rackBeam);
+          addBlock(x - offset, y, z, postW, 0.06, 0.92, PALETTE.rackBeam);
+          addBlock(x + offset, y, z, postW, 0.06, 0.92, PALETTE.rackBeam);
 
-          addBlock(x, y + 0.06, z, 0.78, 0.07, 0.78, PALETTE.woodPallet, scanTarget);
+          addBlock(x, y + 0.06, z, 0.78, 0.07, 0.78, PALETTE.woodPallet);
 
           let boxColor;
           if (isHighBay) {
@@ -291,51 +290,43 @@
           } else {
             boxColor = (x + z + t) % 2 === 0 ? PALETTE.cargoBox : PALETTE.cargoBoxAlt;
           }
-          // The cargo box deepens in scan mode so it never looks white from above!
-          addBlock(x, y + 0.13, z, 0.68, 0.50, 0.68, boxColor, scanTarget);
+          addBlock(x, y + 0.13, z, 0.68, 0.50, 0.68, boxColor);
         }
       }
 
-      // 2. Compact Forklift: Moves forward/backward along its drive heading, stays strictly inside cell
       function spawnForklift(x, z, dir = 'z') {
         const parts = [];
 
         function addPart(ox, oy, oz, sx, sy, sz, colorHex) {
-          // If dir is 'x', rotate 90 degrees around Y: (ox, oz) -> (-oz, ox), (sx, sz) -> (sz, sx)
           const rx = (dir === 'x') ? -oz : ox;
           const rz = (dir === 'x') ? ox : oz;
           const rsx = (dir === 'x') ? sz : sx;
           const rsz = (dir === 'x') ? sx : sz;
 
-          const idx = addBlock(x + rx, oy, z + rz, rsx, sy, rsz, colorHex, PALETTE.scanDarkModule);
-          parts.push({ ox: rx, oy, oz: rz, sx: rsx, sy, sz: rsz, idx });
+          const idx = addBlock(x + rx, oy, z + rz, rsx, sy, rsz, colorHex);
+          parts.push({ ox: rx, oy: oz, sx: rsx, sy: sy, sz: rsz, idx });
         }
 
-        // Body & Counterweight
         addPart(0, 0.05, 0.08, 0.46, 0.28, 0.32, PALETTE.forkliftBody);
-        // Protective Cab Cage
         addPart(-0.16, 0.33, -0.04, 0.04, 0.38, 0.04, PALETTE.forkliftCab);
         addPart(0.16, 0.33, -0.04, 0.04, 0.38, 0.04, PALETTE.forkliftCab);
         addPart(-0.16, 0.33, 0.14, 0.04, 0.38, 0.04, PALETTE.forkliftCab);
         addPart(0.16, 0.33, 0.14, 0.04, 0.38, 0.04, PALETTE.forkliftCab);
         addPart(0, 0.71, 0.05, 0.38, 0.03, 0.32, PALETTE.forkliftCab);
-        // Vertical Mast Rails
         addPart(-0.12, 0.05, -0.14, 0.04, 0.85, 0.04, PALETTE.forkliftMast);
         addPart(0.12, 0.05, -0.14, 0.04, 0.85, 0.04, PALETTE.forkliftMast);
-        // Pallet on Forks
         addPart(0, 0.10, -0.25, 0.38, 0.05, 0.24, PALETTE.woodPallet);
         addPart(0, 0.15, -0.25, 0.32, 0.28, 0.20, PALETTE.cargoBoxAlt);
 
         dynamicFleet.push({
           baseX: x, baseZ: z, dir: dir,
-          range: 0.08, // Subtle inching travel along driving heading (never touches neighbor)
-          speed: 1.2 + Math.random() * 0.4,
+          range: 0.38, // Noticeable, realistic aisle travel
+          speed: 1.5 + Math.random() * 0.4,
           phase: Math.random() * Math.PI * 2,
           parts: parts
         });
       }
 
-      // 3. Compact Ground AMR
       function spawnAMR(x, z, dir = 'z') {
         const parts = [];
         function addPart(ox, oy, oz, sx, sy, sz, colorHex) {
@@ -344,8 +335,8 @@
           const rsx = (dir === 'x') ? sz : sx;
           const rsz = (dir === 'x') ? sx : sz;
 
-          const idx = addBlock(x + rx, oy, z + rz, rsx, sy, rsz, colorHex, PALETTE.scanDarkModule);
-          parts.push({ ox: rx, oy, oz: rz, sx: rsx, sy, sz: rsz, idx });
+          const idx = addBlock(x + rx, oy, z + rz, rsx, sy, rsz, colorHex);
+          parts.push({ ox: rx, oy: oz, sx: rsx, sy: sy, sz: rsz, idx });
         }
 
         addPart(0, 0.05, 0, 0.68, 0.12, 0.68, PALETTE.amrBase);
@@ -354,8 +345,8 @@
 
         dynamicFleet.push({
           baseX: x, baseZ: z, dir: dir,
-          range: 0.08,
-          speed: 1.8 + Math.random() * 0.6,
+          range: 0.40, // Noticeable travel along transit track
+          speed: 2.0 + Math.random() * 0.5,
           phase: Math.random() * Math.PI * 2,
           parts: parts
         });
@@ -363,25 +354,25 @@
 
       function spawnPalletStack(x, z) {
         for (let i = 0; i < 4; i++) {
-          addBlock(x, i * 0.11, z, 0.72, 0.08, 0.72, PALETTE.woodPallet, PALETTE.scanDarkModule);
+          addBlock(x, i * 0.11, z, 0.72, 0.08, 0.72, PALETTE.woodPallet);
         }
       }
 
       function spawnConveyor(x, z, horizontal) {
-        addBlock(x, 0.05, z, horizontal ? 0.90 : 0.55, 0.22, horizontal ? 0.55 : 0.90, PALETTE.conveyorLeg, PALETTE.scanDarkModule);
-        addBlock(x, 0.27, z, horizontal ? 0.86 : 0.48, 0.05, horizontal ? 0.48 : 0.86, PALETTE.conveyorRoller, PALETTE.scanDarkModule);
-        addBlock(x, 0.32, z, 0.44, 0.24, 0.44, PALETTE.amrTote, PALETTE.scanDarkModule);
+        addBlock(x, 0.05, z, horizontal ? 0.90 : 0.55, 0.22, horizontal ? 0.55 : 0.90, PALETTE.conveyorLeg);
+        addBlock(x, 0.27, z, horizontal ? 0.86 : 0.48, 0.05, horizontal ? 0.48 : 0.86, PALETTE.conveyorRoller);
+        addBlock(x, 0.32, z, 0.44, 0.24, 0.44, PALETTE.amrTote);
       }
 
       function spawnChargingDock(x, z) {
-        addBlock(x, 0.04, z, 0.78, 0.06, 0.78, PALETTE.amrBase, PALETTE.scanDarkModule);
-        addBlock(x, 0.10, z, 0.46, 0.04, 0.46, PALETTE.chargePad, PALETTE.scanDarkModule);
+        addBlock(x, 0.04, z, 0.78, 0.06, 0.78, PALETTE.amrBase);
+        addBlock(x, 0.10, z, 0.46, 0.04, 0.46, PALETTE.chargePad);
       }
 
       function spawnSafetyBollards(x, z) {
         const offset = 0.28;
-        addBlock(x - offset, 0.05, z - offset, 0.14, 0.70, 0.14, PALETTE.bollardYellow, PALETTE.scanDarkModule);
-        addBlock(x + offset, 0.05, z + offset, 0.14, 0.70, 0.14, PALETTE.bollardYellow, PALETTE.scanDarkModule);
+        addBlock(x - offset, 0.05, z - offset, 0.14, 0.70, 0.14, PALETTE.bollardYellow);
+        addBlock(x + offset, 0.05, z + offset, 0.14, 0.70, 0.14, PALETTE.bollardYellow);
       }
 
       // --- FACILITY GENERATOR ---
@@ -392,7 +383,7 @@
           instancedMesh = null;
         }
 
-        instanceColorData = [];
+        floorData = [];
         dynamicFleet = [];
         const qr = qrcode(0, 'H');
         qr.addData(text);
@@ -410,7 +401,6 @@
         instancedMesh.receiveShadow = true;
         currentInstance = 0;
 
-        // Collision clearance tracker to prevent equipment overlapping
         const occupiedClearance = new Set();
         function markClearance(c, r) {
           for (let dc = -1; dc <= 1; dc++) {
@@ -432,45 +422,34 @@
             const colDark3D  = new THREE.Color().lerpColors(PALETTE.trackCenter3D, PALETTE.trackEdge3D, normDist * 0.95);
 
             if (!isDark) {
-              // LIGHT MODULE: Concrete Floor Slab (Turns pure white in scan mode)
-              addBlock(posX, 0, posZ, 0.98, 0.08, 0.98, colLight3D, PALETTE.scanLight);
+              const idx = addBlock(posX, 0, posZ, 0.98, 0.08, 0.98, colLight3D);
+              floorData.push({ idx, col3D: colLight3D, colScan: PALETTE.floorScanLight });
             } else {
-              // DARK MODULE: Industrial Demarcation Slab (Turns pure dark in scan mode)
-              addBlock(posX, 0, posZ, 0.98, 0.10, 0.98, colDark3D, PALETTE.scanDarkModule);
+              const idx = addBlock(posX, 0, posZ, 0.98, 0.10, 0.98, colDark3D);
+              floorData.push({ idx, col3D: colDark3D, colScan: PALETTE.trackScanDark });
 
-              // 1. Central AS/RS Core (5-Tier Plateau)
               if (dist < highBayRadius) {
                 spawnAlignedRackBay(posX, posZ, 5, true);
-              } 
-              // 2. Mid-Zone Selective Racks (3-Tier Plateau)
-              else if (dist < rackRadius) {
+              } else if (dist < rackRadius) {
                 spawnAlignedRackBay(posX, posZ, 3, false);
-              } 
-              // 3. Perimeter Transit Equipment & Moving Fleet
-              else {
+              } else {
                 const seed = (r * 13 + c * 7);
                 const coordKey = `${c},${r}`;
 
-                // Forklift: Spawn only if clearance zone is free (Zero overlapping!)
                 if (seed % 19 === 0 && !occupiedClearance.has(coordKey)) {
                   const driveDir = (r % 2 === 0) ? 'z' : 'x';
                   spawnForklift(posX, posZ, driveDir);
                   markClearance(c, r);
-                } 
-                else if (seed % 17 === 2 && !occupiedClearance.has(coordKey)) {
+                } else if (seed % 17 === 2 && !occupiedClearance.has(coordKey)) {
                   spawnPalletStack(posX, posZ);
                   markClearance(c, r);
-                } 
-                else if (seed % 23 === 1) {
+                } else if (seed % 23 === 1) {
                   spawnConveyor(posX, posZ, r % 2 === 0);
-                } 
-                else if (seed % 29 === 3) {
+                } else if (seed % 29 === 3) {
                   spawnChargingDock(posX, posZ);
-                } 
-                else if (seed % 21 === 4) {
+                } else if (seed % 21 === 4) {
                   spawnSafetyBollards(posX, posZ);
-                } 
-                else if (seed % 5 === 0) {
+                } else if (seed % 5 === 0) {
                   spawnAMR(posX, posZ, (c % 2 === 0 ? 'z' : 'x'));
                 }
               }
@@ -483,21 +462,21 @@
         if (instancedMesh.instanceColor) instancedMesh.instanceColor.needsUpdate = true;
         scene.add(instancedMesh);
 
-        updateScanContrast(0);
+        updateFloorTransition(0);
       }
 
       const input = document.getElementById('qr-input');
       generateFacility(input.value.trim());
 
-      // --- SMOOTH SCAN CONTRAST INTERPOLATION ---
+      // --- FLOOR CONTRAST TRANSITION ---
       const contrastState = { progress: 0 };
 
-      function updateScanContrast(progress) {
+      function updateFloorTransition(progress) {
         if (!instancedMesh) return;
         const scratch = new THREE.Color();
 
-        for (let i = 0; i < instanceColorData.length; i++) {
-          const item = instanceColorData[i];
+        for (let i = 0; i < floorData.length; i++) {
+          const item = floorData[i];
           scratch.lerpColors(item.col3D, item.colScan, progress);
           instancedMesh.setColorAt(item.idx, scratch);
         }
@@ -509,70 +488,56 @@
       const tapBadge = document.getElementById('tap-badge');
       const badgeText = document.getElementById('badge-text');
 
-      const currentTarget = new THREE.Vector3(0, 0, 0);
-
       function toggleView() {
         isFlat = !isFlat;
         badgeText.textContent = isFlat ? "Tap to see 3D view" : "Tap the warehouse to see QR code";
 
         const destPos = isFlat ? flatPos : isoPos;
-        // Shift camera target south (+Z) so the QR code lifts up on screen, clear of the bottom bar
-        const destTarget = isFlat ? new THREE.Vector3(0, 0, 6.5) : new THREE.Vector3(0, 0, 0);
 
         controls.enabled = false;
 
-        // Animate Camera Position
         gsap.to(camera.position, {
           x: destPos.x,
           y: destPos.y,
           z: destPos.z,
           duration: 1.2,
-          ease: "power3.inOut"
-        });
-
-        // Animate Camera Target
-        gsap.to(currentTarget, {
-          x: destTarget.x,
-          y: destTarget.y,
-          z: destTarget.z,
-          duration: 1.2,
           ease: "power3.inOut",
           onUpdate: () => {
-            camera.lookAt(currentTarget.x, currentTarget.y, currentTarget.z);
-            controls.target.copy(currentTarget);
+            camera.lookAt(defaultTarget);
+            controls.target.copy(defaultTarget);
           },
           onComplete: () => {
             if (!isFlat) controls.enabled = true;
           }
         });
 
-        // Tween Material Reflection: Metallic/Glossy in 3D, Pure Matte in Scan Mode
+        // Tween reflection: Specular in 3D, Soft Matte in Scan (No white glare!)
         gsap.to(unitMaterial, {
-          roughness: isFlat ? 1.0 : 0.35,
+          roughness: isFlat ? 0.98 : 0.35,
           metalness: isFlat ? 0.0 : 0.16,
           duration: 1.2,
           ease: "power2.inOut"
         });
 
-        // Tween Contrast: Concrete & rich colors in 3D -> Solid Black/White QR modules in scan
+        // Floor transition: 3D concrete gradient -> clean scanning floor
         gsap.to(contrastState, {
           progress: isFlat ? 1 : 0,
           duration: 1.2,
           ease: "power2.inOut",
-          onUpdate: () => updateScanContrast(contrastState.progress)
+          onUpdate: () => updateFloorTransition(contrastState.progress)
         });
 
-        // Kill directional sun reflection in scan mode; use pure flat ambient light
-        gsap.to(sunLight, { intensity: isFlat ? 0.0 : 2.0, duration: 1.2 });
-        gsap.to(ambientLight, { intensity: isFlat ? 1.0 : 0.85, duration: 1.2 });
+        // Soften directional sun in top view to kill specular hotspots
+        gsap.to(sunLight, { intensity: isFlat ? 0.5 : 2.0, duration: 1.2 });
+        gsap.to(ambientLight, { intensity: isFlat ? 1.2 : 0.85, duration: 1.2 });
 
-        // Halt all moving fleet at their exact grid centers for 100% scan precision
+        // When flat, snap fleet to exact cell centers for 100% scan recognition
         if (isFlat && instancedMesh) {
           for (let f = 0; f < dynamicFleet.length; f++) {
             const unit = dynamicFleet[f];
             for (let p = 0; p < unit.parts.length; p++) {
               const part = unit.parts[p];
-              dummy.position.set(unit.baseX + part.ox, part.oy + part.sy / 2, unit.baseZ + part.oz);
+              dummy.position.set(unit.baseX + part.ox, part.sy / 2, unit.baseZ + part.oy);
               dummy.scale.set(part.sx, part.sy, part.sz);
               dummy.rotation.set(0, 0, 0);
               dummy.updateMatrix();
@@ -629,7 +594,7 @@
           controls.update();
         }
 
-        // Real-time motion along heading in 3D
+        // Active motion in 3D
         if (instancedMesh && !isFlat) {
           for (let f = 0; f < dynamicFleet.length; f++) {
             const unit = dynamicFleet[f];
@@ -637,11 +602,10 @@
 
             for (let p = 0; p < unit.parts.length; p++) {
               const part = unit.parts[p];
-              // Drive strictly along drive heading (X or Z)
               const curX = (unit.dir === 'x') ? unit.baseX + part.ox + moveOffset : unit.baseX + part.ox;
-              const curZ = (unit.dir === 'z') ? unit.baseZ + part.oz + moveOffset : unit.baseZ + part.oz;
+              const curZ = (unit.dir === 'z') ? unit.baseZ + part.oy + moveOffset : unit.baseZ + part.oy;
 
-              dummy.position.set(curX, part.oy + part.sy / 2, curZ);
+              dummy.position.set(curX, part.sy / 2, curZ);
               dummy.scale.set(part.sx, part.sy, part.sz);
               dummy.rotation.set(0, 0, 0);
               dummy.updateMatrix();

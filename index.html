@@ -13,23 +13,96 @@
     <style>
       * { box-sizing: border-box; margin: 0; padding: 0; }
       body {
-        background: #080302;
+        background: #060201;
         color: #f8fafc;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
         overflow: hidden;
         user-select: none;
       }
 
-      /* Multi-Layer Cinematic Studio Backdrop */
-      #bg-backdrop {
+      /* Fluid Abstract Mesh Gradient Backdrop */
+      #abstract-bg {
         position: fixed;
-        top: 0;
-        left: 0;
+        inset: 0;
         width: 100vw;
         height: 100vh;
         z-index: 0;
         pointer-events: none;
-        transition: background 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+        overflow: hidden;
+        background-color: #060201;
+        transition: background-color 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .glow-blob {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(100px);
+        opacity: 0.72;
+        will-change: transform;
+        transition: background 1.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.4s ease;
+      }
+
+      /* Blob 1: Intense, warm primary light leak */
+      .blob-1 {
+        width: 65vw;
+        height: 65vw;
+        min-width: 520px;
+        min-height: 520px;
+        bottom: -15%;
+        right: -10%;
+        background: radial-gradient(circle, #ff5400 0%, #ea580c 45%, transparent 75%);
+        animation: floatBlob1 20s infinite alternate ease-in-out;
+      }
+
+      /* Blob 2: Secondary top-right glowing flare */
+      .blob-2 {
+        width: 58vw;
+        height: 58vw;
+        min-width: 440px;
+        min-height: 440px;
+        top: -12%;
+        right: 12%;
+        background: radial-gradient(circle, #f97316 0%, #c2410c 45%, transparent 75%);
+        animation: floatBlob2 25s infinite alternate ease-in-out;
+      }
+
+      /* Blob 3: Deep ambient warmth */
+      .blob-3 {
+        width: 72vw;
+        height: 72vw;
+        min-width: 560px;
+        min-height: 560px;
+        bottom: -10%;
+        left: -18%;
+        background: radial-gradient(circle, #9a3412 0%, #7c2d12 40%, transparent 70%);
+        animation: floatBlob3 28s infinite alternate ease-in-out;
+      }
+
+      /* Soft Dark Vignette to ground contrast */
+      .bg-vignette {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(ellipse at 50% 45%, transparent 30%, rgba(4, 2, 2, 0.72) 85%, rgba(4, 2, 2, 0.96) 100%);
+        pointer-events: none;
+      }
+
+      /* Organic Floating Animations */
+      @keyframes floatBlob1 {
+        0% { transform: translate3d(0, 0, 0) scale(1); }
+        50% { transform: translate3d(-16vw, -14vh, 0) scale(1.14); }
+        100% { transform: translate3d(-8vw, 6vh, 0) scale(0.92); }
+      }
+
+      @keyframes floatBlob2 {
+        0% { transform: translate3d(0, 0, 0) scale(0.92); }
+        50% { transform: translate3d(14vw, 15vh, 0) scale(1.16); }
+        100% { transform: translate3d(-12vw, 8vh, 0) scale(1.02); }
+      }
+
+      @keyframes floatBlob3 {
+        0% { transform: translate3d(0, 0, 0) scale(1.05); }
+        50% { transform: translate3d(18vw, -14vh, 0) scale(0.88); }
+        100% { transform: translate3d(8vw, -5vh, 0) scale(1.12); }
       }
 
       #webgl-container {
@@ -228,8 +301,14 @@
     </style>
   </head>
   <body>
-    <!-- Responsive Studio Lighting Backdrop Layer -->
-    <div id="bg-backdrop"></div>
+    <!-- Fluid Abstract Gradient Mesh Layer -->
+    <div id="abstract-bg">
+      <div id="blob-1" class="glow-blob blob-1"></div>
+      <div id="blob-2" class="glow-blob blob-2"></div>
+      <div id="blob-3" class="glow-blob blob-3"></div>
+      <div class="bg-vignette"></div>
+    </div>
+
     <div id="toast" class="toast">Snapshot saved & link copied!</div>
 
     <!-- Floating Hint Badge -->
@@ -283,7 +362,7 @@
 
     <script>
       // ==========================================
-      // 1. STATE & COMPLETE THEME DEFINITIONS
+      // 1. STATE & THEMES (WITH FLUID MESH GRADIENTS)
       // ==========================================
       let isFlat = false;
       let soundEnabled = false;
@@ -292,8 +371,11 @@
 
       const THEMES = {
         day: {
-          backdropCSS:    'radial-gradient(ellipse at 50% 36%, rgba(194, 65, 12, 0.40) 0%, rgba(124, 45, 18, 0.26) 36%, rgba(20, 8, 4, 0.88) 72%, #080302 100%), #080302',
-          dustColor:      0xfcd34d, // Warm golden dust motes
+          bgBase: '#060201',
+          blob1:  'radial-gradient(circle, #ff5400 0%, #ea580c 45%, transparent 75%)',
+          blob2:  'radial-gradient(circle, #f97316 0%, #c2410c 45%, transparent 75%)',
+          blob3:  'radial-gradient(circle, #9a3412 0%, #7c2d12 40%, transparent 70%)',
+          dustColor: 0xffedd5,
 
           floorCenter3D:  new THREE.Color('#475263'),
           floorEdge3D:    new THREE.Color('#11151e'),
@@ -328,8 +410,11 @@
           laserColor:     0x38bdf8
         },
         cold: {
-          backdropCSS:    'radial-gradient(ellipse at 50% 36%, rgba(14, 165, 233, 0.36) 0%, rgba(3, 105, 161, 0.22) 36%, rgba(8, 20, 36, 0.88) 72%, #030712 100%), #030712',
-          dustColor:      0x7dd3fc, // Icy cyan motes
+          bgBase: '#020617',
+          blob1:  'radial-gradient(circle, #0284c7 0%, #0369a1 45%, transparent 75%)',
+          blob2:  'radial-gradient(circle, #06b6d4 0%, #0284c7 45%, transparent 75%)',
+          blob3:  'radial-gradient(circle, #1e3a8a 0%, #0f172a 40%, transparent 70%)',
+          dustColor: 0xe0f2fe,
 
           floorCenter3D:  new THREE.Color('#334155'),
           floorEdge3D:    new THREE.Color('#0b1120'),
@@ -364,8 +449,11 @@
           laserColor:     0x67e8f9
         },
         night: {
-          backdropCSS:    'radial-gradient(ellipse at 50% 36%, rgba(16, 185, 129, 0.32) 0%, rgba(4, 120, 87, 0.20) 36%, rgba(6, 24, 18, 0.88) 72%, #020806 100%), #020806',
-          dustColor:      0x6ee7b7, // Bio-emerald motes
+          bgBase: '#020a05',
+          blob1:  'radial-gradient(circle, #10b981 0%, #047857 45%, transparent 75%)',
+          blob2:  'radial-gradient(circle, #f59e0b 0%, #b45309 45%, transparent 75%)',
+          blob3:  'radial-gradient(circle, #064e3b 0%, #022c22 40%, transparent 70%)',
+          dustColor: 0xa7f3d0,
 
           floorCenter3D:  new THREE.Color('#181E29'),
           floorEdge3D:    new THREE.Color('#05080F'),
@@ -410,9 +498,14 @@
       let PALETTE = THEMES[activeMode];
       document.getElementById('qr-input').value = initialText;
 
-      // Apply Initial Backdrop
-      const backdropEl = document.getElementById('bg-backdrop');
-      backdropEl.style.background = PALETTE.backdropCSS;
+      function updateBackdropBlobs(themeKey) {
+        const t = THEMES[themeKey];
+        document.getElementById('abstract-bg').style.backgroundColor = t.bgBase;
+        document.getElementById('blob-1').style.background = t.blob1;
+        document.getElementById('blob-2').style.background = t.blob2;
+        document.getElementById('blob-3').style.background = t.blob3;
+      }
+      updateBackdropBlobs(activeMode);
 
       // ==========================================
       // 2. AUDIO ENGINE
@@ -499,12 +592,11 @@
       camera.position.copy(isoPos);
       camera.lookAt(isoTarget);
 
-      // Transparent Canvas so the Backdrop Gradient Shows Through
       const renderer = new THREE.WebGLRenderer({
         antialias: true,
         powerPreference: "high-performance",
         preserveDrawingBuffer: true,
-        alpha: true
+        alpha: true // Allows ambient mesh gradient to show through!
       });
       renderer.setSize(width, height);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -526,7 +618,7 @@
         metalness: 0.16
       });
 
-      // High-Bay Warehouse Lighting Rig
+      // Lighting Rig
       const ambientLight = new THREE.AmbientLight('#ffffff', 0.85);
       scene.add(ambientLight);
 
@@ -549,7 +641,7 @@
       fillLight.position.set(-30, 20, -30);
       scene.add(fillLight);
 
-      // --- PROCEDURAL GLOWING CIRCULAR DUST TEXTURE ---
+      // --- PROCEDURAL GLOWING BOKEH CIRCULAR TEXTURE ---
       function createSoftParticleTexture() {
         const canvas = document.createElement('canvas');
         canvas.width = 64;
@@ -558,29 +650,29 @@
         const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
         grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
         grad.addColorStop(0.35, 'rgba(255, 255, 255, 0.7)');
-        grad.addColorStop(0.7, 'rgba(255, 255, 255, 0.18)');
+        grad.addColorStop(0.7, 'rgba(255, 255, 255, 0.2)');
         grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
         ctx.fillStyle = grad;
         ctx.fillRect(0, 0, 64, 64);
         return new THREE.CanvasTexture(canvas);
       }
 
-      // --- LARGER ATMOSPHERIC FLOATING PARTICLES ---
-      const dustCount = 180;
+      // --- PROMINENT ATMOSPHERIC BOKEH PARTICLES ---
+      const dustCount = 200;
       const dustGeo = new THREE.BufferGeometry();
       const dustPositions = new Float32Array(dustCount * 3);
       for (let i = 0; i < dustCount * 3; i += 3) {
-        dustPositions[i] = (Math.random() - 0.5) * 48;
-        dustPositions[i + 1] = Math.random() * 18;
-        dustPositions[i + 2] = (Math.random() - 0.5) * 48;
+        dustPositions[i] = (Math.random() - 0.5) * 50;
+        dustPositions[i + 1] = Math.random() * 20;
+        dustPositions[i + 2] = (Math.random() - 0.5) * 50;
       }
       dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPositions, 3));
       const dustMat = new THREE.PointsMaterial({
-        size: 0.85, // Substantially larger and clearly visible
+        size: 1.65, // Highly visible, soft atmospheric dust motes
         map: createSoftParticleTexture(),
         color: PALETTE.dustColor,
         transparent: true,
-        opacity: 0.75,
+        opacity: 0.85,
         blending: THREE.AdditiveBlending,
         depthWrite: false
       });
@@ -659,7 +751,6 @@
         }
       }
 
-      // --- 3D TALL REACH TRUCK / FORKLIFT ---
       function spawnForklift(x, z, dir = 'z') {
         const parts = [];
         function addPart(ox, oy, oz, sx, sy, sz, colorHex) {
@@ -703,7 +794,6 @@
         });
       }
 
-      // --- 3D SORTING ROBOT (AMR) ---
       function spawnAMR(x, z, dir = 'z') {
         const parts = [];
         function addPart(ox, oy, oz, sx, sy, sz, colorHex) {
@@ -988,8 +1078,8 @@
           activeMode = tab.dataset.mode;
           PALETTE = THEMES[activeMode];
 
-          // Smoothly animate the backdrop gradient
-          backdropEl.style.background = PALETTE.backdropCSS;
+          // Smoothly animate the fluid abstract mesh gradient blobs
+          updateBackdropBlobs(activeMode);
 
           generateFacility(input.value.trim());
         });
@@ -1069,14 +1159,14 @@
           controls.update();
         }
 
-        // Atmospheric Dust Particle Motion (Gentle downward drift & lateral sway)
+        // Visible Bokeh Dust Particle Motion
         if (dustParticles) {
           const positions = dustGeo.attributes.position.array;
           for (let i = 0; i < dustPositions.length; i += 3) {
-            positions[i + 1] -= 0.016; // Slow downward fall
-            positions[i] += Math.sin(elapsedTime * 0.4 + i) * 0.008; // Gentle lateral sway
+            positions[i + 1] -= 0.016;
+            positions[i] += Math.sin(elapsedTime * 0.4 + i) * 0.009;
             if (positions[i + 1] < 0) {
-              positions[i + 1] = 18;
+              positions[i + 1] = 20;
             }
           }
           dustGeo.attributes.position.needsUpdate = true;

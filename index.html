@@ -13,17 +13,32 @@
     <style>
       * { box-sizing: border-box; margin: 0; padding: 0; }
       body {
-        background: #080b12;
+        background: #080302;
         color: #f8fafc;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
         overflow: hidden;
         user-select: none;
       }
+
+      /* Multi-Layer Cinematic Studio Backdrop */
+      #bg-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 0;
+        pointer-events: none;
+        transition: background 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
       #webgl-container {
+        position: relative;
         width: 100vw;
         height: 100vh;
         display: block;
         cursor: grab;
+        z-index: 1;
       }
       #webgl-container:active {
         cursor: grabbing;
@@ -213,6 +228,8 @@
     </style>
   </head>
   <body>
+    <!-- Responsive Studio Lighting Backdrop Layer -->
+    <div id="bg-backdrop"></div>
     <div id="toast" class="toast">Snapshot saved & link copied!</div>
 
     <!-- Floating Hint Badge -->
@@ -275,6 +292,9 @@
 
       const THEMES = {
         day: {
+          backdropCSS:    'radial-gradient(ellipse at 50% 36%, rgba(194, 65, 12, 0.40) 0%, rgba(124, 45, 18, 0.26) 36%, rgba(20, 8, 4, 0.88) 72%, #080302 100%), #080302',
+          dustColor:      0xfcd34d, // Warm golden dust motes
+
           floorCenter3D:  new THREE.Color('#475263'),
           floorEdge3D:    new THREE.Color('#11151e'),
           floorScanLight: new THREE.Color('#E2E8F0'),
@@ -291,19 +311,16 @@
           highBayCargo:   '#DC2626',
           highBayCargoAlt:'#991B1B',
 
-          // Forklift / Reach Truck Components
-          forkliftBody:   '#EAB308', // Safety Traffic Yellow
-          forkliftCab:    '#0F172A', // Protective Charcoal Steel Cage
-          forkliftMast:   '#334155', // Twin Steel Vertical Rails
-          forkliftBeacon: '#F97316', // Amber Roof Warning Beacon
+          forkliftBody:   '#EAB308',
+          forkliftCab:    '#0F172A',
+          forkliftMast:   '#334155',
+          forkliftBeacon: '#F97316',
 
-          // AMR Components
-          amrChassis:     '#EAB308', // Safety Yellow Shell
-          amrBase:        '#0F172A', // Dark Drive Base
-          amrTray:        '#C2410C', // Orange Top Carrier Deck
-          amrTote:        '#2563EB', // Blue Order Picking Tote
+          amrChassis:     '#EAB308',
+          amrBase:        '#0F172A',
+          amrTray:        '#C2410C',
+          amrTote:        '#2563EB',
 
-          // Infrastructure
           conveyorLeg:    '#334155',
           conveyorRoller: '#94A3B8',
           bollardYellow:  '#FACC15',
@@ -311,6 +328,9 @@
           laserColor:     0x38bdf8
         },
         cold: {
+          backdropCSS:    'radial-gradient(ellipse at 50% 36%, rgba(14, 165, 233, 0.36) 0%, rgba(3, 105, 161, 0.22) 36%, rgba(8, 20, 36, 0.88) 72%, #030712 100%), #030712',
+          dustColor:      0x7dd3fc, // Icy cyan motes
+
           floorCenter3D:  new THREE.Color('#334155'),
           floorEdge3D:    new THREE.Color('#0b1120'),
           floorScanLight: new THREE.Color('#E0F2FE'),
@@ -327,9 +347,9 @@
           highBayCargo:   '#0284C7',
           highBayCargoAlt:'#075985',
 
-          forkliftBody:   '#06B6D4', // Cryo Cyan
-          forkliftCab:    '#0B132B', // Deep Navy Cage
-          forkliftMast:   '#475569', // Steel Mast
+          forkliftBody:   '#06B6D4',
+          forkliftCab:    '#0B132B',
+          forkliftMast:   '#475569',
           forkliftBeacon: '#38BDF8',
 
           amrChassis:     '#06B6D4',
@@ -344,6 +364,9 @@
           laserColor:     0x67e8f9
         },
         night: {
+          backdropCSS:    'radial-gradient(ellipse at 50% 36%, rgba(16, 185, 129, 0.32) 0%, rgba(4, 120, 87, 0.20) 36%, rgba(6, 24, 18, 0.88) 72%, #020806 100%), #020806',
+          dustColor:      0x6ee7b7, // Bio-emerald motes
+
           floorCenter3D:  new THREE.Color('#181E29'),
           floorEdge3D:    new THREE.Color('#05080F'),
           floorScanLight: new THREE.Color('#F8FAFC'),
@@ -360,8 +383,8 @@
           highBayCargo:   '#EF4444',
           highBayCargoAlt:'#B91C1C',
 
-          forkliftBody:   '#10B981', // Hazard Night Green
-          forkliftCab:    '#050811', // Obsidian Cage
+          forkliftBody:   '#10B981',
+          forkliftCab:    '#050811',
           forkliftMast:   '#1E293B',
           forkliftBeacon: '#F59E0B',
 
@@ -386,6 +409,10 @@
       }
       let PALETTE = THEMES[activeMode];
       document.getElementById('qr-input').value = initialText;
+
+      // Apply Initial Backdrop
+      const backdropEl = document.getElementById('bg-backdrop');
+      backdropEl.style.background = PALETTE.backdropCSS;
 
       // ==========================================
       // 2. AUDIO ENGINE
@@ -459,7 +486,6 @@
       // ==========================================
       const container = document.getElementById('webgl-container');
       const scene = new THREE.Scene();
-      scene.background = new THREE.Color('#080b12');
 
       let width = window.innerWidth;
       let height = window.innerHeight;
@@ -473,7 +499,13 @@
       camera.position.copy(isoPos);
       camera.lookAt(isoTarget);
 
-      const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance", preserveDrawingBuffer: true });
+      // Transparent Canvas so the Backdrop Gradient Shows Through
+      const renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        powerPreference: "high-performance",
+        preserveDrawingBuffer: true,
+        alpha: true
+      });
       renderer.setSize(width, height);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.shadowMap.enabled = true;
@@ -494,7 +526,7 @@
         metalness: 0.16
       });
 
-      // Lighting Rig
+      // High-Bay Warehouse Lighting Rig
       const ambientLight = new THREE.AmbientLight('#ffffff', 0.85);
       scene.add(ambientLight);
 
@@ -517,22 +549,40 @@
       fillLight.position.set(-30, 20, -30);
       scene.add(fillLight);
 
-      // Atmospheric Dust Particles
-      const dustCount = 140;
+      // --- PROCEDURAL GLOWING CIRCULAR DUST TEXTURE ---
+      function createSoftParticleTexture() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 64;
+        canvas.height = 64;
+        const ctx = canvas.getContext('2d');
+        const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+        grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+        grad.addColorStop(0.35, 'rgba(255, 255, 255, 0.7)');
+        grad.addColorStop(0.7, 'rgba(255, 255, 255, 0.18)');
+        grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, 64, 64);
+        return new THREE.CanvasTexture(canvas);
+      }
+
+      // --- LARGER ATMOSPHERIC FLOATING PARTICLES ---
+      const dustCount = 180;
       const dustGeo = new THREE.BufferGeometry();
       const dustPositions = new Float32Array(dustCount * 3);
       for (let i = 0; i < dustCount * 3; i += 3) {
-        dustPositions[i] = (Math.random() - 0.5) * 44;
-        dustPositions[i + 1] = Math.random() * 16;
-        dustPositions[i + 2] = (Math.random() - 0.5) * 44;
+        dustPositions[i] = (Math.random() - 0.5) * 48;
+        dustPositions[i + 1] = Math.random() * 18;
+        dustPositions[i + 2] = (Math.random() - 0.5) * 48;
       }
       dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPositions, 3));
       const dustMat = new THREE.PointsMaterial({
-        size: 0.22,
-        color: 0x93c5fd,
+        size: 0.85, // Substantially larger and clearly visible
+        map: createSoftParticleTexture(),
+        color: PALETTE.dustColor,
         transparent: true,
-        opacity: 0.45,
-        blending: THREE.AdditiveBlending
+        opacity: 0.75,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
       });
       const dustParticles = new THREE.Points(dustGeo, dustMat);
       scene.add(dustParticles);
@@ -561,7 +611,7 @@
       const contrastState = { progress: 0 };
 
       // ==========================================
-      // 4. GENERATOR FUNCTIONS (3D DETAILED ASSETS)
+      // 4. GENERATOR FUNCTIONS
       // ==========================================
       function addBlock(x, y, z, sx, sy, sz, colorHex) {
         if (!instancedMesh) return -1;
@@ -609,7 +659,7 @@
         }
       }
 
-      // --- 3D TALL INDUSTRIAL REACH TRUCK / FORKLIFT ---
+      // --- 3D TALL REACH TRUCK / FORKLIFT ---
       function spawnForklift(x, z, dir = 'z') {
         const parts = [];
         function addPart(ox, oy, oz, sx, sy, sz, colorHex) {
@@ -622,28 +672,24 @@
           parts.push({ ox: rx, oy: oy, oz: rz, sx: rsx, sy: sy, sz: rsz, idx });
         }
 
-        // 1. Sturdy Yellow Chassis Body
+        // Yellow Chassis & Counterweight
         addPart(0, 0.08, 0.12, 0.52, 0.45, 0.42, PALETTE.forkliftBody);
-        // 2. Rear Counterweight & Bumper (Dark Charcoal)
         addPart(0, 0.05, 0.30, 0.50, 0.28, 0.14, PALETTE.forkliftCab);
 
-        // 3. 4-Pillar Steel Safety Cage (Tall Overhead Guard up to Y=1.60)
+        // 4-Pillar Safety Cage
         addPart(-0.20, 0.53, -0.04, 0.05, 1.05, 0.05, PALETTE.forkliftCab);
         addPart(0.20, 0.53, -0.04, 0.05, 1.05, 0.05, PALETTE.forkliftCab);
         addPart(-0.20, 0.53, 0.22, 0.05, 1.05, 0.05, PALETTE.forkliftCab);
         addPart(0.20, 0.53, 0.22, 0.05, 1.05, 0.05, PALETTE.forkliftCab);
-        // Roof Guard
         addPart(0, 1.58, 0.09, 0.46, 0.05, 0.42, PALETTE.forkliftCab);
-        // Amber Warning Beacon Light on Roof
         addPart(0, 1.63, 0.09, 0.12, 0.10, 0.12, PALETTE.forkliftBeacon);
 
-        // 4. Twin Vertical Lifting Mast Rails (Extending to Y=1.80!)
+        // Twin Vertical Lifting Rails (Y=1.80)
         addPart(-0.15, 0.05, -0.16, 0.06, 1.80, 0.06, PALETTE.forkliftMast);
         addPart(0.15, 0.05, -0.16, 0.06, 1.80, 0.06, PALETTE.forkliftMast);
-        // Mast Crossbrace
         addPart(0, 1.40, -0.16, 0.30, 0.06, 0.04, PALETTE.forkliftMast);
 
-        // 5. Forks & Pallet Carriage
+        // Forks, Euro Pallet & Cargo Carton
         addPart(0, 0.20, -0.22, 0.42, 0.06, 0.10, PALETTE.forkliftCab);
         addPart(0, 0.22, -0.32, 0.44, 0.08, 0.32, PALETTE.woodPallet);
         addPart(0, 0.30, -0.32, 0.38, 0.44, 0.28, PALETTE.cargoKraft);
@@ -657,7 +703,7 @@
         });
       }
 
-      // --- 3D LAYERED SORTING ROBOT (AMR) ---
+      // --- 3D SORTING ROBOT (AMR) ---
       function spawnAMR(x, z, dir = 'z') {
         const parts = [];
         function addPart(ox, oy, oz, sx, sy, sz, colorHex) {
@@ -670,15 +716,10 @@
           parts.push({ ox: rx, oy: oy, oz: rz, sx: rsx, sy: sy, sz: rsz, idx });
         }
 
-        // 1. Dark Undercarriage Base
         addPart(0, 0.05, 0, 0.72, 0.16, 0.72, PALETTE.amrBase);
-        // 2. Bold Safety-Yellow Main Chassis
         addPart(0, 0.21, 0, 0.64, 0.24, 0.64, PALETTE.amrChassis);
-        // 3. Orange Top Carrier Deck
         addPart(0, 0.45, 0, 0.58, 0.06, 0.58, PALETTE.amrTray);
-        // 4. Blue Picking Tote on Deck
         addPart(0, 0.51, 0, 0.48, 0.30, 0.48, PALETTE.amrTote);
-        // 5. Lidar Sensor Dome
         addPart(0, 0.36, -0.30, 0.16, 0.12, 0.12, PALETTE.amrBase);
 
         dynamicFleet.push({
@@ -824,6 +865,7 @@
         scene.add(instancedMesh);
 
         laserMat.color.setHex(PALETTE.laserColor);
+        dustMat.color.setHex(PALETTE.dustColor);
         updateFloorTransition(isFlat ? 1 : 0);
       }
 
@@ -945,6 +987,10 @@
           tab.classList.add('active');
           activeMode = tab.dataset.mode;
           PALETTE = THEMES[activeMode];
+
+          // Smoothly animate the backdrop gradient
+          backdropEl.style.background = PALETTE.backdropCSS;
+
           generateFacility(input.value.trim());
         });
       });
@@ -1023,15 +1069,18 @@
           controls.update();
         }
 
-        // Dust Particle Drift
+        // Atmospheric Dust Particle Motion (Gentle downward drift & lateral sway)
         if (dustParticles) {
           const positions = dustGeo.attributes.position.array;
-          for (let i = 1; i < dustPositions.length; i += 3) {
-            positions[i] -= 0.015;
-            if (positions[i] < 0) positions[i] = 16;
+          for (let i = 0; i < dustPositions.length; i += 3) {
+            positions[i + 1] -= 0.016; // Slow downward fall
+            positions[i] += Math.sin(elapsedTime * 0.4 + i) * 0.008; // Gentle lateral sway
+            if (positions[i + 1] < 0) {
+              positions[i + 1] = 18;
+            }
           }
           dustGeo.attributes.position.needsUpdate = true;
-          dustParticles.rotation.y = elapsedTime * 0.03;
+          dustParticles.rotation.y = elapsedTime * 0.025;
         }
 
         // Active Cruising Motion in 3D

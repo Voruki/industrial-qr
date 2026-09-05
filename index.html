@@ -6,6 +6,7 @@
     <title>Autonomous Intralogistics Facility - 3D QR</title>
     <!-- Stable Browser CDNs -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 
@@ -22,113 +23,154 @@
         width: 100vw;
         height: 100vh;
         display: block;
+        cursor: grab;
       }
-      .ui-overlay {
+      #webgl-container:active {
+        cursor: grabbing;
+      }
+
+      /* Floating Hint Badge (Matches tree.icqr.com) */
+      .tap-badge {
         position: absolute;
-        top: 20px;
+        bottom: 96px;
         left: 50%;
         transform: translateX(-50%);
-        display: flex;
-        gap: 10px;
-        background: rgba(12, 16, 26, 0.92);
-        backdrop-filter: blur(14px);
-        padding: 8px 12px;
+        background: rgba(24, 30, 44, 0.82);
+        backdrop-filter: blur(12px);
+        color: #cbd5e1;
+        font-size: 13px;
+        font-weight: 500;
+        padding: 7px 18px;
         border-radius: 9999px;
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.9);
-        z-index: 10;
-      }
-      .ui-input {
-        background: rgba(255, 255, 255, 0.06);
-        border: 1px solid rgba(255, 255, 255, 0.18);
-        padding: 9px 18px;
-        border-radius: 9999px;
-        color: #fff;
-        outline: none;
-        font-size: 14px;
-        min-width: 260px;
-      }
-      .ui-input:focus { border-color: #3b82f6; }
-      .ui-btn {
-        background: #2563eb;
-        color: #fff;
-        border: none;
-        padding: 9px 22px;
-        border-radius: 9999px;
-        font-weight: 600;
-        font-size: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6);
         cursor: pointer;
-        transition: background 0.2s, transform 0.1s;
-        white-space: nowrap;
+        transition: all 0.2s ease;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        gap: 8px;
       }
-      .ui-btn:hover { background: #1d4ed8; }
-      .ui-btn:active { transform: scale(0.97); }
-      .hint {
+      .tap-badge:hover {
+        background: rgba(37, 99, 235, 0.85);
+        color: #ffffff;
+        border-color: rgba(255, 255, 255, 0.3);
+        transform: translateX(-50%) translateY(-2px);
+      }
+      .pulse-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #38bdf8;
+        box-shadow: 0 0 8px #38bdf8;
+      }
+
+      /* Bottom Typing Bar (Matches tree.icqr.com) */
+      .bottom-bar {
         position: absolute;
         bottom: 24px;
         left: 50%;
         transform: translateX(-50%);
-        font-size: 12px;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: rgba(255, 255, 255, 0.45);
-        pointer-events: none;
-        text-align: center;
-        width: 100%;
+        width: calc(100% - 32px);
+        max-width: 520px;
+        display: flex;
+        gap: 8px;
+        background: rgba(15, 20, 32, 0.92);
+        backdrop-filter: blur(16px);
+        padding: 8px 10px;
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0 25px 40px -10px rgba(0, 0, 0, 0.85);
+        z-index: 10;
       }
+      .bottom-input {
+        flex: 1;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        padding: 12px 18px;
+        border-radius: 14px;
+        color: #ffffff;
+        outline: none;
+        font-size: 14px;
+        transition: border-color 0.2s;
+      }
+      .bottom-input:focus {
+        border-color: #3b82f6;
+        background: rgba(255, 255, 255, 0.09);
+      }
+      .submit-btn {
+        background: #2563eb;
+        color: #ffffff;
+        border: none;
+        width: 46px;
+        height: 46px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background 0.2s, transform 0.1s;
+      }
+      .submit-btn:hover { background: #1d4ed8; }
+      .submit-btn:active { transform: scale(0.95); }
     </style>
   </head>
   <body>
-    <div class="ui-overlay">
-      <input id="qr-input" class="ui-input" type="text" value="https://voruki.github.io/industrial-qr/" placeholder="Enter URL or text..." />
-      <button id="toggle-btn" class="ui-btn">Flatten to Scan</button>
+    <!-- Floating Hint Badge -->
+    <div id="tap-badge" class="tap-badge">
+      <span class="pulse-dot"></span>
+      <span id="badge-text">Tap the warehouse to see QR code</span>
     </div>
-    <div class="hint">Click & drag to orbit · Tap button to scan</div>
+
+    <!-- Bottom Input Bar -->
+    <div class="bottom-bar">
+      <input id="qr-input" class="bottom-input" type="text" value="https://voruki.github.io/industrial-qr/" placeholder="Type any link or text..." />
+      <button id="submit-btn" class="submit-btn" title="Update Grid">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+          <polyline points="12 5 19 12 12 19"></polyline>
+        </svg>
+      </button>
+    </div>
+
     <div id="webgl-container"></div>
 
     <script>
       // --- INDUSTRIAL COLOR PALETTE (RAL & VDA STANDARDS) ---
       const PALETTE = {
-        // Floor 3D Gradient Targets
-        floorCenter3D:  new THREE.Color('#4c5565'), // Polished concrete illuminated center
-        floorEdge3D:    new THREE.Color('#141822'), // Dark charcoal perimeter falloff
-        floorScanLight: new THREE.Color('#f8fafc'), // 2D Scan white background
+        floorCenter3D:  new THREE.Color('#4c5565'),
+        floorEdge3D:    new THREE.Color('#141822'),
+        floorScanLight: new THREE.Color('#f8fafc'),
 
-        trackCenter3D:  new THREE.Color('#222936'), // Dark transit floor center
-        trackEdge3D:    new THREE.Color('#0b0e14'), // Dark transit floor edge
-        trackScanDark:  new THREE.Color('#020617'), // 2D Scan black foreground
+        trackCenter3D:  new THREE.Color('#222936'),
+        trackEdge3D:    new THREE.Color('#0b0e14'),
+        trackScanDark:  new THREE.Color('#020617'),
 
-        // Structural Racking
-        rackUpright: '#1E3A8A',    // RAL 5010 Industrial Blue Posts
-        rackBeam:    '#EA580C',    // RAL 2004 Industrial Orange Load Crossbeams
-        woodPallet:  '#854D0E',    // Euro Pallet Timber
+        rackUpright: '#1E3A8A',    // RAL 5010 Industrial Blue
+        rackBeam:    '#EA580C',    // RAL 2004 Industrial Orange
+        woodPallet:  '#854D0E',
 
-        // Standard 3-Tier Selective Cargo (Mid-Zone)
-        cargoBox:    '#94A3B8',    // Stretch-wrapped light grey parcels
-        cargoBoxAlt: '#A16207',    // Corrugated kraft cartons
+        cargoBox:    '#94A3B8',
+        cargoBoxAlt: '#A16207',
 
-        // High-Bay 5-Tier AS/RS Core Cargo (RAL 3001/3000 Signal & Flame Red Priority Totes)
-        highBayCargo:    '#B91C1C', // RAL 3001 Signal Red AS/RS Bin
-        highBayCargoAlt: '#991B1B', // RAL 3000 Flame Red High-Value Container
+        highBayCargo:    '#B91C1C', // RAL 3001 Signal Red
+        highBayCargoAlt: '#991B1B', // RAL 3000 Flame Red
 
-        // Fleet: Forklifts & Reach Trucks
         forkliftBody: '#EAB308',   // Safety Traffic Yellow
-        forkliftCab:  '#0F172A',   // Overhead Safety Guard
-        forkliftMast: '#475569',   // Vertical Mast Steel
+        forkliftCab:  '#0F172A',
+        forkliftMast: '#475569',
 
-        // Fleet: Ground AMRs
-        amrChassis:  '#CA8A04',    // Industrial Yellow Shell
-        amrBase:     '#1E293B',    // Drive Base Charcoal
-        amrTote:     '#2563EB',    // Blue Picking Tote
+        amrChassis:  '#CA8A04',
+        amrBase:     '#1E293B',
+        amrTote:     '#2563EB',
 
-        // Infrastructure
-        conveyorLeg: '#334155',    // Conveyor Stand
-        conveyorRoller: '#CBD5E1', // Steel Rollers
-        bollardYellow: '#FACC15',  // Crash Safety Bollards
-        chargePad: '#10B981'       // Inductive Dock LED
+        conveyorLeg: '#334155',
+        conveyorRoller: '#CBD5E1',
+        bollardYellow: '#FACC15',
+        chargePad: '#10B981'
       };
 
-      // --- THREE.JS SCENE SETUP ---
+      // --- THREE.JS SETUP ---
       const container = document.getElementById('webgl-container');
       const scene = new THREE.Scene();
       scene.background = new THREE.Color('#080b12');
@@ -138,7 +180,7 @@
 
       const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 1000);
       const isoPos = new THREE.Vector3(38, 44, 38);
-      const flatPos = new THREE.Vector3(0, 60, -0.001);
+      const flatPos = new THREE.Vector3(0, 62, -0.001);
       camera.position.copy(isoPos);
       camera.lookAt(0, 0, 0);
 
@@ -149,7 +191,16 @@
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       container.appendChild(renderer.domElement);
 
-      // High-Bay Warehouse Lighting
+      // --- SMOOTH ORBIT CONTROLS (FREE MOVE IN 3D) ---
+      const controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.06;
+      controls.maxPolarAngle = Math.PI / 2 - 0.05; // Stay above ground
+      controls.minDistance = 18;                   // Can zoom in close to racks
+      controls.maxDistance = 110;                  // Can pull back for full view
+      controls.target.set(0, 0, 0);
+
+      // Lighting Rig
       const ambientLight = new THREE.AmbientLight('#ffffff', 0.85);
       scene.add(ambientLight);
 
@@ -172,7 +223,7 @@
       fillLight.position.set(-30, 20, -30);
       scene.add(fillLight);
 
-      // Foundation Slab Ground Plate
+      // Foundation Slab Plate
       const groundPlateGeo = new THREE.BoxGeometry(90, 0.2, 90);
       const groundPlateMat = new THREE.MeshStandardMaterial({
         color: 0x0c1018,
@@ -184,7 +235,7 @@
       groundPlate.receiveShadow = true;
       scene.add(groundPlate);
 
-      // --- INSTANCED RENDERING SYSTEM ---
+      // --- INSTANCED RENDERING & DYNAMIC MOTION ---
       const boxGeo = new THREE.BoxGeometry(1, 1, 1);
       const unitMaterial = new THREE.MeshStandardMaterial({
         roughness: 0.4,
@@ -197,12 +248,14 @@
       let currentInstance = 0;
 
       let floorData = [];
+      let dynamicFleet = []; // Stores moving AMRs and forklifts
 
       function addBlock(x, y, z, sx, sy, sz, colorHex) {
         if (!instancedMesh) return -1;
         const idx = currentInstance;
         dummy.position.set(x, y + sy / 2, z);
         dummy.scale.set(sx, sy, sz);
+        dummy.rotation.set(0, 0, 0);
         dummy.updateMatrix();
         instancedMesh.setMatrixAt(idx, dummy.matrix);
         instancedMesh.setColorAt(idx, tempColor.set(colorHex));
@@ -210,89 +263,102 @@
         return idx;
       }
 
-      // --- PROCEDURAL ALIGNED RACK BAY ---
+      // Aligned Heavy Racking
       function spawnAlignedRackBay(x, z, tiers, isHighBay = false) {
         const tierHeight = 0.88;
         const totalHeight = tiers * tierHeight;
         const postW = 0.08;
         const offset = 0.42;
 
-        // 4 Blue Structural Steel Uprights
         addBlock(x - offset, 0, z - offset, postW, totalHeight, postW, PALETTE.rackUpright);
         addBlock(x + offset, 0, z - offset, postW, totalHeight, postW, PALETTE.rackUpright);
         addBlock(x - offset, 0, z + offset, postW, totalHeight, postW, PALETTE.rackUpright);
         addBlock(x + offset, 0, z + offset, postW, totalHeight, postW, PALETTE.rackUpright);
 
-        // Uniform Storage Levels
         for (let t = 0; t < tiers; t++) {
           const y = t * tierHeight;
-          // Orange Load Crossbeams
           addBlock(x, y, z - offset, 0.92, 0.06, postW, PALETTE.rackBeam);
           addBlock(x, y, z + offset, 0.92, 0.06, postW, PALETTE.rackBeam);
           addBlock(x - offset, y, z, postW, 0.06, 0.92, PALETTE.rackBeam);
           addBlock(x + offset, y, z, postW, 0.06, 0.92, PALETTE.rackBeam);
 
-          // Wood Euro Pallet
           addBlock(x, y + 0.06, z, 0.78, 0.07, 0.78, PALETTE.woodPallet);
 
-          // Cargo Load: High-Bay Red Priority Totes vs Standard Selective Cartons
           let boxColor;
           if (isHighBay) {
             boxColor = (x + z + t) % 2 === 0 ? PALETTE.highBayCargo : PALETTE.highBayCargoAlt;
           } else {
             boxColor = (x + z + t) % 2 === 0 ? PALETTE.cargoBox : PALETTE.cargoBoxAlt;
           }
-
           addBlock(x, y + 0.13, z, 0.68, 0.50, 0.68, boxColor);
         }
       }
 
-      // Forklift / Reach Truck
-      function spawnForklift(x, z, angle) {
-        dummy.rotation.y = angle;
+      // Procedural Forklift with dynamic tracking
+      function spawnForklift(x, z, axis = 'x') {
+        const parts = [];
+        // Helper to push part descriptor for moving update
+        function addForkliftPart(ox, oy, oz, sx, sy, sz, color) {
+          const idx = addBlock(x + ox, oy, z + oz, sx, sy, sz, color);
+          parts.push({ ox, oy, oz, sx, sy, sz, idx });
+        }
 
-        addBlock(x, 0.05, z + 0.1, 0.65, 0.35, 0.55, PALETTE.forkliftBody);
+        addForkliftPart(0, 0.05, 0.1, 0.65, 0.35, 0.55, PALETTE.forkliftBody);
+        addForkliftPart(-0.24, 0.40, -0.05, 0.05, 0.50, 0.05, PALETTE.forkliftCab);
+        addForkliftPart(0.24, 0.40, -0.05, 0.05, 0.50, 0.05, PALETTE.forkliftCab);
+        addForkliftPart(-0.24, 0.40, 0.25, 0.05, 0.50, 0.05, PALETTE.forkliftCab);
+        addForkliftPart(0.24, 0.40, 0.25, 0.05, 0.50, 0.05, PALETTE.forkliftCab);
+        addForkliftPart(0, 0.90, 0.1, 0.55, 0.04, 0.55, PALETTE.forkliftCab);
+        addForkliftPart(-0.18, 0.05, -0.25, 0.06, 1.15, 0.06, PALETTE.forkliftMast);
+        addForkliftPart(0.18, 0.05, -0.25, 0.06, 1.15, 0.06, PALETTE.forkliftMast);
+        addForkliftPart(0, 0.15, -0.38, 0.55, 0.06, 0.55, PALETTE.woodPallet);
+        addForkliftPart(0, 0.21, -0.38, 0.48, 0.40, 0.48, PALETTE.cargoBoxAlt);
 
-        addBlock(x - 0.24, 0.40, z - 0.05, 0.05, 0.50, 0.05, PALETTE.forkliftCab);
-        addBlock(x + 0.24, 0.40, z - 0.05, 0.05, 0.50, 0.05, PALETTE.forkliftCab);
-        addBlock(x - 0.24, 0.40, z + 0.25, 0.05, 0.50, 0.05, PALETTE.forkliftCab);
-        addBlock(x + 0.24, 0.40, z + 0.25, 0.05, 0.50, 0.05, PALETTE.forkliftCab);
-        addBlock(x, 0.90, z + 0.1, 0.55, 0.04, 0.55, PALETTE.forkliftCab);
-
-        addBlock(x - 0.18, 0.05, z - 0.25, 0.06, 1.15, 0.06, PALETTE.forkliftMast);
-        addBlock(x + 0.18, 0.05, z - 0.25, 0.06, 1.15, 0.06, PALETTE.forkliftMast);
-        addBlock(x, 0.15, z - 0.38, 0.55, 0.06, 0.55, PALETTE.woodPallet);
-        addBlock(x, 0.21, z - 0.38, 0.48, 0.40, 0.48, PALETTE.cargoBoxAlt);
+        dynamicFleet.push({
+          baseX: x, baseZ: z, axis: axis,
+          range: 0.32, speed: 1.2 + Math.random() * 0.4,
+          phase: Math.random() * Math.PI * 2,
+          parts: parts
+        });
       }
 
-      // Ground AMR
-      function spawnAMR(x, z) {
-        addBlock(x, 0.05, z, 0.76, 0.14, 0.76, PALETTE.amrBase);
-        addBlock(x, 0.19, z, 0.68, 0.16, 0.68, PALETTE.amrChassis);
-        addBlock(x, 0.35, z, 0.54, 0.24, 0.54, PALETTE.amrTote);
+      // Procedural AMR with dynamic tracking
+      function spawnAMR(x, z, axis = 'z') {
+        const parts = [];
+        function addAMRPart(ox, oy, oz, sx, sy, sz, color) {
+          const idx = addBlock(x + ox, oy, z + oz, sx, sy, sz, color);
+          parts.push({ ox, oy, oz, sx, sy, sz, idx });
+        }
+
+        addAMRPart(0, 0.05, 0, 0.76, 0.14, 0.76, PALETTE.amrBase);
+        addAMRPart(0, 0.19, 0, 0.68, 0.16, 0.68, PALETTE.amrChassis);
+        addAMRPart(0, 0.35, 0, 0.54, 0.24, 0.54, PALETTE.amrTote);
+
+        dynamicFleet.push({
+          baseX: x, baseZ: z, axis: axis,
+          range: 0.28, speed: 1.8 + Math.random() * 0.6,
+          phase: Math.random() * Math.PI * 2,
+          parts: parts
+        });
       }
 
-      // Staging Pallet Stack
       function spawnPalletStack(x, z) {
         for (let i = 0; i < 4; i++) {
           addBlock(x, i * 0.11, z, 0.76, 0.08, 0.76, PALETTE.woodPallet);
         }
       }
 
-      // Roller Conveyor Spur
       function spawnConveyor(x, z, horizontal) {
         addBlock(x, 0.05, z, horizontal ? 0.94 : 0.60, 0.25, horizontal ? 0.60 : 0.94, PALETTE.conveyorLeg);
         addBlock(x, 0.30, z, horizontal ? 0.90 : 0.52, 0.06, horizontal ? 0.52 : 0.90, PALETTE.conveyorRoller);
         addBlock(x, 0.36, z, 0.48, 0.26, 0.48, PALETTE.amrTote);
       }
 
-      // Inductive Charging Dock
       function spawnChargingDock(x, z) {
         addBlock(x, 0.04, z, 0.82, 0.06, 0.82, PALETTE.amrBase);
         addBlock(x, 0.10, z, 0.50, 0.04, 0.50, PALETTE.chargePad);
       }
 
-      // Heavy Safety Bollards
       function spawnSafetyBollards(x, z) {
         const offset = 0.28;
         addBlock(x - offset, 0.05, z - offset, 0.14, 0.75, 0.14, PALETTE.bollardYellow);
@@ -308,6 +374,7 @@
         }
 
         floorData = [];
+        dynamicFleet = [];
         const qr = qrcode(0, 'H');
         qr.addData(text);
         qr.make();
@@ -316,8 +383,8 @@
         const center = size / 2;
         const maxRadius = size * 0.707;
         
-        const highBayRadius = size * 0.18; // Central High-Bay AS/RS zone
-        const rackRadius = size * 0.37;    // Intermediate selective rack zone
+        const highBayRadius = size * 0.18;
+        const rackRadius = size * 0.37;
 
         instancedMesh = new THREE.InstancedMesh(boxGeo, unitMaterial, 20000);
         instancedMesh.castShadow = true;
@@ -342,20 +409,15 @@
               const idx = addBlock(posX, 0, posZ, 0.98, 0.10, 0.98, '#222936');
               floorData.push({ idx, type: 'dark', col3D: colDark3D });
 
-              // ZONE 1A: Central High-Bay AS/RS Core (Clean FLAT 5-Tier Plateau with RED PRIORITY TOTES)
               if (dist < highBayRadius) {
                 spawnAlignedRackBay(posX, posZ, 5, true);
-              }
-              // ZONE 1B: Mid-Zone Selective Racking (Clean FLAT 3-Tier Plateau with STANDARD CARGO)
-              else if (dist < rackRadius) {
+              } else if (dist < rackRadius) {
                 spawnAlignedRackBay(posX, posZ, 3, false);
-              }
-              // ZONE 2: Surrounding Infrastructure & Fleet
-              else {
+              } else {
                 const seed = (r * 13 + c * 7);
 
                 if (seed % 17 === 0) {
-                  spawnForklift(posX, posZ, (r % 2 === 0 ? 0 : Math.PI / 2));
+                  spawnForklift(posX, posZ, (r % 2 === 0 ? 'x' : 'z'));
                 } else if (seed % 19 === 1) {
                   spawnConveyor(posX, posZ, r % 2 === 0);
                 } else if (seed % 13 === 2) {
@@ -365,7 +427,7 @@
                 } else if (seed % 21 === 4) {
                   spawnSafetyBollards(posX, posZ);
                 } else if (seed % 4 === 0) {
-                  spawnAMR(posX, posZ);
+                  spawnAMR(posX, posZ, (c % 2 === 0 ? 'z' : 'x'));
                 }
               }
             }
@@ -380,7 +442,6 @@
         updateFloorContrast(0);
       }
 
-      // Initial Build
       const input = document.getElementById('qr-input');
       generateFacility(input.value.trim());
 
@@ -403,25 +464,34 @@
         if (instancedMesh.instanceColor) instancedMesh.instanceColor.needsUpdate = true;
       }
 
-      // --- VIEW TOGGLE & CAMERA ANIMATION ---
+      // --- VIEW TOGGLE (CLICK / TAP TO SWITCH) ---
       let isFlat = false;
-      let autoRotate = true;
-      const toggleBtn = document.getElementById('toggle-btn');
+      const tapBadge = document.getElementById('tap-badge');
+      const badgeText = document.getElementById('badge-text');
 
       function toggleView() {
         isFlat = !isFlat;
-        autoRotate = false;
-        toggleBtn.textContent = isFlat ? "3D Warehouse View" : "Flatten to Scan";
-        const target = isFlat ? flatPos : isoPos;
+        badgeText.textContent = isFlat ? "Tap to see 3D view" : "Tap the warehouse to see QR code";
 
-        gsap.to(camera.position, {
-          x: target.x,
-          y: target.y,
-          z: target.z,
-          duration: 1.2,
-          ease: "power3.inOut",
-          onUpdate: () => camera.lookAt(0, 0, 0)
-        });
+        if (isFlat) {
+          controls.enabled = false;
+          gsap.to(camera.position, {
+            x: flatPos.x, y: flatPos.y, z: flatPos.z,
+            duration: 1.2,
+            ease: "power3.inOut",
+            onUpdate: () => camera.lookAt(0, 0, 0)
+          });
+          gsap.to(controls.target, { x: 0, y: 0, z: 0, duration: 1.2 });
+        } else {
+          gsap.to(camera.position, {
+            x: isoPos.x, y: isoPos.y, z: isoPos.z,
+            duration: 1.2,
+            ease: "power3.inOut",
+            onUpdate: () => camera.lookAt(0, 0, 0),
+            onComplete: () => { controls.enabled = true; }
+          });
+          gsap.to(controls.target, { x: 0, y: 0, z: 0, duration: 1.2 });
+        }
 
         gsap.to(contrastState, {
           progress: isFlat ? 1 : 0,
@@ -435,43 +505,32 @@
         gsap.to(groundPlate.position, { y: isFlat ? -5 : -0.15, duration: 0.8 });
       }
 
-      toggleBtn.addEventListener('click', toggleView);
+      tapBadge.addEventListener('click', toggleView);
 
-      input.addEventListener('change', () => {
-        if (input.value.trim().length > 0) generateFacility(input.value.trim());
-      });
-      input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && input.value.trim().length > 0) generateFacility(input.value.trim());
-      });
-
-      // --- MOUSE & TOUCH ORBIT ---
-      let isDragging = false;
-      let prevPointer = { x: 0, y: 0 };
-
+      // Tap on canvas detection (differentiates small click from camera drag)
+      let pointerDownPos = { x: 0, y: 0 };
       window.addEventListener('pointerdown', (e) => {
-        if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
-        isDragging = true;
-        autoRotate = false;
-        prevPointer = { x: e.clientX, y: e.clientY };
+        pointerDownPos = { x: e.clientX, y: e.clientY };
+      });
+      window.addEventListener('pointerup', (e) => {
+        if (e.target.closest('.bottom-bar') || e.target.closest('.tap-badge')) return;
+        const dist = Math.hypot(e.clientX - pointerDownPos.x, e.clientY - pointerDownPos.y);
+        if (dist < 6) { // It's a clean tap!
+          toggleView();
+        }
       });
 
-      window.addEventListener('pointermove', (e) => {
-        if (!isDragging || isFlat) return;
-        const deltaX = (e.clientX - prevPointer.x) * 0.006;
-        const deltaY = (e.clientY - prevPointer.y) * 0.006;
-
-        const radius = Math.hypot(camera.position.x, camera.position.z);
-        let angle = Math.atan2(camera.position.z, camera.position.x) + deltaX;
-
-        camera.position.x = radius * Math.cos(angle);
-        camera.position.z = radius * Math.sin(angle);
-        camera.position.y = Math.max(14, Math.min(65, camera.position.y - deltaY * 16));
-        camera.lookAt(0, 0, 0);
-
-        prevPointer = { x: e.clientX, y: e.clientY };
+      // Submit new URL
+      const submitBtn = document.getElementById('submit-btn');
+      function handleUpdate() {
+        if (input.value.trim().length > 0) {
+          generateFacility(input.value.trim());
+        }
+      }
+      submitBtn.addEventListener('click', handleUpdate);
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') handleUpdate();
       });
-
-      window.addEventListener('pointerup', () => { isDragging = false; });
 
       window.addEventListener('resize', () => {
         width = window.innerWidth;
@@ -481,16 +540,37 @@
         renderer.setSize(width, height);
       });
 
-      // --- RENDER LOOP ---
+      // --- ANIMATION LOOP (DYNAMICS & IDLE MOTION) ---
+      const clock = new THREE.Clock();
+
       function animate() {
         requestAnimationFrame(animate);
+        const elapsedTime = clock.getElapsedTime();
 
-        if (autoRotate && !isFlat && !isDragging) {
-          const radius = Math.hypot(camera.position.x, camera.position.z);
-          let angle = Math.atan2(camera.position.z, camera.position.x) + 0.0022;
-          camera.position.x = radius * Math.cos(angle);
-          camera.position.z = radius * Math.sin(angle);
-          camera.lookAt(0, 0, 0);
+        // 1. Update Free Camera Controls
+        if (controls.enabled) {
+          controls.update();
+        }
+
+        // 2. Animate Moving Forklifts & AMRs (Freeze when flat for 100% scan accuracy)
+        if (instancedMesh && !isFlat) {
+          for (let f = 0; f < dynamicFleet.length; f++) {
+            const unit = dynamicFleet[f];
+            const moveOffset = Math.sin(elapsedTime * unit.speed + unit.phase) * unit.range;
+
+            for (let p = 0; p < unit.parts.length; p++) {
+              const part = unit.parts[p];
+              const curX = unit.axis === 'x' ? unit.baseX + part.ox + moveOffset : unit.baseX + part.ox;
+              const curZ = unit.axis === 'z' ? unit.baseZ + part.oz + moveOffset : unit.baseZ + part.oz;
+
+              dummy.position.set(curX, part.oy + part.sy / 2, curZ);
+              dummy.scale.set(part.sx, part.sy, part.sz);
+              dummy.rotation.set(0, 0, 0);
+              dummy.updateMatrix();
+              instancedMesh.setMatrixAt(part.idx, dummy.matrix);
+            }
+          }
+          instancedMesh.instanceMatrix.needsUpdate = true;
         }
 
         renderer.render(scene, camera);

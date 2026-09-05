@@ -266,7 +266,7 @@
 
     <script>
       // ==========================================
-      // 1. STATE & THEMES (DEFINED AT THE VERY TOP)
+      // 1. STATE & COMPLETE THEME DEFINITIONS
       // ==========================================
       let isFlat = false;
       let soundEnabled = false;
@@ -281,6 +281,7 @@
           trackCenter3D:  new THREE.Color('#222834'),
           trackEdge3D:    new THREE.Color('#0a0d14'),
           trackScanDark:  new THREE.Color('#111827'),
+          
           rackUpright:    '#1D4ED8',
           rackBeam:       '#EA580C',
           woodPallet:     '#78350F',
@@ -289,8 +290,24 @@
           cargoTote:      '#2563EB',
           highBayCargo:   '#DC2626',
           highBayCargoAlt:'#991B1B',
-          forkliftBody:   '#EAB308',
-          amrChassis:     '#EAB308',
+
+          // Forklift / Reach Truck Components
+          forkliftBody:   '#EAB308', // Safety Traffic Yellow
+          forkliftCab:    '#0F172A', // Protective Charcoal Steel Cage
+          forkliftMast:   '#334155', // Twin Steel Vertical Rails
+          forkliftBeacon: '#F97316', // Amber Roof Warning Beacon
+
+          // AMR Components
+          amrChassis:     '#EAB308', // Safety Yellow Shell
+          amrBase:        '#0F172A', // Dark Drive Base
+          amrTray:        '#C2410C', // Orange Top Carrier Deck
+          amrTote:        '#2563EB', // Blue Order Picking Tote
+
+          // Infrastructure
+          conveyorLeg:    '#334155',
+          conveyorRoller: '#94A3B8',
+          bollardYellow:  '#FACC15',
+          chargePad:      '#10B981',
           laserColor:     0x38bdf8
         },
         cold: {
@@ -300,6 +317,7 @@
           trackCenter3D:  new THREE.Color('#1e293b'),
           trackEdge3D:    new THREE.Color('#070b14'),
           trackScanDark:  new THREE.Color('#0c1a30'),
+          
           rackUpright:    '#0284C7',
           rackBeam:       '#38BDF8',
           woodPallet:     '#475569',
@@ -308,8 +326,21 @@
           cargoTote:      '#7DD3FC',
           highBayCargo:   '#0284C7',
           highBayCargoAlt:'#075985',
-          forkliftBody:   '#06B6D4',
+
+          forkliftBody:   '#06B6D4', // Cryo Cyan
+          forkliftCab:    '#0B132B', // Deep Navy Cage
+          forkliftMast:   '#475569', // Steel Mast
+          forkliftBeacon: '#38BDF8',
+
           amrChassis:     '#06B6D4',
+          amrBase:        '#0B132B',
+          amrTray:        '#0284C7',
+          amrTote:        '#38BDF8',
+
+          conveyorLeg:    '#334155',
+          conveyorRoller: '#7DD3FC',
+          bollardYellow:  '#38BDF8',
+          chargePad:      '#06B6D4',
           laserColor:     0x67e8f9
         },
         night: {
@@ -319,6 +350,7 @@
           trackCenter3D:  new THREE.Color('#0F172A'),
           trackEdge3D:    new THREE.Color('#020408'),
           trackScanDark:  new THREE.Color('#050811'),
+          
           rackUpright:    '#1E293B',
           rackBeam:       '#F59E0B',
           woodPallet:     '#451A03',
@@ -327,13 +359,25 @@
           cargoTote:      '#F59E0B',
           highBayCargo:   '#EF4444',
           highBayCargoAlt:'#B91C1C',
-          forkliftBody:   '#10B981',
+
+          forkliftBody:   '#10B981', // Hazard Night Green
+          forkliftCab:    '#050811', // Obsidian Cage
+          forkliftMast:   '#1E293B',
+          forkliftBeacon: '#F59E0B',
+
           amrChassis:     '#10B981',
+          amrBase:        '#050811',
+          amrTray:        '#F59E0B',
+          amrTote:        '#3B82F6',
+
+          conveyorLeg:    '#1E293B',
+          conveyorRoller: '#F59E0B',
+          bollardYellow:  '#F59E0B',
+          chargePad:      '#10B981',
           laserColor:     0xf59e0b
         }
       };
 
-      // Query param initialization
       const urlParams = new URLSearchParams(window.location.search);
       const initialText = urlParams.get('url') || 'https://yongming.vorky.fyi/';
       const initialMode = urlParams.get('mode');
@@ -344,7 +388,7 @@
       document.getElementById('qr-input').value = initialText;
 
       // ==========================================
-      // 2. SYNTHETIC AUDIO ENGINE
+      // 2. AUDIO ENGINE
       // ==========================================
       function initAudio() {
         if (!audioCtx) {
@@ -411,7 +455,7 @@
       }
 
       // ==========================================
-      // 3. THREE.JS SCENE, CAMERAS & RENDERER
+      // 3. THREE.JS SCENE SETUP
       // ==========================================
       const container = document.getElementById('webgl-container');
       const scene = new THREE.Scene();
@@ -473,7 +517,7 @@
       fillLight.position.set(-30, 20, -30);
       scene.add(fillLight);
 
-      // Dust Particles
+      // Atmospheric Dust Particles
       const dustCount = 140;
       const dustGeo = new THREE.BufferGeometry();
       const dustPositions = new Float32Array(dustCount * 3);
@@ -517,7 +561,7 @@
       const contrastState = { progress: 0 };
 
       // ==========================================
-      // 4. GENERATOR FUNCTIONS
+      // 4. GENERATOR FUNCTIONS (3D DETAILED ASSETS)
       // ==========================================
       function addBlock(x, y, z, sx, sy, sz, colorHex) {
         if (!instancedMesh) return -1;
@@ -565,6 +609,7 @@
         }
       }
 
+      // --- 3D TALL INDUSTRIAL REACH TRUCK / FORKLIFT ---
       function spawnForklift(x, z, dir = 'z') {
         const parts = [];
         function addPart(ox, oy, oz, sx, sy, sz, colorHex) {
@@ -577,16 +622,31 @@
           parts.push({ ox: rx, oy: oy, oz: rz, sx: rsx, sy: sy, sz: rsz, idx });
         }
 
-        addPart(0, 0.05, 0.08, 0.46, 0.28, 0.32, PALETTE.forkliftBody);
-        addPart(-0.16, 0.33, -0.04, 0.04, 0.38, 0.04, PALETTE.forkliftCab);
-        addPart(0.16, 0.33, -0.04, 0.04, 0.38, 0.04, PALETTE.forkliftCab);
-        addPart(-0.16, 0.33, 0.14, 0.04, 0.38, 0.04, PALETTE.forkliftCab);
-        addPart(0.16, 0.33, 0.14, 0.04, 0.38, 0.04, PALETTE.forkliftCab);
-        addPart(0, 0.71, 0.05, 0.38, 0.03, 0.32, PALETTE.forkliftCab);
-        addPart(-0.12, 0.05, -0.14, 0.04, 0.85, 0.04, PALETTE.forkliftMast);
-        addPart(0.12, 0.05, -0.14, 0.04, 0.85, 0.04, PALETTE.forkliftMast);
-        addPart(0, 0.10, -0.25, 0.38, 0.05, 0.24, PALETTE.woodPallet);
-        addPart(0, 0.15, -0.25, 0.32, 0.28, 0.20, PALETTE.cargoKraft);
+        // 1. Sturdy Yellow Chassis Body
+        addPart(0, 0.08, 0.12, 0.52, 0.45, 0.42, PALETTE.forkliftBody);
+        // 2. Rear Counterweight & Bumper (Dark Charcoal)
+        addPart(0, 0.05, 0.30, 0.50, 0.28, 0.14, PALETTE.forkliftCab);
+
+        // 3. 4-Pillar Steel Safety Cage (Tall Overhead Guard up to Y=1.60)
+        addPart(-0.20, 0.53, -0.04, 0.05, 1.05, 0.05, PALETTE.forkliftCab);
+        addPart(0.20, 0.53, -0.04, 0.05, 1.05, 0.05, PALETTE.forkliftCab);
+        addPart(-0.20, 0.53, 0.22, 0.05, 1.05, 0.05, PALETTE.forkliftCab);
+        addPart(0.20, 0.53, 0.22, 0.05, 1.05, 0.05, PALETTE.forkliftCab);
+        // Roof Guard
+        addPart(0, 1.58, 0.09, 0.46, 0.05, 0.42, PALETTE.forkliftCab);
+        // Amber Warning Beacon Light on Roof
+        addPart(0, 1.63, 0.09, 0.12, 0.10, 0.12, PALETTE.forkliftBeacon);
+
+        // 4. Twin Vertical Lifting Mast Rails (Extending to Y=1.80!)
+        addPart(-0.15, 0.05, -0.16, 0.06, 1.80, 0.06, PALETTE.forkliftMast);
+        addPart(0.15, 0.05, -0.16, 0.06, 1.80, 0.06, PALETTE.forkliftMast);
+        // Mast Crossbrace
+        addPart(0, 1.40, -0.16, 0.30, 0.06, 0.04, PALETTE.forkliftMast);
+
+        // 5. Forks & Pallet Carriage
+        addPart(0, 0.20, -0.22, 0.42, 0.06, 0.10, PALETTE.forkliftCab);
+        addPart(0, 0.22, -0.32, 0.44, 0.08, 0.32, PALETTE.woodPallet);
+        addPart(0, 0.30, -0.32, 0.38, 0.44, 0.28, PALETTE.cargoKraft);
 
         dynamicFleet.push({
           baseX: x, baseZ: z, dir: dir,
@@ -597,6 +657,7 @@
         });
       }
 
+      // --- 3D LAYERED SORTING ROBOT (AMR) ---
       function spawnAMR(x, z, dir = 'z') {
         const parts = [];
         function addPart(ox, oy, oz, sx, sy, sz, colorHex) {
@@ -609,9 +670,16 @@
           parts.push({ ox: rx, oy: oy, oz: rz, sx: rsx, sy: sy, sz: rsz, idx });
         }
 
-        addPart(0, 0.05, 0, 0.68, 0.12, 0.68, PALETTE.amrBase);
-        addPart(0, 0.17, 0, 0.58, 0.14, 0.58, PALETTE.amrChassis);
-        addPart(0, 0.31, 0, 0.46, 0.20, 0.46, PALETTE.amrTote);
+        // 1. Dark Undercarriage Base
+        addPart(0, 0.05, 0, 0.72, 0.16, 0.72, PALETTE.amrBase);
+        // 2. Bold Safety-Yellow Main Chassis
+        addPart(0, 0.21, 0, 0.64, 0.24, 0.64, PALETTE.amrChassis);
+        // 3. Orange Top Carrier Deck
+        addPart(0, 0.45, 0, 0.58, 0.06, 0.58, PALETTE.amrTray);
+        // 4. Blue Picking Tote on Deck
+        addPart(0, 0.51, 0, 0.48, 0.30, 0.48, PALETTE.amrTote);
+        // 5. Lidar Sensor Dome
+        addPart(0, 0.36, -0.30, 0.16, 0.12, 0.12, PALETTE.amrBase);
 
         dynamicFleet.push({
           baseX: x, baseZ: z, dir: dir,

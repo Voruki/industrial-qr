@@ -90,22 +90,22 @@
       // --- INDUSTRIAL COLOR PALETTE (RAL STANDARDS) ---
       const PALETTE = {
         // Floor 3D Gradient Targets
-        floorCenter3D:  new THREE.Color('#4c5565'), // Mid-grey concrete in center
-        floorEdge3D:    new THREE.Color('#141822'), // Dark charcoal concrete on edge
-        floorScanLight: new THREE.Color('#f8fafc'), // 2D High-contrast white
+        floorCenter3D:  new THREE.Color('#4c5565'), // Concrete grey under center lights
+        floorEdge3D:    new THREE.Color('#141822'), // Dark charcoal falloff
+        floorScanLight: new THREE.Color('#f8fafc'), // 2D Scan white
 
-        trackCenter3D:  new THREE.Color('#222936'), // Dark transit tile center
-        trackEdge3D:    new THREE.Color('#0b0e14'), // Dark transit tile edge
-        trackScanDark:  new THREE.Color('#020617'), // 2D High-contrast black
+        trackCenter3D:  new THREE.Color('#222936'), // Dark transit floor center
+        trackEdge3D:    new THREE.Color('#0b0e14'), // Dark transit floor edge
+        trackScanDark:  new THREE.Color('#020617'), // 2D Scan black
 
-        // Heavy Racking
+        // Heavy Industrial Racking
         rackUpright: '#1E3A8A',    // RAL 5010 Industrial Blue Posts
-        rackBeam:    '#EA580C',    // RAL 2004 Industrial Orange Load Beams
+        rackBeam:    '#EA580C',    // RAL 2004 Industrial Orange Beams
         woodPallet:  '#854D0E',    // Euro Pallet Timber
         cargoBox:    '#94A3B8',    // Stretch-wrapped grey parcel
         cargoBoxAlt: '#A16207',    // Corrugated kraft carton
 
-        // Forklifts / Reach Trucks
+        // Material Handling Fleet
         forkliftBody: '#EAB308',   // Safety Traffic Yellow
         forkliftCab:  '#0F172A',   // Overhead Safety Cage
         forkliftMast: '#475569',   // Vertical Mast Steel
@@ -116,7 +116,7 @@
         amrTote:     '#2563EB',    // Blue Picking Tote
 
         // Conveyors & Infrastructure
-        conveyorLeg: '#334155',    // Conveyor structural frame
+        conveyorLeg: '#334155',    // Steel stand
         conveyorRoller: '#CBD5E1', // Steel rollers
         bollardYellow: '#FACC15',  // Safety crash bollard
         chargePad: '#10B981'       // Inductive dock LED ring
@@ -143,7 +143,7 @@
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       container.appendChild(renderer.domElement);
 
-      // Warehouse Ambient & High-Bay Lighting
+      // Warehouse Lighting Rig
       const ambientLight = new THREE.AmbientLight('#ffffff', 0.85);
       scene.add(ambientLight);
 
@@ -166,7 +166,7 @@
       fillLight.position.set(-30, 20, -30);
       scene.add(fillLight);
 
-      // Large ambient warehouse floor foundation to blend into the darkness
+      // Foundation Slab Ground Plate
       const groundPlateGeo = new THREE.BoxGeometry(90, 0.2, 90);
       const groundPlateMat = new THREE.MeshStandardMaterial({
         color: 0x0c1018,
@@ -190,7 +190,6 @@
       const tempColor = new THREE.Color();
       let currentInstance = 0;
 
-      // Track floor tiles to smoothly interpolate colors on flatten
       let floorData = [];
 
       function addBlock(x, y, z, sx, sy, sz, colorHex) {
@@ -205,21 +204,21 @@
         return idx;
       }
 
-      // 1. Aligned Heavy Storage Racks (Uniform 3-Tier Industrial Bays)
-      function spawnAlignedRackBay(x, z) {
-        const tierHeight = 0.9;
-        const totalHeight = 3 * tierHeight;
+      // --- PROCEDURAL ALIGNED RACK BAY (FLAT TOP TIERS) ---
+      function spawnAlignedRackBay(x, z, tiers) {
+        const tierHeight = 0.88;
+        const totalHeight = tiers * tierHeight;
         const postW = 0.08;
         const offset = 0.42;
 
-        // 4 Blue Structural Steel Uprights
+        // 4 Blue Structural Steel Uprights (Terminating at uniform height)
         addBlock(x - offset, 0, z - offset, postW, totalHeight, postW, PALETTE.rackUpright);
         addBlock(x + offset, 0, z - offset, postW, totalHeight, postW, PALETTE.rackUpright);
         addBlock(x - offset, 0, z + offset, postW, totalHeight, postW, PALETTE.rackUpright);
         addBlock(x + offset, 0, z + offset, postW, totalHeight, postW, PALETTE.rackUpright);
 
-        // 3 Storage Tiers
-        for (let t = 0; t < 3; t++) {
+        // Uniform Storage Levels
+        for (let t = 0; t < tiers; t++) {
           const y = t * tierHeight;
           // Orange Load Crossbeams
           addBlock(x, y, z - offset, 0.92, 0.06, postW, PALETTE.rackBeam);
@@ -227,71 +226,63 @@
           addBlock(x - offset, y, z, postW, 0.06, 0.92, PALETTE.rackBeam);
           addBlock(x + offset, y, z, postW, 0.06, 0.92, PALETTE.rackBeam);
 
-          // Wood Pallet
+          // Wood Euro Pallet
           addBlock(x, y + 0.06, z, 0.78, 0.07, 0.78, PALETTE.woodPallet);
 
-          // Stretch-wrapped cargo
+          // Stretch-Wrapped Cargo Load
           const boxColor = (x + z + t) % 2 === 0 ? PALETTE.cargoBox : PALETTE.cargoBoxAlt;
-          addBlock(x, y + 0.13, z, 0.68, 0.52, 0.68, boxColor);
+          addBlock(x, y + 0.13, z, 0.68, 0.50, 0.68, boxColor);
         }
       }
 
-      // 2. Counterbalanced Forklift / Reach Truck
+      // Forklift / Reach Truck
       function spawnForklift(x, z, angle) {
         dummy.rotation.y = angle;
 
-        // Chassis & Counterweight
         addBlock(x, 0.05, z + 0.1, 0.65, 0.35, 0.55, PALETTE.forkliftBody);
 
-        // Overhead Guard Cab Cage
+        // Overhead Guard Cage
         addBlock(x - 0.24, 0.40, z - 0.05, 0.05, 0.50, 0.05, PALETTE.forkliftCab);
         addBlock(x + 0.24, 0.40, z - 0.05, 0.05, 0.50, 0.05, PALETTE.forkliftCab);
         addBlock(x - 0.24, 0.40, z + 0.25, 0.05, 0.50, 0.05, PALETTE.forkliftCab);
         addBlock(x + 0.24, 0.40, z + 0.25, 0.05, 0.50, 0.05, PALETTE.forkliftCab);
         addBlock(x, 0.90, z + 0.1, 0.55, 0.04, 0.55, PALETTE.forkliftCab);
 
-        // Lifting Mast Rails
+        // Mast & Pallet
         addBlock(x - 0.18, 0.05, z - 0.25, 0.06, 1.15, 0.06, PALETTE.forkliftMast);
         addBlock(x + 0.18, 0.05, z - 0.25, 0.06, 1.15, 0.06, PALETTE.forkliftMast);
-
-        // Pallet on Forks
         addBlock(x, 0.15, z - 0.38, 0.55, 0.06, 0.55, PALETTE.woodPallet);
         addBlock(x, 0.21, z - 0.38, 0.48, 0.40, 0.48, PALETTE.cargoBoxAlt);
       }
 
-      // 3. Ground Fleet AMR (Sorting Robot)
+      // Ground AMR
       function spawnAMR(x, z) {
         addBlock(x, 0.05, z, 0.76, 0.14, 0.76, PALETTE.amrBase);
         addBlock(x, 0.19, z, 0.68, 0.16, 0.68, PALETTE.amrChassis);
         addBlock(x, 0.35, z, 0.54, 0.24, 0.54, PALETTE.amrTote);
       }
 
-      // 4. Staging Buffer: Empty Pallet Stack (3-High)
+      // Staging Pallet Stack
       function spawnPalletStack(x, z) {
         for (let i = 0; i < 4; i++) {
           addBlock(x, i * 0.11, z, 0.76, 0.08, 0.76, PALETTE.woodPallet);
         }
       }
 
-      // 5. Automated Roller Conveyor Spur
+      // Roller Conveyor Spur
       function spawnConveyor(x, z, horizontal) {
-        // Support frame
         addBlock(x, 0.05, z, horizontal ? 0.94 : 0.60, 0.25, horizontal ? 0.60 : 0.94, PALETTE.conveyorLeg);
-        // Rollers bed
         addBlock(x, 0.30, z, horizontal ? 0.90 : 0.52, 0.06, horizontal ? 0.52 : 0.90, PALETTE.conveyorRoller);
-        // Moving tote on conveyor
         addBlock(x, 0.36, z, 0.48, 0.26, 0.48, PALETTE.amrTote);
       }
 
-      // 6. AMR Wireless Inductive Charging Pad
+      // Inductive Charging Dock
       function spawnChargingDock(x, z) {
-        // Base plate
         addBlock(x, 0.04, z, 0.82, 0.06, 0.82, PALETTE.amrBase);
-        // Illuminated green center coil
         addBlock(x, 0.10, z, 0.50, 0.04, 0.50, PALETTE.chargePad);
       }
 
-      // 7. Heavy-Duty Safety Crash Bollards
+      // Heavy Safety Bollards
       function spawnSafetyBollards(x, z) {
         const offset = 0.28;
         addBlock(x - offset, 0.05, z - offset, 0.14, 0.75, 0.14, PALETTE.bollardYellow);
@@ -313,10 +304,13 @@
 
         const size = qr.getModuleCount();
         const center = size / 2;
-        const maxRadius = size * 0.707; // Outer corner radius
-        const rackRadius = size * 0.36;
+        const maxRadius = size * 0.707;
+        
+        // TWO DISTINCT FLAT PLATEAU THRESHOLDS:
+        const highBayRadius = size * 0.18; // Central High-Bay AS/RS zone
+        const rackRadius = size * 0.37;    // Intermediate selective rack zone
 
-        instancedMesh = new THREE.InstancedMesh(boxGeo, unitMaterial, 16000);
+        instancedMesh = new THREE.InstancedMesh(boxGeo, unitMaterial, 20000);
         instancedMesh.castShadow = true;
         instancedMesh.receiveShadow = true;
         currentInstance = 0;
@@ -329,49 +323,39 @@
             const dist = Math.hypot(posX, posZ);
             const normDist = Math.min(1.0, dist / maxRadius);
 
-            // Compute radial gradient color for 3D mode
             const colLight3D = new THREE.Color().lerpColors(PALETTE.floorCenter3D, PALETTE.floorEdge3D, normDist * 0.95);
             const colDark3D  = new THREE.Color().lerpColors(PALETTE.trackCenter3D, PALETTE.trackEdge3D, normDist * 0.95);
 
             if (!isDark) {
-              // LIGHT MODULE: Concrete Floor with Radial Falloff
               const idx = addBlock(posX, 0, posZ, 0.98, 0.08, 0.98, '#4c5565');
               floorData.push({ idx, type: 'light', col3D: colLight3D });
             } else {
-              // DARK MODULE: Industrial Demarcation Slab
               const idx = addBlock(posX, 0, posZ, 0.98, 0.10, 0.98, '#222936');
               floorData.push({ idx, type: 'dark', col3D: colDark3D });
 
-              // ZONE 1: Central Storage Grid -> Uniform Racks
-              if (dist < rackRadius) {
-                spawnAlignedRackBay(posX, posZ);
-              } 
+              // ZONE 1A: Central High-Bay AS/RS Core (Clean FLAT 5-Tier Plateau)
+              if (dist < highBayRadius) {
+                spawnAlignedRackBay(posX, posZ, 5);
+              }
+              // ZONE 1B: Mid-Zone Selective Racking (Clean FLAT 3-Tier Plateau)
+              else if (dist < rackRadius) {
+                spawnAlignedRackBay(posX, posZ, 3);
+              }
               // ZONE 2: Surrounding Infrastructure & Fleet
               else {
                 const seed = (r * 13 + c * 7);
 
-                // Forklifts / Reach Trucks
                 if (seed % 17 === 0) {
                   spawnForklift(posX, posZ, (r % 2 === 0 ? 0 : Math.PI / 2));
-                }
-                // Automated Roller Conveyors
-                else if (seed % 19 === 1) {
+                } else if (seed % 19 === 1) {
                   spawnConveyor(posX, posZ, r % 2 === 0);
-                }
-                // Empty Pallet Staging Stacks
-                else if (seed % 13 === 2) {
+                } else if (seed % 13 === 2) {
                   spawnPalletStack(posX, posZ);
-                }
-                // AMR Wireless Charging Pads
-                else if (seed % 23 === 3) {
+                } else if (seed % 23 === 3) {
                   spawnChargingDock(posX, posZ);
-                }
-                // Rack Corner Crash Bollards
-                else if (seed % 21 === 4) {
+                } else if (seed % 21 === 4) {
                   spawnSafetyBollards(posX, posZ);
-                }
-                // Autonomous Sorting AMRs
-                else if (seed % 4 === 0) {
+                } else if (seed % 4 === 0) {
                   spawnAMR(posX, posZ);
                 }
               }
@@ -384,7 +368,6 @@
         if (instancedMesh.instanceColor) instancedMesh.instanceColor.needsUpdate = true;
         scene.add(instancedMesh);
 
-        // Apply initial 3D gradient colors to floor
         updateFloorContrast(0);
       }
 
@@ -392,7 +375,7 @@
       const input = document.getElementById('qr-input');
       generateFacility(input.value.trim());
 
-      // --- SMOOTH FLOOR CONTRAST INTERPOLATION ---
+      // --- FLOOR CONTRAST INTERPOLATION ---
       const contrastState = { progress: 0 };
 
       function updateFloorContrast(progress) {
@@ -422,7 +405,6 @@
         toggleBtn.textContent = isFlat ? "3D Warehouse View" : "Flatten to Scan";
         const target = isFlat ? flatPos : isoPos;
 
-        // Camera Transition
         gsap.to(camera.position, {
           x: target.x,
           y: target.y,
@@ -432,7 +414,6 @@
           onUpdate: () => camera.lookAt(0, 0, 0)
         });
 
-        // Floor contrast transition: dark gradient in 3D -> scan contrast in 2D
         gsap.to(contrastState, {
           progress: isFlat ? 1 : 0,
           duration: 1.2,
@@ -440,10 +421,9 @@
           onUpdate: () => updateFloorContrast(contrastState.progress)
         });
 
-        // Lighting balance
         gsap.to(sunLight, { intensity: isFlat ? 1.0 : 2.0, duration: 1.2 });
         gsap.to(ambientLight, { intensity: isFlat ? 1.9 : 0.85, duration: 1.2 });
-        gsap.to(groundPlate.position, { y: isFlat ? -5 : -0.15, duration: 0.8 }); // Lower foundation plate when flat
+        gsap.to(groundPlate.position, { y: isFlat ? -5 : -0.15, duration: 0.8 });
       }
 
       toggleBtn.addEventListener('click', toggleView);
@@ -455,7 +435,7 @@
         if (e.key === 'Enter' && input.value.trim().length > 0) generateFacility(input.value.trim());
       });
 
-      // --- MOUSE & TOUCH ORBIT CONTROLS ---
+      // --- MOUSE & TOUCH ORBIT ---
       let isDragging = false;
       let prevPointer = { x: 0, y: 0 };
 

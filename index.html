@@ -4,18 +4,19 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Autonomous Intralogistics Grid - 3D QR</title>
-    <!-- External Libraries via CDN (No NPM or Node needed) -->
+    <!-- Stable Browser CDNs -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 
     <style>
       * { box-sizing: border-box; margin: 0; padding: 0; }
       body {
-        background: #0f172a;
+        background: #0b0f19;
         color: #f8fafc;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
         overflow: hidden;
+        user-select: none;
       }
       #webgl-container {
         width: 100vw;
@@ -24,103 +25,110 @@
       }
       .ui-overlay {
         position: absolute;
-        top: 24px;
+        top: 20px;
         left: 50%;
         transform: translateX(-50%);
         display: flex;
         gap: 10px;
-        background: rgba(15, 23, 42, 0.85);
-        backdrop-filter: blur(12px);
+        background: rgba(15, 23, 42, 0.88);
+        backdrop-filter: blur(14px);
         padding: 8px 12px;
         border-radius: 9999px;
         border: 1px solid rgba(255, 255, 255, 0.15);
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+        box-shadow: 0 20px 30px -8px rgba(0, 0, 0, 0.7);
         z-index: 10;
       }
       .ui-input {
-        background: rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.07);
         border: 1px solid rgba(255, 255, 255, 0.2);
-        padding: 8px 16px;
+        padding: 9px 18px;
         border-radius: 9999px;
         color: #fff;
         outline: none;
         font-size: 14px;
-        min-width: 220px;
+        min-width: 250px;
+        transition: border 0.2s;
       }
+      .ui-input:focus { border-color: #3b82f6; }
       .ui-btn {
         background: #2563eb;
         color: #fff;
         border: none;
-        padding: 8px 18px;
+        padding: 9px 20px;
         border-radius: 9999px;
         font-weight: 600;
         font-size: 14px;
         cursor: pointer;
-        transition: background 0.2s ease;
+        transition: background 0.2s, transform 0.1s;
+        white-space: nowrap;
       }
       .ui-btn:hover { background: #1d4ed8; }
+      .ui-btn:active { transform: scale(0.97); }
       .hint {
         position: absolute;
         bottom: 24px;
         left: 50%;
         transform: translateX(-50%);
-        font-size: 13px;
-        letter-spacing: 0.05em;
+        font-size: 12px;
+        letter-spacing: 0.08em;
         text-transform: uppercase;
-        color: rgba(255, 255, 255, 0.6);
+        color: rgba(255, 255, 255, 0.55);
         pointer-events: none;
+        text-align: center;
+        width: 100%;
       }
     </style>
   </head>
   <body>
     <div class="ui-overlay">
-      <input id="qr-input" class="ui-input" type="text" value="https://github.com" placeholder="Enter target URL..." />
+      <input id="qr-input" class="ui-input" type="text" value="https://voruki.github.io/industrial-qr/" placeholder="Enter URL or text..." />
       <button id="toggle-btn" class="ui-btn">Flatten to Scan</button>
     </div>
     <div class="hint">Click & drag to orbit · Tap button to scan</div>
     <div id="webgl-container"></div>
 
     <script>
-      // --- PALETTE (RAL INDUSTRIAL STANDARDS) ---
+      // --- INDUSTRIAL PALETTE (RAL STANDARDS) ---
       const PALETTE = {
-        floor: '#F3F4F6',          // Concrete warehouse floor
-        rackUpright: '#1E3A8A',    // RAL 5010 Industrial Blue
-        rackBeam: '#C2410C',       // RAL 2004 Industrial Orange
-        amrChassis: '#CA8A04',     // RAL 1023 Safety Yellow
-        amrBase: '#1F2937'         // Machine Base Dark Charcoal
+        floor: '#E5E7EB',          // Light Polished Concrete (Light Module)
+        rackUpright: '#1E3A8A',    // RAL 5010 Industrial Blue Uprights
+        rackBeam: '#C2410C',       // RAL 2004 Pure Industrial Orange Beams
+        amrChassis: '#CA8A04',     // RAL 1023 Safety Traffic Yellow Deck
+        amrBase: '#1F2937'         // RAL 7021 Dark Machine Undercarriage
       };
 
-      // --- THREE.JS SETUP ---
+      // --- THREE.JS INITIALIZATION ---
       const container = document.getElementById('webgl-container');
       const scene = new THREE.Scene();
-      scene.background = new THREE.Color('#0f172a');
+      scene.background = new THREE.Color('#0b0f19');
 
       let width = window.innerWidth;
       let height = window.innerHeight;
 
       const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-      const isoPos = new THREE.Vector3(38, 42, 38);
-      const flatPos = new THREE.Vector3(0, 56, 0.001);
+      const isoPos = new THREE.Vector3(36, 42, 36);
+      const flatPos = new THREE.Vector3(0, 60, -0.001); // Slightly south so top of QR faces up
       camera.position.copy(isoPos);
       camera.lookAt(0, 0, 0);
 
-      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
       renderer.setSize(width, height);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.shadowMap.enabled = true;
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       container.appendChild(renderer.domElement);
 
-      const ambientLight = new THREE.AmbientLight('#ffffff', 1.2);
+      // --- LIGHTING RIG ---
+      const ambientLight = new THREE.AmbientLight('#ffffff', 1.1);
       scene.add(ambientLight);
 
-      const sunLight = new THREE.DirectionalLight('#fff8eb', 2.0);
-      sunLight.position.set(30, 60, 20);
+      const sunLight = new THREE.DirectionalLight('#fff5ea', 1.8);
+      sunLight.position.set(35, 65, 25);
       sunLight.castShadow = true;
       sunLight.shadow.mapSize.width = 2048;
       sunLight.shadow.mapSize.height = 2048;
       sunLight.shadow.camera.near = 10;
-      sunLight.shadow.camera.far = 150;
+      sunLight.shadow.camera.far = 160;
       const d = 35;
       sunLight.shadow.camera.left = -d;
       sunLight.shadow.camera.right = d;
@@ -129,8 +137,18 @@
       sunLight.shadow.bias = -0.0005;
       scene.add(sunLight);
 
+      // Warehouse Fill Light
+      const fillLight = new THREE.DirectionalLight('#60a5fa', 0.4);
+      fillLight.position.set(-30, 20, -30);
+      scene.add(fillLight);
+
+      // --- INSTANCED MESH SYSTEM ---
       const boxGeo = new THREE.BoxGeometry(1, 1, 1);
-      const unitMaterial = new THREE.MeshStandardMaterial({ roughness: 0.4, metalness: 0.15 });
+      const unitMaterial = new THREE.MeshStandardMaterial({
+        roughness: 0.35,
+        metalness: 0.15,
+        color: 0xffffff
+      });
 
       let instancedMesh = null;
       const dummy = new THREE.Object3D();
@@ -147,6 +165,7 @@
         currentInstance++;
       }
 
+      // --- INDUSTRIAL QR BUILDER ---
       function generateIndustrialGrid(text) {
         if (instancedMesh) {
           scene.remove(instancedMesh);
@@ -154,42 +173,63 @@
           instancedMesh = null;
         }
 
-        const qr = QRCode.create(text, { errorCorrectionLevel: 'H' });
-        const size = qr.modules.size;
+        // Generate QR code using qrcode-generator (Type 0 = auto-detect, H = High error correction)
+        const qr = qrcode(0, 'H');
+        qr.addData(text);
+        qr.make();
+
+        const size = qr.getModuleCount();
         const center = size / 2;
         const maxCanopyRadius = size * 0.42;
 
-        instancedMesh = new THREE.InstancedMesh(boxGeo, unitMaterial, 7500);
+        // Allocate block capacity for AS/RS tiers and robots
+        const maxBlocks = size * size * 7;
+        instancedMesh = new THREE.InstancedMesh(boxGeo, unitMaterial, maxBlocks);
         instancedMesh.castShadow = true;
         instancedMesh.receiveShadow = true;
         currentInstance = 0;
 
-        for (let z = 0; z < size; z++) {
-          for (let x = 0; x < size; x++) {
-            const isDark = qr.modules.get ? qr.modules.get(z, x) : (qr.modules.data[z * size + x] === 1);
-            const posX = x - center + 0.5;
-            const posZ = z - center + 0.5;
+        for (let r = 0; r < size; r++) {
+          for (let c = 0; c < size; c++) {
+            const isDark = qr.isDark(r, c);
+            const posX = c - center + 0.5;
+            const posZ = r - center + 0.5;
             const distFromCenter = Math.hypot(posX, posZ);
 
             if (!isDark) {
+              // Light Module: Polished Concrete Floor Slab
               addBlock(posX, 0, posZ, 0.98, 0.15, 0.98, PALETTE.floor);
             } else {
+              // Dark Module: Industrial Racks & Mobile Fleet
               if (distFromCenter < 3.2) {
+                // Central High-Density AS/RS Racking Hub
                 const tiers = 6;
                 for (let layer = 0; layer < tiers; layer++) {
                   const isShelf = layer % 2 === 1;
-                  addBlock(posX, layer * 0.85, posZ, 0.92, 0.80, 0.92, isShelf ? PALETTE.rackBeam : PALETTE.rackUpright);
+                  addBlock(
+                    posX, layer * 0.85, posZ,
+                    0.92, 0.80, 0.92,
+                    isShelf ? PALETTE.rackBeam : PALETTE.rackUpright
+                  );
                 }
+                // Central Top-Deck Sorting Robot
                 addBlock(posX, tiers * 0.85, posZ, 0.88, 0.28, 0.88, PALETTE.amrChassis);
               } else if (distFromCenter < maxCanopyRadius) {
+                // Tiered Sorting Levels (Parabolic dome stepping down)
                 const normalizedDist = 1 - (distFromCenter / maxCanopyRadius);
                 const rackTiers = Math.max(1, Math.round(4 * Math.pow(normalizedDist, 1.6)));
 
                 for (let layer = 0; layer < rackTiers; layer++) {
-                  addBlock(posX, layer * 0.85, posZ, 0.92, 0.80, 0.92, layer === 0 ? PALETTE.rackUpright : PALETTE.rackBeam);
+                  addBlock(
+                    posX, layer * 0.85, posZ,
+                    0.92, 0.80, 0.92,
+                    layer === 0 ? PALETTE.rackUpright : PALETTE.rackBeam
+                  );
                 }
+                // Mounted Sorting AMR
                 addBlock(posX, rackTiers * 0.85, posZ, 0.88, 0.32, 0.88, PALETTE.amrChassis);
               } else {
+                // Ground Level Autonomous Transport AMRs
                 addBlock(posX, 0, posZ, 0.90, 0.20, 0.90, PALETTE.amrBase);
                 addBlock(posX, 0.20, posZ, 0.86, 0.24, 0.86, PALETTE.amrChassis);
               }
@@ -203,16 +243,18 @@
         scene.add(instancedMesh);
       }
 
-      // Initial Build
-      const initialUrl = document.getElementById('qr-input').value;
-      generateIndustrialGrid(initialUrl);
+      // --- INITIAL GENERATION ---
+      const input = document.getElementById('qr-input');
+      generateIndustrialGrid(input.value.trim());
 
-      // --- CAMERA FLATTEN ANIMATION ---
+      // --- VIEW TOGGLE & CAMERA ANIMATION ---
       let isFlat = false;
+      let autoRotate = true;
       const toggleBtn = document.getElementById('toggle-btn');
 
       function toggleView() {
         isFlat = !isFlat;
+        autoRotate = false; // Stop auto-spinning on user interaction
         toggleBtn.textContent = isFlat ? "3D Isometric View" : "Flatten to Scan";
         const target = isFlat ? flatPos : isoPos;
 
@@ -220,31 +262,38 @@
           x: target.x,
           y: target.y,
           z: target.z,
-          duration: 1.1,
+          duration: 1.2,
           ease: "power3.inOut",
           onUpdate: () => camera.lookAt(0, 0, 0)
         });
 
-        gsap.to(sunLight, { intensity: isFlat ? 1.0 : 2.0, duration: 1.1 });
-        gsap.to(ambientLight, { intensity: isFlat ? 1.8 : 1.2, duration: 1.1 });
+        // Optimize lighting for scanning vs 3D volume
+        gsap.to(sunLight, { intensity: isFlat ? 1.0 : 1.8, duration: 1.2 });
+        gsap.to(ambientLight, { intensity: isFlat ? 1.9 : 1.1, duration: 1.2 });
       }
 
       toggleBtn.addEventListener('click', toggleView);
 
-      const input = document.getElementById('qr-input');
+      // Rebuild on input change
       input.addEventListener('change', () => {
         if (input.value.trim().length > 0) {
           generateIndustrialGrid(input.value.trim());
         }
       });
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && input.value.trim().length > 0) {
+          generateIndustrialGrid(input.value.trim());
+        }
+      });
 
-      // --- DRAG ORBIT ---
+      // --- ORBIT CONTROLS (MOUSE & TOUCH) ---
       let isDragging = false;
       let prevPointer = { x: 0, y: 0 };
 
       window.addEventListener('pointerdown', (e) => {
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
         isDragging = true;
+        autoRotate = false;
         prevPointer = { x: e.clientX, y: e.clientY };
       });
 
@@ -258,7 +307,7 @@
 
         camera.position.x = radius * Math.cos(angle);
         camera.position.z = radius * Math.sin(angle);
-        camera.position.y = Math.max(15, Math.min(65, camera.position.y - deltaY * 15));
+        camera.position.y = Math.max(14, Math.min(65, camera.position.y - deltaY * 16));
         camera.lookAt(0, 0, 0);
 
         prevPointer = { x: e.clientX, y: e.clientY };
@@ -266,6 +315,7 @@
 
       window.addEventListener('pointerup', () => { isDragging = false; });
 
+      // Resize listener
       window.addEventListener('resize', () => {
         width = window.innerWidth;
         height = window.innerHeight;
@@ -274,8 +324,19 @@
         renderer.setSize(width, height);
       });
 
+      // --- RENDER LOOP ---
       function animate() {
         requestAnimationFrame(animate);
+
+        // Gentle idle orbit when in 3D mode
+        if (autoRotate && !isFlat && !isDragging) {
+          const radius = Math.hypot(camera.position.x, camera.position.z);
+          let angle = Math.atan2(camera.position.z, camera.position.x) + 0.0025;
+          camera.position.x = radius * Math.cos(angle);
+          camera.position.z = radius * Math.sin(angle);
+          camera.lookAt(0, 0, 0);
+        }
+
         renderer.render(scene, camera);
       }
       animate();

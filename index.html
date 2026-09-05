@@ -13,11 +13,12 @@
     <style>
       * { box-sizing: border-box; margin: 0; padding: 0; }
       body {
-        background: #1c1412;
+        background: #fef3c7;
         color: #f8fafc;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
         overflow: hidden;
         user-select: none;
+        transition: background-color 1.4s cubic-bezier(0.16, 1, 0.3, 1);
       }
 
       /* Fluid Ambient Pastel Mesh Backdrop */
@@ -29,7 +30,7 @@
         z-index: 0;
         pointer-events: none;
         overflow: hidden;
-        background-color: #1c1412;
+        background-color: #fef3c7;
         transition: background-color 1.4s cubic-bezier(0.16, 1, 0.3, 1);
       }
 
@@ -37,12 +38,12 @@
         position: absolute;
         border-radius: 50%;
         filter: blur(120px);
-        opacity: 0.65;
+        opacity: 0.70;
         will-change: transform;
         transition: background 1.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.4s ease;
       }
 
-      /* Blob 1: Large primary studio light pool */
+      /* Blob 1: Large primary floating studio pool */
       .blob-1 {
         width: 68vw;
         height: 68vw;
@@ -75,7 +76,7 @@
         animation: floatBlob3 30s infinite alternate ease-in-out;
       }
 
-      /* Soft Diffused Studio Vignette (No harsh black cuts!) */
+      /* Screen Horizon Vignette: Blooms into pastel at the screen edges */
       .bg-vignette {
         position: absolute;
         inset: 0;
@@ -119,15 +120,15 @@
         bottom: 136px;
         left: 50%;
         transform: translateX(-50%);
-        background: rgba(20, 26, 38, 0.88);
+        background: rgba(15, 23, 42, 0.88);
         backdrop-filter: blur(14px);
-        color: #cbd5e1;
+        color: #f1f5f9;
         font-size: 13px;
         font-weight: 500;
         padding: 7px 18px;
         border-radius: 9999px;
-        border: 1px solid rgba(255, 255, 255, 0.16);
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        box-shadow: 0 12px 25px -5px rgba(0, 0, 0, 0.35);
         cursor: pointer;
         transition: all 0.2s ease;
         z-index: 10;
@@ -136,9 +137,9 @@
         gap: 8px;
       }
       .tap-badge:hover {
-        background: rgba(37, 99, 235, 0.92);
+        background: rgba(37, 99, 235, 0.95);
         color: #ffffff;
-        border-color: rgba(255, 255, 255, 0.35);
+        border-color: rgba(255, 255, 255, 0.45);
         transform: translateX(-50%) translateY(-2px);
       }
       .pulse-dot {
@@ -168,17 +169,17 @@
         width: 100%;
         display: flex;
         gap: 8px;
-        background: rgba(14, 18, 28, 0.92);
+        background: rgba(15, 23, 42, 0.92);
         backdrop-filter: blur(18px);
         padding: 7px 9px;
         border-radius: 20px;
-        border: 1px solid rgba(255, 255, 255, 0.14);
-        box-shadow: 0 25px 40px -10px rgba(0, 0, 0, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.4);
       }
       .bottom-input {
         flex: 1;
-        background: rgba(255, 255, 255, 0.06);
-        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.18);
         padding: 11px 16px;
         border-radius: 14px;
         color: #ffffff;
@@ -188,7 +189,7 @@
       }
       .bottom-input:focus {
         border-color: #3b82f6;
-        background: rgba(255, 255, 255, 0.10);
+        background: rgba(255, 255, 255, 0.14);
       }
       .action-btn {
         background: #2563eb;
@@ -207,7 +208,7 @@
       .action-btn:active { transform: scale(0.95); }
 
       .share-btn {
-        background: rgba(217, 119, 6, 0.92);
+        background: rgba(217, 119, 6, 0.95);
       }
       .share-btn:hover { background: rgb(180, 83, 9); }
 
@@ -220,12 +221,12 @@
       .mode-selector {
         flex: 1;
         display: flex;
-        background: rgba(14, 18, 28, 0.90);
+        background: rgba(15, 23, 42, 0.90);
         backdrop-filter: blur(16px);
         padding: 4px;
         border-radius: 16px;
-        border: 1px solid rgba(255, 255, 255, 0.14);
-        box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.3);
       }
       .mode-tab {
         flex: 1;
@@ -242,18 +243,18 @@
         white-space: nowrap;
       }
       .mode-tab.active {
-        background: rgba(255, 255, 255, 0.14);
+        background: rgba(255, 255, 255, 0.20);
         color: #ffffff;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
       }
       .mode-tab:hover:not(.active) {
         color: #f1f5f9;
-        background: rgba(255, 255, 255, 0.06);
+        background: rgba(255, 255, 255, 0.08);
       }
       .audio-btn {
-        background: rgba(14, 18, 28, 0.90);
+        background: rgba(15, 23, 42, 0.90);
         backdrop-filter: blur(16px);
-        border: 1px solid rgba(255, 255, 255, 0.14);
+        border: 1px solid rgba(255, 255, 255, 0.18);
         color: #94a3b8;
         width: 44px;
         height: 44px;
@@ -263,10 +264,11 @@
         justify-content: center;
         cursor: pointer;
         transition: all 0.2s;
+        box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.3);
       }
       .audio-btn:hover {
         color: #ffffff;
-        border-color: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.35);
       }
       .audio-btn.active {
         color: #38bdf8;
@@ -278,13 +280,13 @@
         top: 24px;
         left: 50%;
         transform: translateX(-50%) translateY(-30px);
-        background: rgba(16, 185, 129, 0.92);
+        background: rgba(16, 185, 129, 0.95);
         color: #ffffff;
         font-size: 13px;
         font-weight: 600;
         padding: 9px 20px;
         border-radius: 9999px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
         opacity: 0;
         pointer-events: none;
         transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -358,7 +360,7 @@
 
     <script>
       // ==========================================
-      // 1. STATE & PASTEL STUDIO PALETTES
+      // 1. STATE & PASTEL HORIZON PALETTES
       // ==========================================
       let isFlat = false;
       let soundEnabled = false;
@@ -367,19 +369,20 @@
 
       const THEMES = {
         day: {
-          // Warm Pastel Terracotta & Peach Studio (Matches reference image)
-          bgBase: '#1c1412',
-          blob1:  'radial-gradient(circle, rgba(251, 146, 60, 0.55) 0%, rgba(244, 114, 182, 0.28) 48%, transparent 75%)',
-          blob2:  'radial-gradient(circle, rgba(253, 186, 116, 0.50) 0%, rgba(254, 215, 170, 0.22) 50%, transparent 75%)',
-          blob3:  'radial-gradient(circle, rgba(225, 29, 72, 0.32) 0%, rgba(159, 18, 57, 0.18) 45%, transparent 70%)',
-          vignette: 'radial-gradient(ellipse at 50% 45%, transparent 40%, rgba(22, 15, 14, 0.55) 85%, rgba(15, 10, 9, 0.92) 100%)',
-          dustColor: 0xfde68a, // Soft warm golden bokeh
+          // Transitions out to bright pastel yellow at the screen edges!
+          bgBase: '#fef3c7', // Soft warm cream base
+          blob1:  'radial-gradient(circle, rgba(249, 115, 22, 0.58) 0%, rgba(251, 146, 60, 0.32) 48%, transparent 75%)', // Terracotta-peach center
+          blob2:  'radial-gradient(circle, rgba(245, 158, 11, 0.52) 0%, rgba(252, 211, 77, 0.30) 50%, transparent 75%)', // Golden apricot
+          blob3:  'radial-gradient(circle, rgba(225, 29, 72, 0.35) 0%, rgba(251, 113, 133, 0.18) 45%, transparent 70%)', // Rose coral
+          // Center has deep warm contrast for the model, edges bloom into luminous pastel yellow (#fde047 / #fef08a)
+          vignette: 'radial-gradient(ellipse at 50% 45%, rgba(67, 20, 7, 0.42) 0%, rgba(154, 52, 18, 0.20) 42%, rgba(254, 240, 138, 0.65) 75%, #fde047 100%)',
+          dustColor: 0xb45309, // Soft golden amber bokeh motes
 
           sunIntensity: 1.85,
           ambientIntensity: 0.88,
           sunColor: '#fffbf0',
 
-          // Medium Slate-Grey Concrete Floor
+          // Medium Slate-Grey Concrete Floor Slab
           floorCenter3D:  new THREE.Color('#3f4854'), 
           floorEdge3D:    new THREE.Color('#252d36'), 
           floorScanLight: new THREE.Color('#ffffff'),
@@ -413,19 +416,20 @@
           laserColor:     0x38bdf8
         },
         cold: {
-          // Frosty Powder-Blue & Lavender Mist Pastel
-          bgBase: '#0c1522',
-          blob1:  'radial-gradient(circle, rgba(125, 211, 252, 0.50) 0%, rgba(56, 189, 248, 0.28) 48%, transparent 75%)',
-          blob2:  'radial-gradient(circle, rgba(165, 243, 252, 0.52) 0%, rgba(34, 211, 238, 0.22) 50%, transparent 75%)',
-          blob3:  'radial-gradient(circle, rgba(199, 210, 254, 0.38) 0%, rgba(129, 140, 248, 0.18) 45%, transparent 70%)',
-          vignette: 'radial-gradient(ellipse at 50% 45%, transparent 40%, rgba(8, 15, 26, 0.55) 85%, rgba(5, 10, 18, 0.92) 100%)',
-          dustColor: 0xbae6fd, // Soft frosty powder-blue motes
+          // Transitions out to frosty pastel powder-blue at the screen edges!
+          bgBase: '#e0f2fe', // Soft ice-powder base
+          blob1:  'radial-gradient(circle, rgba(2, 132, 199, 0.55) 0%, rgba(56, 189, 248, 0.30) 48%, transparent 75%)', // Glacial azure center
+          blob2:  'radial-gradient(circle, rgba(14, 165, 233, 0.50) 0%, rgba(125, 211, 252, 0.28) 50%, transparent 75%)', // Arctic cyan
+          blob3:  'radial-gradient(circle, rgba(99, 102, 241, 0.38) 0%, rgba(165, 180, 252, 0.20) 45%, transparent 70%)', // Lavender frost
+          // Center has deep navy contrast for the ice warehouse, edges bloom into crisp pastel powder-blue (#7dd3fc / #bae6fd)
+          vignette: 'radial-gradient(ellipse at 50% 45%, rgba(8, 47, 73, 0.45) 0%, rgba(3, 105, 161, 0.18) 42%, rgba(186, 230, 253, 0.65) 75%, #7dd3fc 100%)',
+          dustColor: 0x0284c7, // Soft frosty azure motes
 
           sunIntensity: 1.85,
           ambientIntensity: 0.88,
           sunColor: '#f0f9ff',
 
-          // Cool Bluish-Grey Concrete Floor
+          // Cool Bluish-Grey Concrete Floor Slab
           floorCenter3D:  new THREE.Color('#334454'), 
           floorEdge3D:    new THREE.Color('#1e2a36'), 
           floorScanLight: new THREE.Color('#ffffff'),
@@ -459,19 +463,19 @@
           laserColor:     0x67e8f9
         },
         night: {
-          // Moody Twilight Emerald & Hazard Amber Pastel
-          bgBase: '#090e17',
-          blob1:  'radial-gradient(circle, rgba(110, 231, 183, 0.42) 0%, rgba(16, 185, 129, 0.22) 48%, transparent 75%)',
-          blob2:  'radial-gradient(circle, rgba(253, 224, 71, 0.35) 0%, rgba(245, 158, 11, 0.18) 50%, transparent 75%)',
-          blob3:  'radial-gradient(circle, rgba(147, 197, 253, 0.32) 0%, rgba(59, 130, 246, 0.16) 45%, transparent 70%)',
-          vignette: 'radial-gradient(ellipse at 50% 45%, transparent 40%, rgba(5, 9, 16, 0.60) 85%, rgba(2, 5, 10, 0.94) 100%)',
-          dustColor: 0xa7f3d0, // Soft pastel emerald motes
+          // Moody Twilight Emerald & Hazard Amber Stealth
+          bgBase: '#020617',
+          blob1:  'radial-gradient(circle, rgba(16, 185, 129, 0.50) 0%, rgba(5, 150, 105, 0.25) 48%, transparent 75%)',
+          blob2:  'radial-gradient(circle, rgba(245, 158, 11, 0.40) 0%, rgba(217, 119, 6, 0.18) 50%, transparent 75%)',
+          blob3:  'radial-gradient(circle, rgba(37, 99, 235, 0.35) 0%, rgba(30, 58, 138, 0.16) 45%, transparent 70%)',
+          vignette: 'radial-gradient(ellipse at 50% 45%, transparent 35%, rgba(2, 6, 23, 0.65) 80%, #020617 100%)',
+          dustColor: 0x6ee7b7,
 
           sunIntensity: 1.65,
           ambientIntensity: 0.70,
           sunColor: '#fffbeb',
 
-          // Dark Charcoal Concrete Floor
+          // Dark Charcoal Concrete Floor Slab
           floorCenter3D:  new THREE.Color('#202632'), 
           floorEdge3D:    new THREE.Color('#0e1218'), 
           floorScanLight: new THREE.Color('#ffffff'),
@@ -517,6 +521,7 @@
 
       function updateBackdropBlobs(themeKey) {
         const t = THEMES[themeKey];
+        document.body.style.backgroundColor = t.bgBase;
         document.getElementById('abstract-bg').style.backgroundColor = t.bgBase;
         document.getElementById('blob-1').style.background = t.blob1;
         document.getElementById('blob-2').style.background = t.blob2;
@@ -614,7 +619,7 @@
         antialias: true,
         powerPreference: "high-performance",
         preserveDrawingBuffer: true,
-        alpha: true
+        alpha: true // Shows the fluid abstract pastel mesh
       });
       renderer.setSize(width, height);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -675,7 +680,7 @@
         return new THREE.CanvasTexture(canvas);
       }
 
-      // --- SUBTLE, ATMOSPHERIC PARTICLES ---
+      // --- SUBTLE ATMOSPHERIC DUST MOTES ---
       const dustCount = 130;
       const dustGeo = new THREE.BufferGeometry();
       const dustPositions = new Float32Array(dustCount * 3);
@@ -686,7 +691,7 @@
       }
       dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPositions, 3));
       const dustMat = new THREE.PointsMaterial({
-        size: 0.48, // Subtle, refined scale
+        size: 0.48,
         map: createSoftParticleTexture(),
         color: PALETTE.dustColor,
         transparent: true,
@@ -721,7 +726,7 @@
       const contrastState = { progress: 0 };
 
       // ==========================================
-      // 4. GENERATOR FUNCTIONS (3D DETAILED ASSETS)
+      // 4. GENERATOR FUNCTIONS (3D SOLID SLAB)
       // ==========================================
       function addBlock(x, y, z, sx, sy, sz, colorHex) {
         if (!instancedMesh) return -1;
@@ -769,7 +774,7 @@
         }
       }
 
-      // Tall Reach Truck
+      // Tall 3D Reach Truck
       function spawnForklift(x, z, dir = 'z') {
         const parts = [];
         function addPart(ox, oy, oz, sx, sy, sz, colorHex) {
@@ -809,7 +814,7 @@
         });
       }
 
-      // Layered AMR
+      // Layered 3D AMR
       function spawnAMR(x, z, dir = 'z') {
         const parts = [];
         function addPart(ox, oy, oz, sx, sy, sz, colorHex) {

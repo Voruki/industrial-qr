@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Autonomous Intralogistics Facility - 3D QR</title>
-    <!-- Three.js + GSAP + QR Generator via CDN -->
+    <!-- Stable Browser CDNs -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
@@ -87,39 +87,45 @@
     <div id="webgl-container"></div>
 
     <script>
-      // --- INDUSTRIAL COLOR PALETTE (RAL STANDARDS) ---
+      // --- INDUSTRIAL COLOR PALETTE (RAL & VDA STANDARDS) ---
       const PALETTE = {
         // Floor 3D Gradient Targets
-        floorCenter3D:  new THREE.Color('#4c5565'), // Concrete grey under center lights
-        floorEdge3D:    new THREE.Color('#141822'), // Dark charcoal falloff
-        floorScanLight: new THREE.Color('#f8fafc'), // 2D Scan white
+        floorCenter3D:  new THREE.Color('#4c5565'), // Polished concrete illuminated center
+        floorEdge3D:    new THREE.Color('#141822'), // Dark charcoal perimeter falloff
+        floorScanLight: new THREE.Color('#f8fafc'), // 2D Scan white background
 
         trackCenter3D:  new THREE.Color('#222936'), // Dark transit floor center
         trackEdge3D:    new THREE.Color('#0b0e14'), // Dark transit floor edge
-        trackScanDark:  new THREE.Color('#020617'), // 2D Scan black
+        trackScanDark:  new THREE.Color('#020617'), // 2D Scan black foreground
 
-        // Heavy Industrial Racking
+        // Structural Racking
         rackUpright: '#1E3A8A',    // RAL 5010 Industrial Blue Posts
-        rackBeam:    '#EA580C',    // RAL 2004 Industrial Orange Beams
+        rackBeam:    '#EA580C',    // RAL 2004 Industrial Orange Load Crossbeams
         woodPallet:  '#854D0E',    // Euro Pallet Timber
-        cargoBox:    '#94A3B8',    // Stretch-wrapped grey parcel
-        cargoBoxAlt: '#A16207',    // Corrugated kraft carton
 
-        // Material Handling Fleet
+        // Standard 3-Tier Selective Cargo (Mid-Zone)
+        cargoBox:    '#94A3B8',    // Stretch-wrapped light grey parcels
+        cargoBoxAlt: '#A16207',    // Corrugated kraft cartons
+
+        // High-Bay 5-Tier AS/RS Core Cargo (RAL 3001/3000 Signal & Flame Red Priority Totes)
+        highBayCargo:    '#B91C1C', // RAL 3001 Signal Red AS/RS Bin
+        highBayCargoAlt: '#991B1B', // RAL 3000 Flame Red High-Value Container
+
+        // Fleet: Forklifts & Reach Trucks
         forkliftBody: '#EAB308',   // Safety Traffic Yellow
-        forkliftCab:  '#0F172A',   // Overhead Safety Cage
+        forkliftCab:  '#0F172A',   // Overhead Safety Guard
         forkliftMast: '#475569',   // Vertical Mast Steel
 
-        // Mobile AMRs
-        amrChassis:  '#CA8A04',    // Safety Yellow
+        // Fleet: Ground AMRs
+        amrChassis:  '#CA8A04',    // Industrial Yellow Shell
         amrBase:     '#1E293B',    // Drive Base Charcoal
         amrTote:     '#2563EB',    // Blue Picking Tote
 
-        // Conveyors & Infrastructure
-        conveyorLeg: '#334155',    // Steel stand
-        conveyorRoller: '#CBD5E1', // Steel rollers
-        bollardYellow: '#FACC15',  // Safety crash bollard
-        chargePad: '#10B981'       // Inductive dock LED ring
+        // Infrastructure
+        conveyorLeg: '#334155',    // Conveyor Stand
+        conveyorRoller: '#CBD5E1', // Steel Rollers
+        bollardYellow: '#FACC15',  // Crash Safety Bollards
+        chargePad: '#10B981'       // Inductive Dock LED
       };
 
       // --- THREE.JS SCENE SETUP ---
@@ -143,7 +149,7 @@
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       container.appendChild(renderer.domElement);
 
-      // Warehouse Lighting Rig
+      // High-Bay Warehouse Lighting
       const ambientLight = new THREE.AmbientLight('#ffffff', 0.85);
       scene.add(ambientLight);
 
@@ -204,14 +210,14 @@
         return idx;
       }
 
-      // --- PROCEDURAL ALIGNED RACK BAY (FLAT TOP TIERS) ---
-      function spawnAlignedRackBay(x, z, tiers) {
+      // --- PROCEDURAL ALIGNED RACK BAY ---
+      function spawnAlignedRackBay(x, z, tiers, isHighBay = false) {
         const tierHeight = 0.88;
         const totalHeight = tiers * tierHeight;
         const postW = 0.08;
         const offset = 0.42;
 
-        // 4 Blue Structural Steel Uprights (Terminating at uniform height)
+        // 4 Blue Structural Steel Uprights
         addBlock(x - offset, 0, z - offset, postW, totalHeight, postW, PALETTE.rackUpright);
         addBlock(x + offset, 0, z - offset, postW, totalHeight, postW, PALETTE.rackUpright);
         addBlock(x - offset, 0, z + offset, postW, totalHeight, postW, PALETTE.rackUpright);
@@ -229,8 +235,14 @@
           // Wood Euro Pallet
           addBlock(x, y + 0.06, z, 0.78, 0.07, 0.78, PALETTE.woodPallet);
 
-          // Stretch-Wrapped Cargo Load
-          const boxColor = (x + z + t) % 2 === 0 ? PALETTE.cargoBox : PALETTE.cargoBoxAlt;
+          // Cargo Load: High-Bay Red Priority Totes vs Standard Selective Cartons
+          let boxColor;
+          if (isHighBay) {
+            boxColor = (x + z + t) % 2 === 0 ? PALETTE.highBayCargo : PALETTE.highBayCargoAlt;
+          } else {
+            boxColor = (x + z + t) % 2 === 0 ? PALETTE.cargoBox : PALETTE.cargoBoxAlt;
+          }
+
           addBlock(x, y + 0.13, z, 0.68, 0.50, 0.68, boxColor);
         }
       }
@@ -241,14 +253,12 @@
 
         addBlock(x, 0.05, z + 0.1, 0.65, 0.35, 0.55, PALETTE.forkliftBody);
 
-        // Overhead Guard Cage
         addBlock(x - 0.24, 0.40, z - 0.05, 0.05, 0.50, 0.05, PALETTE.forkliftCab);
         addBlock(x + 0.24, 0.40, z - 0.05, 0.05, 0.50, 0.05, PALETTE.forkliftCab);
         addBlock(x - 0.24, 0.40, z + 0.25, 0.05, 0.50, 0.05, PALETTE.forkliftCab);
         addBlock(x + 0.24, 0.40, z + 0.25, 0.05, 0.50, 0.05, PALETTE.forkliftCab);
         addBlock(x, 0.90, z + 0.1, 0.55, 0.04, 0.55, PALETTE.forkliftCab);
 
-        // Mast & Pallet
         addBlock(x - 0.18, 0.05, z - 0.25, 0.06, 1.15, 0.06, PALETTE.forkliftMast);
         addBlock(x + 0.18, 0.05, z - 0.25, 0.06, 1.15, 0.06, PALETTE.forkliftMast);
         addBlock(x, 0.15, z - 0.38, 0.55, 0.06, 0.55, PALETTE.woodPallet);
@@ -306,7 +316,6 @@
         const center = size / 2;
         const maxRadius = size * 0.707;
         
-        // TWO DISTINCT FLAT PLATEAU THRESHOLDS:
         const highBayRadius = size * 0.18; // Central High-Bay AS/RS zone
         const rackRadius = size * 0.37;    // Intermediate selective rack zone
 
@@ -333,13 +342,13 @@
               const idx = addBlock(posX, 0, posZ, 0.98, 0.10, 0.98, '#222936');
               floorData.push({ idx, type: 'dark', col3D: colDark3D });
 
-              // ZONE 1A: Central High-Bay AS/RS Core (Clean FLAT 5-Tier Plateau)
+              // ZONE 1A: Central High-Bay AS/RS Core (Clean FLAT 5-Tier Plateau with RED PRIORITY TOTES)
               if (dist < highBayRadius) {
-                spawnAlignedRackBay(posX, posZ, 5);
+                spawnAlignedRackBay(posX, posZ, 5, true);
               }
-              // ZONE 1B: Mid-Zone Selective Racking (Clean FLAT 3-Tier Plateau)
+              // ZONE 1B: Mid-Zone Selective Racking (Clean FLAT 3-Tier Plateau with STANDARD CARGO)
               else if (dist < rackRadius) {
-                spawnAlignedRackBay(posX, posZ, 3);
+                spawnAlignedRackBay(posX, posZ, 3, false);
               }
               // ZONE 2: Surrounding Infrastructure & Fleet
               else {

@@ -43,7 +43,6 @@
         transition: background 1.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.4s ease;
       }
 
-      /* Blob 1: Large primary floating studio pool */
       .blob-1 {
         width: 68vw;
         height: 68vw;
@@ -54,7 +53,6 @@
         animation: floatBlob1 22s infinite alternate ease-in-out;
       }
 
-      /* Blob 2: Secondary top-right pastel accent flare */
       .blob-2 {
         width: 60vw;
         height: 60vw;
@@ -65,7 +63,6 @@
         animation: floatBlob2 26s infinite alternate ease-in-out;
       }
 
-      /* Blob 3: Deep ambient fill warmth */
       .blob-3 {
         width: 75vw;
         height: 75vw;
@@ -76,7 +73,6 @@
         animation: floatBlob3 30s infinite alternate ease-in-out;
       }
 
-      /* Screen Horizon Vignette: Blooms into pastel at the screen edges */
       .bg-vignette {
         position: absolute;
         inset: 0;
@@ -360,7 +356,7 @@
 
     <script>
       // ==========================================
-      // 1. STATE & PASTEL HORIZON PALETTES
+      // 1. STATE & SHIFT-SPECIFIC LIGHTING PALETTES
       // ==========================================
       let isFlat = false;
       let soundEnabled = false;
@@ -369,18 +365,20 @@
 
       const THEMES = {
         day: {
-          // Transitions out to bright pastel yellow at the screen edges!
-          bgBase: '#fef3c7', // Soft warm cream base
-          blob1:  'radial-gradient(circle, rgba(249, 115, 22, 0.58) 0%, rgba(251, 146, 60, 0.32) 48%, transparent 75%)', // Terracotta-peach center
-          blob2:  'radial-gradient(circle, rgba(245, 158, 11, 0.52) 0%, rgba(252, 211, 77, 0.30) 50%, transparent 75%)', // Golden apricot
-          blob3:  'radial-gradient(circle, rgba(225, 29, 72, 0.35) 0%, rgba(251, 113, 133, 0.18) 45%, transparent 70%)', // Rose coral
-          // Center has deep warm contrast for the model, edges bloom into luminous pastel yellow (#fde047 / #fef08a)
+          bgBase: '#fef3c7',
+          blob1:  'radial-gradient(circle, rgba(249, 115, 22, 0.58) 0%, rgba(251, 146, 60, 0.32) 48%, transparent 75%)',
+          blob2:  'radial-gradient(circle, rgba(245, 158, 11, 0.52) 0%, rgba(252, 211, 77, 0.30) 50%, transparent 75%)',
+          blob3:  'radial-gradient(circle, rgba(225, 29, 72, 0.35) 0%, rgba(251, 113, 133, 0.18) 45%, transparent 70%)',
           vignette: 'radial-gradient(ellipse at 50% 45%, rgba(67, 20, 7, 0.42) 0%, rgba(154, 52, 18, 0.20) 42%, rgba(254, 240, 138, 0.65) 75%, #fde047 100%)',
-          dustColor: 0xb45309, // Soft golden amber bokeh motes
+          dustColor: 0xb45309,
 
-          sunIntensity: 1.85,
-          ambientIntensity: 0.88,
-          sunColor: '#fffbf0',
+          // ☀️ Warm Golden Sunlight Reflections
+          sunColor: '#fff1dc',
+          sunIntensity: 2.4,
+          fillColor: '#fed7aa',
+          fillIntensity: 0.45,
+          ambientColor: '#fffbeb',
+          ambientIntensity: 0.85,
 
           // Medium Slate-Grey Concrete Floor Slab
           floorCenter3D:  new THREE.Color('#3f4854'), 
@@ -416,20 +414,21 @@
           laserColor:     0x38bdf8
         },
         cold: {
-          // Transitions out to frosty pastel powder-blue at the screen edges!
-          bgBase: '#e0f2fe', // Soft ice-powder base
-          blob1:  'radial-gradient(circle, rgba(2, 132, 199, 0.55) 0%, rgba(56, 189, 248, 0.30) 48%, transparent 75%)', // Glacial azure center
-          blob2:  'radial-gradient(circle, rgba(14, 165, 233, 0.50) 0%, rgba(125, 211, 252, 0.28) 50%, transparent 75%)', // Arctic cyan
-          blob3:  'radial-gradient(circle, rgba(99, 102, 241, 0.38) 0%, rgba(165, 180, 252, 0.20) 45%, transparent 70%)', // Lavender frost
-          // Center has deep navy contrast for the ice warehouse, edges bloom into crisp pastel powder-blue (#7dd3fc / #bae6fd)
+          bgBase: '#e0f2fe',
+          blob1:  'radial-gradient(circle, rgba(2, 132, 199, 0.55) 0%, rgba(56, 189, 248, 0.30) 48%, transparent 75%)',
+          blob2:  'radial-gradient(circle, rgba(14, 165, 233, 0.50) 0%, rgba(125, 211, 252, 0.28) 50%, transparent 75%)',
+          blob3:  'radial-gradient(circle, rgba(99, 102, 241, 0.38) 0%, rgba(165, 180, 252, 0.20) 45%, transparent 70%)',
           vignette: 'radial-gradient(ellipse at 50% 45%, rgba(8, 47, 73, 0.45) 0%, rgba(3, 105, 161, 0.18) 42%, rgba(186, 230, 253, 0.65) 75%, #7dd3fc 100%)',
-          dustColor: 0x0284c7, // Soft frosty azure motes
+          dustColor: 0x0284c7,
 
-          sunIntensity: 1.85,
-          ambientIntensity: 0.88,
-          sunColor: '#f0f9ff',
+          // ❄️ Glacial Cyan Frost Light Reflections
+          sunColor: '#e0f2fe',
+          sunIntensity: 2.0,
+          fillColor: '#38bdf8',
+          fillIntensity: 0.45,
+          ambientColor: '#f0f9ff',
+          ambientIntensity: 0.85,
 
-          // Cool Bluish-Grey Concrete Floor Slab
           floorCenter3D:  new THREE.Color('#334454'), 
           floorEdge3D:    new THREE.Color('#1e2a36'), 
           floorScanLight: new THREE.Color('#ffffff'),
@@ -463,7 +462,6 @@
           laserColor:     0x67e8f9
         },
         night: {
-          // Moody Twilight Emerald & Hazard Amber Stealth
           bgBase: '#020617',
           blob1:  'radial-gradient(circle, rgba(16, 185, 129, 0.50) 0%, rgba(5, 150, 105, 0.25) 48%, transparent 75%)',
           blob2:  'radial-gradient(circle, rgba(245, 158, 11, 0.40) 0%, rgba(217, 119, 6, 0.18) 50%, transparent 75%)',
@@ -471,11 +469,14 @@
           vignette: 'radial-gradient(ellipse at 50% 45%, transparent 35%, rgba(2, 6, 23, 0.65) 80%, #020617 100%)',
           dustColor: 0x6ee7b7,
 
-          sunIntensity: 1.65,
-          ambientIntensity: 0.70,
-          sunColor: '#fffbeb',
+          // 🌙 Cool Silver Moonlight Reflections
+          sunColor: '#93c5fd',
+          sunIntensity: 1.45,
+          fillColor: '#1e3a8a',
+          fillIntensity: 0.40,
+          ambientColor: '#0f172a',
+          ambientIntensity: 0.55,
 
-          // Dark Charcoal Concrete Floor Slab
           floorCenter3D:  new THREE.Color('#202632'), 
           floorEdge3D:    new THREE.Color('#0e1218'), 
           floorScanLight: new THREE.Color('#ffffff'),
@@ -619,7 +620,7 @@
         antialias: true,
         powerPreference: "high-performance",
         preserveDrawingBuffer: true,
-        alpha: true // Shows the fluid abstract pastel mesh
+        alpha: true
       });
       renderer.setSize(width, height);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -641,8 +642,8 @@
         metalness: 0.16
       });
 
-      // Lighting Rig
-      const ambientLight = new THREE.AmbientLight('#ffffff', PALETTE.ambientIntensity);
+      // Lighting Rig (Shift-Adaptive Colors)
+      const ambientLight = new THREE.AmbientLight(PALETTE.ambientColor, PALETTE.ambientIntensity);
       scene.add(ambientLight);
 
       const sunLight = new THREE.DirectionalLight(PALETTE.sunColor, PALETTE.sunIntensity);
@@ -660,7 +661,7 @@
       sunLight.shadow.bias = -0.0004;
       scene.add(sunLight);
 
-      const fillLight = new THREE.DirectionalLight('#38bdf8', 0.35);
+      const fillLight = new THREE.DirectionalLight(PALETTE.fillColor, PALETTE.fillIntensity);
       fillLight.position.set(-30, 20, -30);
       scene.add(fillLight);
 
@@ -935,11 +936,9 @@
             const colDark3D  = new THREE.Color().lerpColors(PALETTE.trackCenter3D, PALETTE.trackEdge3D, normDist * 0.95);
 
             if (!isDark) {
-              // SOLID 0.45 THICKNESS CONCRETE FOUNDATION SLAB!
               const idx = addBlock(posX, -0.45, posZ, 0.98, 0.45, 0.98, colLight3D);
               floorData.push({ idx, col3D: colLight3D, colScan: PALETTE.floorScanLight });
             } else {
-              // SOLID 0.47 THICKNESS TRANSIT GUIDE SLAB!
               const idx = addBlock(posX, -0.45, posZ, 0.98, 0.47, 0.98, colDark3D);
               floorData.push({ idx, col3D: colDark3D, colScan: PALETTE.trackScanDark });
 
@@ -977,9 +976,16 @@
         if (instancedMesh.instanceColor) instancedMesh.instanceColor.needsUpdate = true;
         scene.add(instancedMesh);
 
-        sunLight.color.set(PALETTE.sunColor);
-        sunLight.intensity = PALETTE.sunIntensity;
-        ambientLight.intensity = PALETTE.ambientIntensity;
+        // Smooth Lighting & Reflection Transition
+        gsap.to(sunLight.color, { r: new THREE.Color(PALETTE.sunColor).r, g: new THREE.Color(PALETTE.sunColor).g, b: new THREE.Color(PALETTE.sunColor).b, duration: 1.2 });
+        gsap.to(sunLight, { intensity: PALETTE.sunIntensity, duration: 1.2 });
+
+        gsap.to(fillLight.color, { r: new THREE.Color(PALETTE.fillColor).r, g: new THREE.Color(PALETTE.fillColor).g, b: new THREE.Color(PALETTE.fillColor).b, duration: 1.2 });
+        gsap.to(fillLight, { intensity: PALETTE.fillIntensity, duration: 1.2 });
+
+        gsap.to(ambientLight.color, { r: new THREE.Color(PALETTE.ambientColor).r, g: new THREE.Color(PALETTE.ambientColor).g, b: new THREE.Color(PALETTE.ambientColor).b, duration: 1.2 });
+        gsap.to(ambientLight, { intensity: PALETTE.ambientIntensity, duration: 1.2 });
+
         laserMat.color.setHex(PALETTE.laserColor);
         dustMat.color.setHex(PALETTE.dustColor);
 

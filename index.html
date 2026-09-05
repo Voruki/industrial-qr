@@ -31,7 +31,7 @@
       /* Floating Hint Badge */
       .tap-badge {
         position: absolute;
-        bottom: 88px;
+        bottom: 136px;
         left: 50%;
         transform: translateX(-50%);
         background: rgba(20, 26, 38, 0.90);
@@ -64,29 +64,37 @@
         box-shadow: 0 0 8px #38bdf8;
       }
 
-      /* Bottom Input Bar */
-      .bottom-bar {
+      /* UI Control Stack */
+      .bottom-control-panel {
         position: absolute;
-        bottom: 22px;
+        bottom: 18px;
         left: 50%;
         transform: translateX(-50%);
         width: calc(100% - 32px);
         max-width: 520px;
         display: flex;
+        flex-direction: column;
+        gap: 10px;
+        z-index: 10;
+      }
+
+      /* Typing & Action Bar */
+      .bottom-bar {
+        width: 100%;
+        display: flex;
         gap: 8px;
         background: rgba(14, 18, 28, 0.94);
         backdrop-filter: blur(16px);
-        padding: 8px 10px;
+        padding: 7px 9px;
         border-radius: 20px;
         border: 1px solid rgba(255, 255, 255, 0.12);
         box-shadow: 0 25px 40px -10px rgba(0, 0, 0, 0.9);
-        z-index: 10;
       }
       .bottom-input {
         flex: 1;
         background: rgba(255, 255, 255, 0.06);
         border: 1px solid rgba(255, 255, 255, 0.12);
-        padding: 12px 18px;
+        padding: 11px 16px;
         border-radius: 14px;
         color: #ffffff;
         outline: none;
@@ -97,12 +105,12 @@
         border-color: #3b82f6;
         background: rgba(255, 255, 255, 0.09);
       }
-      .submit-btn {
+      .action-btn {
         background: #2563eb;
         color: #ffffff;
         border: none;
-        width: 46px;
-        height: 46px;
+        width: 44px;
+        height: 44px;
         border-radius: 14px;
         display: flex;
         align-items: center;
@@ -110,68 +118,289 @@
         cursor: pointer;
         transition: background 0.2s, transform 0.1s;
       }
-      .submit-btn:hover { background: #1d4ed8; }
-      .submit-btn:active { transform: scale(0.95); }
+      .action-btn:hover { background: #1d4ed8; }
+      .action-btn:active { transform: scale(0.95); }
+
+      .share-btn {
+        background: rgba(217, 119, 6, 0.9);
+      }
+      .share-btn:hover { background: rgb(180, 83, 9); }
+
+      /* Modes and Audio Switcher Row */
+      .mode-row {
+        width: 100%;
+        display: flex;
+        gap: 8px;
+      }
+      .mode-selector {
+        flex: 1;
+        display: flex;
+        background: rgba(14, 18, 28, 0.92);
+        backdrop-filter: blur(14px);
+        padding: 4px;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.6);
+      }
+      .mode-tab {
+        flex: 1;
+        background: transparent;
+        border: none;
+        color: #94a3b8;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 8px 4px;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-align: center;
+        white-space: nowrap;
+      }
+      .mode-tab.active {
+        background: rgba(255, 255, 255, 0.12);
+        color: #ffffff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+      }
+      .mode-tab:hover:not(.active) {
+        color: #f1f5f9;
+        background: rgba(255, 255, 255, 0.05);
+      }
+      .audio-btn {
+        background: rgba(14, 18, 28, 0.92);
+        backdrop-filter: blur(14px);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: #94a3b8;
+        width: 44px;
+        height: 44px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .audio-btn:hover {
+        color: #ffffff;
+        border-color: rgba(255, 255, 255, 0.25);
+      }
+      .audio-btn.active {
+        color: #38bdf8;
+      }
+
+      /* Notification Toast */
+      .toast {
+        position: absolute;
+        top: 24px;
+        left: 50%;
+        transform: translateX(-50%) translateY(-30px);
+        background: rgba(16, 185, 129, 0.92);
+        color: #ffffff;
+        font-size: 13px;
+        font-weight: 600;
+        padding: 9px 20px;
+        border-radius: 9999px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+        opacity: 0;
+        pointer-events: none;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        z-index: 100;
+      }
+      .toast.show {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+      }
     </style>
   </head>
   <body>
+    <div id="toast" class="toast">Snapshot saved & link copied!</div>
+
     <div id="tap-badge" class="tap-badge">
       <span class="pulse-dot"></span>
       <span id="badge-text">Tap the warehouse to see QR code</span>
     </div>
 
-    <div class="bottom-bar">
-      <input id="qr-input" class="bottom-input" type="text" value="https://yongming.vorky.fyi/" placeholder="Type any link or text..." />
-      <button id="submit-btn" class="submit-btn" title="Update Grid">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="5" y1="12" x2="19" y2="12"></line>
-          <polyline points="12 5 19 12 12 19"></polyline>
-        </svg>
-      </button>
+    <div class="bottom-control-panel">
+      <div class="bottom-bar">
+        <input id="qr-input" class="bottom-input" type="text" value="https://yongming.vorky.fyi/" placeholder="Type any link or text..." />
+        <button id="submit-btn" class="action-btn" title="Update Facility">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </button>
+        <button id="share-btn" class="action-btn share-btn" title="Export Snapshot & Share Link">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+            <polyline points="16 6 12 2 8 6"></polyline>
+            <line x1="12" y1="2" x2="12" y2="15"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="mode-row">
+        <div class="mode-selector">
+          <button class="mode-tab active" data-mode="day">☀️ Day Shift</button>
+          <button class="mode-tab" data-mode="cold">❄️ Cold Storage</button>
+          <button class="mode-tab" data-mode="night">🌙 Night Shift</button>
+        </div>
+        <button id="audio-btn" class="audio-btn" title="Toggle Sound FX">
+          <svg id="audio-icon-on" style="display:none;" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+          </svg>
+          <svg id="audio-icon-off" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <line x1="23" y1="9" x2="17" y2="15"></line>
+            <line x1="17" y1="9" x2="23" y2="15"></line>
+          </svg>
+        </button>
+      </div>
     </div>
 
     <div id="webgl-container"></div>
 
     <script>
-      // --- INDUSTRIAL COLOR PALETTE ---
-      const PALETTE = {
-        // Floor in 3D: Dark Slate Gradient (Blends naturally with dark void)
-        floorCenter3D:  new THREE.Color('#475263'),
-        floorEdge3D:    new THREE.Color('#11151e'),
-        floorScanLight: new THREE.Color('#E2E8F0'), // Light concrete in Top View for scan contrast
-
-        trackCenter3D:  new THREE.Color('#222834'),
-        trackEdge3D:    new THREE.Color('#0a0d14'),
-        trackScanDark:  new THREE.Color('#111827'), // Dark transit track in Top View
-
-        // Equipment Colors (Preserved in BOTH 3D & Top View)
-        rackUpright: '#1D4ED8',   // RAL 5010 Blue Upright Frames
-        rackBeam:    '#EA580C',   // RAL 2004 Pure Orange Beams
-        woodPallet:  '#78350F',   // Timber Pallets
-
-        // Cargo Boxes
-        cargoKraft:  '#B45309',   // Kraft Corrugated Carton
-        cargoAmber:  '#92400E',   // Heavy Duty Storage Carton
-        cargoTote:   '#2563EB',   // Industrial Blue Tote
-
-        // Central High-Bay Red Priority Containers
-        highBayCargo:    '#DC2626', // RAL 3001 Signal Red
-        highBayCargoAlt: '#991B1B', // RAL 3000 Flame Red
-
-        // Mobile Fleet
-        forkliftBody: '#EAB308',  // Safety Yellow
-        forkliftCab:  '#0F172A',  // Protective Black Cage
-        forkliftMast: '#475569',  // Vertical Mast Steel
-
-        amrChassis:   '#EAB308',  // Safety Yellow
-        amrBase:      '#1E293B',  // Charcoal Drive Base
-        amrTote:      '#2563EB',  // Picking Tote
-
-        conveyorLeg:    '#334155',
-        conveyorRoller: '#94A3B8',
-        bollardYellow:  '#FACC15',
-        chargePad:      '#10B981'
+      // --- OPERATIONAL PALETTES (RAL & THEMATIC STANDARDS) ---
+      const THEMES = {
+        day: {
+          floorCenter3D:  new THREE.Color('#475263'),
+          floorEdge3D:    new THREE.Color('#11151e'),
+          floorScanLight: new THREE.Color('#E2E8F0'),
+          trackCenter3D:  new THREE.Color('#222834'),
+          trackEdge3D:    new THREE.Color('#0a0d14'),
+          trackScanDark:  new THREE.Color('#111827'),
+          rackUpright:    '#1D4ED8',
+          rackBeam:       '#EA580C',
+          woodPallet:     '#78350F',
+          cargoKraft:     '#B45309',
+          cargoAmber:     '#92400E',
+          cargoTote:      '#2563EB',
+          highBayCargo:   '#DC2626',
+          highBayCargoAlt:'#991B1B',
+          forkliftBody:   '#EAB308',
+          amrChassis:     '#EAB308',
+          laserColor:     0x38bdf8
+        },
+        cold: {
+          floorCenter3D:  new THREE.Color('#334155'),
+          floorEdge3D:    new THREE.Color('#0b1120'),
+          floorScanLight: new THREE.Color('#E0F2FE'),
+          trackCenter3D:  new THREE.Color('#1e293b'),
+          trackEdge3D:    new THREE.Color('#070b14'),
+          trackScanDark:  new THREE.Color('#0c1a30'),
+          rackUpright:    '#0284C7',
+          rackBeam:       '#38BDF8',
+          woodPallet:     '#475569',
+          cargoKraft:     '#0369A1',
+          cargoAmber:     '#0284C7',
+          cargoTote:      '#7DD3FC',
+          highBayCargo:   '#0284C7',
+          highBayCargoAlt:'#075985',
+          forkliftBody:   '#06B6D4',
+          amrChassis:     '#06B6D4',
+          laserColor:     0x67e8f9
+        },
+        night: {
+          floorCenter3D:  new THREE.Color('#181E29'),
+          floorEdge3D:    new THREE.Color('#05080F'),
+          floorScanLight: new THREE.Color('#F8FAFC'),
+          trackCenter3D:  new THREE.Color('#0F172A'),
+          trackEdge3D:    new THREE.Color('#020408'),
+          trackScanDark:  new THREE.Color('#050811'),
+          rackUpright:    '#1E293B',
+          rackBeam:       '#F59E0B',
+          woodPallet:     '#451A03',
+          cargoKraft:     '#78350F',
+          cargoAmber:     '#B45309',
+          cargoTote:      '#F59E0B',
+          highBayCargo:   '#EF4444',
+          highBayCargoAlt:'#B91C1C',
+          forkliftBody:   '#10B981',
+          amrChassis:     '#10B981',
+          laserColor:     0xf59e0b
+        }
       };
+
+      let activeMode = 'day';
+      let PALETTE = THEMES[activeMode];
+
+      // --- URL QUERY PARAMETER INITIALIZATION ---
+      const urlParams = new URLSearchParams(window.location.search);
+      const initialText = urlParams.get('url') || 'https://yongming.vorky.fyi/';
+      const initialMode = urlParams.get('mode');
+      if (initialMode && THEMES[initialMode]) {
+        activeMode = initialMode;
+        PALETTE = THEMES[activeMode];
+      }
+      document.getElementById('qr-input').value = initialText;
+
+      // --- SYNTHETIC WEB AUDIO ENGINE (ZERO EXTERNAL MP3s) ---
+      let audioCtx = null;
+      let soundEnabled = false;
+
+      function initAudio() {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+      }
+
+      function playServoHum() {
+        if (!soundEnabled || !audioCtx) return;
+        try {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(120, audioCtx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.85);
+          gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.85);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.85);
+        } catch (e) {}
+      }
+
+      function playScanChime() {
+        if (!soundEnabled || !audioCtx) return;
+        try {
+          const osc1 = audioCtx.createOscillator();
+          const osc2 = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc1.type = 'sine';
+          osc2.type = 'sine';
+          osc1.frequency.setValueAtTime(2100, audioCtx.currentTime);
+          osc2.frequency.setValueAtTime(2800, audioCtx.currentTime + 0.08);
+          gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.35);
+          osc1.connect(gain);
+          osc2.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc1.start();
+          osc2.start(audioCtx.currentTime + 0.08);
+          osc1.stop(audioCtx.currentTime + 0.35);
+          osc2.stop(audioCtx.currentTime + 0.35);
+        } catch (e) {}
+      }
+
+      function playClick() {
+        if (!soundEnabled || !audioCtx) return;
+        try {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(950, audioCtx.currentTime);
+          gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.04);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.04);
+        } catch (e) {}
+      }
 
       // --- THREE.JS SCENE SETUP ---
       const container = document.getElementById('webgl-container');
@@ -182,25 +411,21 @@
       let height = window.innerHeight;
 
       const camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 1000);
-      
-      // Symmetrically aligned coordinates (X=Z for exact horizontal balance)
       const isoPos = new THREE.Vector3(48.0, 46.0, 48.0);
       const isoTarget = new THREE.Vector3(0.0, -3.8, 0.0);
-
       const flatPos = new THREE.Vector3(0.0, 88.0, 2.501);
       const flatTarget = new THREE.Vector3(0.0, 0.0, 2.5);
 
       camera.position.copy(isoPos);
       camera.lookAt(isoTarget);
 
-      const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+      const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance", preserveDrawingBuffer: true });
       renderer.setSize(width, height);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.shadowMap.enabled = true;
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       container.appendChild(renderer.domElement);
 
-      // Smooth Orbit Controls
       const controls = new THREE.OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
       controls.dampingFactor = 0.06;
@@ -209,7 +434,6 @@
       controls.maxDistance = 135;
       controls.target.copy(isoTarget);
 
-      // Material System
       const boxGeo = new THREE.BoxGeometry(1, 1, 1);
       const unitMaterial = new THREE.MeshStandardMaterial({
         roughness: 0.35,
@@ -238,6 +462,40 @@
       const fillLight = new THREE.DirectionalLight('#38bdf8', 0.35);
       fillLight.position.set(-30, 20, -30);
       scene.add(fillLight);
+
+      // --- ATMOSPHERIC DUST PARTICLES ---
+      const dustCount = 140;
+      const dustGeo = new THREE.BufferGeometry();
+      const dustPositions = new Float32Array(dustCount * 3);
+      for (let i = 0; i < dustCount * 3; i += 3) {
+        dustPositions[i] = (Math.random() - 0.5) * 44;
+        dustPositions[i + 1] = Math.random() * 16;
+        dustPositions[i + 2] = (Math.random() - 0.5) * 44;
+      }
+      dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPositions, 3));
+      const dustMat = new THREE.PointsMaterial({
+        size: 0.22,
+        color: 0x93c5fd,
+        transparent: true,
+        opacity: 0.45,
+        blending: THREE.AdditiveBlending
+      });
+      const dustParticles = new THREE.Points(dustGeo, dustMat);
+      scene.add(dustParticles);
+
+      // --- LIDAR SCANNING LASER PLANE ---
+      const laserGeo = new THREE.PlaneGeometry(36, 0.45);
+      const laserMat = new THREE.MeshBasicMaterial({
+        color: PALETTE.laserColor,
+        transparent: true,
+        opacity: 0.0,
+        side: THREE.DoubleSide,
+        blending: THREE.AdditiveBlending
+      });
+      const laserPlane = new THREE.Mesh(laserGeo, laserMat);
+      laserPlane.rotation.x = Math.PI / 2;
+      laserPlane.position.y = 0.35;
+      scene.add(laserPlane);
 
       // --- INSTANCED RENDERING SYSTEM ---
       let instancedMesh = null;
@@ -296,7 +554,6 @@
 
       function spawnForklift(x, z, dir = 'z') {
         const parts = [];
-
         function addPart(ox, oy, oz, sx, sy, sz, colorHex) {
           const rx = (dir === 'x') ? -oz : ox;
           const rz = (dir === 'x') ? ox : oz;
@@ -462,7 +719,8 @@
         if (instancedMesh.instanceColor) instancedMesh.instanceColor.needsUpdate = true;
         scene.add(instancedMesh);
 
-        updateFloorTransition(0);
+        laserMat.color.setHex(PALETTE.laserColor);
+        updateFloorTransition(isFlat ? 1 : 0);
       }
 
       const input = document.getElementById('qr-input');
@@ -483,12 +741,27 @@
         if (instancedMesh.instanceColor) instancedMesh.instanceColor.needsUpdate = true;
       }
 
-      // --- VIEW TOGGLE & PERFECT CENTERING ---
+      // --- VIEW TOGGLE & CAMERA CENTERING ---
       let isFlat = false;
       const tapBadge = document.getElementById('tap-badge');
       const badgeText = document.getElementById('badge-text');
 
+      function triggerLidarSweep() {
+        laserPlane.position.z = -17;
+        laserMat.opacity = 0.85;
+        gsap.to(laserPlane.position, {
+          z: 17,
+          duration: 1.1,
+          ease: "power2.inOut",
+          onComplete: () => {
+            gsap.to(laserMat, { opacity: 0.0, duration: 0.3 });
+            playScanChime();
+          }
+        });
+      }
+
       function toggleView() {
+        initAudio();
         isFlat = !isFlat;
         badgeText.textContent = isFlat ? "Tap to see 3D view" : "Tap the warehouse to see QR code";
 
@@ -496,6 +769,7 @@
         const destTarget = isFlat ? flatTarget : isoTarget;
 
         controls.enabled = false;
+        playServoHum();
 
         gsap.to(camera.position, {
           x: destPos.x,
@@ -516,10 +790,10 @@
           },
           onComplete: () => {
             controls.enabled = !isFlat;
+            if (isFlat) triggerLidarSweep();
           }
         });
 
-        // Floor contrast: Slate concrete in 3D -> light surface in Top View
         gsap.to(contrastState, {
           progress: isFlat ? 1 : 0,
           duration: 1.2,
@@ -527,7 +801,6 @@
           onUpdate: () => updateFloorTransition(contrastState.progress)
         });
 
-        // Kill glare in top view, keep metallic reflection in 3D
         gsap.to(unitMaterial, {
           roughness: isFlat ? 0.95 : 0.35,
           metalness: isFlat ? 0.02 : 0.16,
@@ -538,7 +811,6 @@
         gsap.to(sunLight, { intensity: isFlat ? 0.4 : 2.0, duration: 1.2 });
         gsap.to(ambientLight, { intensity: isFlat ? 1.1 : 0.85, duration: 1.2 });
 
-        // Snap fleet to cell centers on scan mode
         if (isFlat && instancedMesh) {
           for (let f = 0; f < dynamicFleet.length; f++) {
             const unit = dynamicFleet[f];
@@ -563,7 +835,7 @@
         pointerDownPos = { x: e.clientX, y: e.clientY };
       });
       window.addEventListener('pointerup', (e) => {
-        if (e.target.closest('.bottom-bar') || e.target.closest('.tap-badge')) return;
+        if (e.target.closest('.bottom-control-panel') || e.target.closest('.tap-badge')) return;
         const dist = Math.hypot(e.clientX - pointerDownPos.x, e.clientY - pointerDownPos.y);
         if (dist < 6) {
           toggleView();
@@ -573,6 +845,8 @@
       // Submit URL
       const submitBtn = document.getElementById('submit-btn');
       function handleUpdate() {
+        initAudio();
+        playClick();
         if (input.value.trim().length > 0) {
           generateFacility(input.value.trim());
         }
@@ -580,6 +854,79 @@
       submitBtn.addEventListener('click', handleUpdate);
       input.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') handleUpdate();
+      });
+
+      // --- FEATURE 1: MODE SWITCHER ---
+      const modeTabs = document.querySelectorAll('.mode-tab');
+      // Set initial active state from query param if provided
+      modeTabs.forEach(t => {
+        if (t.dataset.mode === activeMode) t.classList.add('active');
+        else t.classList.remove('active');
+      });
+
+      modeTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          initAudio();
+          playClick();
+          modeTabs.forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          activeMode = tab.dataset.mode;
+          PALETTE = THEMES[activeMode];
+          generateFacility(input.value.trim());
+        });
+      });
+
+      // --- FEATURE 2: SNAPSHOT & SHARE TOOL ---
+      const shareBtn = document.getElementById('share-btn');
+      const toast = document.getElementById('toast');
+
+      function showToast(msg) {
+        toast.textContent = msg;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2600);
+      }
+
+      shareBtn.addEventListener('click', () => {
+        initAudio();
+        playClick();
+
+        // 1. Download PNG Snapshot
+        renderer.render(scene, camera);
+        const dataURL = renderer.domElement.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.download = `autonomous-warehouse-${isFlat ? 'qr' : '3d'}.png`;
+        link.href = dataURL;
+        link.click();
+
+        // 2. Build & Copy Shareable URL
+        const shareUrl = new URL(window.location.origin + window.location.pathname);
+        shareUrl.searchParams.set('url', input.value.trim());
+        shareUrl.searchParams.set('mode', activeMode);
+        navigator.clipboard.writeText(shareUrl.toString()).then(() => {
+          showToast("Snapshot saved & link copied!");
+        }).catch(() => {
+          showToast("Snapshot downloaded!");
+        });
+      });
+
+      // --- FEATURE 5: AUDIO TOGGLE ---
+      const audioBtn = document.getElementById('audio-btn');
+      const audioIconOn = document.getElementById('audio-icon-on');
+      const audioIconOff = document.getElementById('audio-icon-off');
+
+      audioBtn.addEventListener('click', () => {
+        initAudio();
+        soundEnabled = !soundEnabled;
+        if (soundEnabled) {
+          audioIconOn.style.display = 'block';
+          audioIconOff.style.display = 'none';
+          audioBtn.classList.add('active');
+          playClick();
+        } else {
+          audioIconOn.style.display = 'none';
+          audioIconOff.style.display = 'block';
+          audioBtn.classList.remove('active');
+        }
       });
 
       window.addEventListener('resize', () => {
@@ -599,6 +946,17 @@
 
         if (controls.enabled) {
           controls.update();
+        }
+
+        // Feature 4: Atmospheric Dust Drift
+        if (dustParticles) {
+          const positions = dustGeo.attributes.position.array;
+          for (let i = 1; i < dustPositions.length; i += 3) {
+            positions[i] -= 0.015;
+            if (positions[i] < 0) positions[i] = 16;
+          }
+          dustGeo.attributes.position.needsUpdate = true;
+          dustParticles.rotation.y = elapsedTime * 0.03;
         }
 
         // Active large cruising motion in 3D

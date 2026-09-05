@@ -136,28 +136,33 @@
     <div id="webgl-container"></div>
 
     <script>
-      // --- VIBRANT INDUSTRIAL COLOR PALETTE ---
+      // --- INDUSTRIAL COLOR PALETTE ---
       const PALETTE = {
-        // Concrete Floor (Natural warehouse concrete slab)
-        floorLight: '#C5CAD3',
-        floorDark:  '#1E293B',    // Dark industrial transit track
+        // Floor in 3D: Dark Slate Gradient (Blends with dark void)
+        floorCenter3D:  new THREE.Color('#475263'),
+        floorEdge3D:    new THREE.Color('#11151e'),
+        floorScanLight: new THREE.Color('#E2E8F0'), // Light concrete in Top View for scan contrast
 
-        // Racks & Structure
+        trackCenter3D:  new THREE.Color('#222834'),
+        trackEdge3D:    new THREE.Color('#0a0d14'),
+        trackScanDark:  new THREE.Color('#111827'), // Dark transit track in Top View
+
+        // Equipment Colors (Preserved in BOTH 3D & Top View!)
         rackUpright: '#1D4ED8',   // RAL 5010 Blue Upright Frames
         rackBeam:    '#EA580C',   // RAL 2004 Pure Orange Beams
         woodPallet:  '#78350F',   // Timber Pallets
 
-        // Cargo Boxes: Warm Industrial Kraft & Deep Totes (Never White!)
+        // Cargo Boxes (Warm Kraft & Amber - Never White!)
         cargoKraft:  '#B45309',   // Kraft Corrugated Carton
-        cargoAmber:  '#92400E',   // Heavy Duty Storage Box
-        cargoTote:   '#2563EB',   // Industrial Blue Buffer Tote
+        cargoAmber:  '#92400E',   // Storage Carton
+        cargoTote:   '#2563EB',   // Industrial Blue Tote
 
         // Central High-Bay Red Priority Containers
         highBayCargo:    '#DC2626', // RAL 3001 Signal Red
         highBayCargoAlt: '#991B1B', // RAL 3000 Flame Red
 
         // Mobile Fleet
-        forkliftBody: '#EAB308',  // Safety Yellow Body
+        forkliftBody: '#EAB308',  // Safety Yellow
         forkliftCab:  '#0F172A',  // Protective Black Cage
         forkliftMast: '#475569',  // Vertical Mast Steel
 
@@ -181,7 +186,7 @@
 
       const camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 1000);
       
-      // Perfectly calibrated coordinates for centering above bottom UI
+      // Calibrated coordinates for centering above bottom UI bar
       const isoPos = new THREE.Vector3(48.0, 46.0, 48.0);
       const isoTarget = new THREE.Vector3(0.0, -4.0, 3.0);
 
@@ -198,7 +203,7 @@
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       container.appendChild(renderer.domElement);
 
-      // Smooth Orbit Controls
+      // Orbit Controls
       const controls = new THREE.OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
       controls.dampingFactor = 0.06;
@@ -207,7 +212,7 @@
       controls.maxDistance = 135;
       controls.target.copy(isoTarget);
 
-      // Material: Metallic/Glossy in 3D, matte in scan view
+      // Material: Subtle reflections in 3D, matte in scan view
       const boxGeo = new THREE.BoxGeometry(1, 1, 1);
       const unitMaterial = new THREE.MeshStandardMaterial({
         roughness: 0.35,
@@ -243,6 +248,7 @@
       const tempColor = new THREE.Color();
       let currentInstance = 0;
 
+      let floorData = [];
       let dynamicFleet = [];
 
       function addBlock(x, y, z, sx, sy, sz, colorHex) {
@@ -253,7 +259,9 @@
         dummy.rotation.set(0, 0, 0);
         dummy.updateMatrix();
         instancedMesh.setMatrixAt(idx, dummy.matrix);
-        instancedMesh.setColorAt(idx, tempColor.set(colorHex));
+
+        const col = (colorHex instanceof THREE.Color) ? colorHex.clone() : new THREE.Color(colorHex);
+        instancedMesh.setColorAt(idx, col);
         currentInstance++;
         return idx;
       }
@@ -278,7 +286,6 @@
 
           addBlock(x, y + 0.06, z, 0.78, 0.07, 0.78, PALETTE.woodPallet);
 
-          // All boxes are rich dark tones: Red, Kraft Amber, or Blue (Never White!)
           let boxColor;
           if (isHighBay) {
             boxColor = (x + z + t) % 2 === 0 ? PALETTE.highBayCargo : PALETTE.highBayCargoAlt;
@@ -316,7 +323,7 @@
 
         dynamicFleet.push({
           baseX: x, baseZ: z, dir: dir,
-          range: 0.55, // Large, visible corridor cruising
+          range: 0.50, // Noticeable corridor cruising
           speed: 1.6 + Math.random() * 0.4,
           phase: Math.random() * Math.PI * 2,
           parts: parts
@@ -341,7 +348,7 @@
 
         dynamicFleet.push({
           baseX: x, baseZ: z, dir: dir,
-          range: 0.55, // Large visible cruising travel
+          range: 0.50,
           speed: 2.2 + Math.random() * 0.5,
           phase: Math.random() * Math.PI * 2,
           parts: parts
@@ -379,6 +386,7 @@
           instancedMesh = null;
         }
 
+        floorData = [];
         dynamicFleet = [];
         const qr = qrcode(0, 'H');
         qr.addData(text);
@@ -386,6 +394,7 @@
 
         const size = qr.getModuleCount();
         const center = size / 2;
+        const maxRadius = size * 0.707;
         
         const highBayRadius = size * 0.18;
         const rackRadius = size * 0.37;
@@ -410,13 +419,20 @@
             const posX = c - center + 0.5;
             const posZ = r - center + 0.5;
             const dist = Math.hypot(posX, posZ);
+            const normDist = Math.min(1.0, dist / maxRadius);
+
+            // 3D Slate Gradient (Dark concrete floor that blends with background)
+            const colLight3D = new THREE.Color().lerpColors(PALETTE.floorCenter3D, PALETTE.floorEdge3D, normDist * 0.95);
+            const colDark3D  = new THREE.Color().lerpColors(PALETTE.trackCenter3D, PALETTE.trackEdge3D, normDist * 0.95);
 
             if (!isDark) {
-              // LIGHT MODULE: Natural warehouse concrete slab (Always stays natural concrete!)
-              addBlock(posX, 0, posZ, 0.98, 0.08, 0.98, PALETTE.floorLight);
+              // LIGHT MODULE: Slate concrete in 3D -> Light contrast in Scan mode
+              const idx = addBlock(posX, 0, posZ, 0.98, 0.08, 0.98, colLight3D);
+              floorData.push({ idx, col3D: colLight3D, colScan: PALETTE.floorScanLight });
             } else {
               // DARK MODULE: Industrial Demarcation Slab
-              addBlock(posX, 0, posZ, 0.98, 0.10, 0.98, PALETTE.floorDark);
+              const idx = addBlock(posX, 0, posZ, 0.98, 0.10, 0.98, colDark3D);
+              floorData.push({ idx, col3D: colDark3D, colScan: PALETTE.trackScanDark });
 
               if (dist < highBayRadius) {
                 spawnAlignedRackBay(posX, posZ, 5, true);
@@ -451,12 +467,29 @@
         instancedMesh.instanceMatrix.needsUpdate = true;
         if (instancedMesh.instanceColor) instancedMesh.instanceColor.needsUpdate = true;
         scene.add(instancedMesh);
+
+        updateFloorTransition(0);
       }
 
       const input = document.getElementById('qr-input');
       generateFacility(input.value.trim());
 
-      // --- VIEW TOGGLE & PERFECT CENTERING ---
+      // --- FLOOR TRANSITION (SLATE IN 3D -> CLEAN IN SCAN) ---
+      const contrastState = { progress: 0 };
+
+      function updateFloorTransition(progress) {
+        if (!instancedMesh) return;
+        const scratch = new THREE.Color();
+
+        for (let i = 0; i < floorData.length; i++) {
+          const item = floorData[i];
+          scratch.lerpColors(item.col3D, item.colScan, progress);
+          instancedMesh.setColorAt(item.idx, scratch);
+        }
+        if (instancedMesh.instanceColor) instancedMesh.instanceColor.needsUpdate = true;
+      }
+
+      // --- VIEW TOGGLE & CAMERA CENTERING ---
       let isFlat = false;
       const tapBadge = document.getElementById('tap-badge');
       const badgeText = document.getElementById('badge-text');
@@ -492,7 +525,15 @@
           }
         });
 
-        // Kill glare in top view, keep full metallic shine in 3D (Colors stay identical!)
+        // Floor contrast: Slate concrete in 3D -> light surface in Top View
+        gsap.to(contrastState, {
+          progress: isFlat ? 1 : 0,
+          duration: 1.2,
+          ease: "power2.inOut",
+          onUpdate: () => updateFloorTransition(contrastState.progress)
+        });
+
+        // Kill glare in top view, keep metallic reflection in 3D
         gsap.to(unitMaterial, {
           roughness: isFlat ? 0.95 : 0.35,
           metalness: isFlat ? 0.02 : 0.16,
@@ -500,11 +541,10 @@
           ease: "power2.inOut"
         });
 
-        // Diffuse ambient light in top view so top faces don't blow out
         gsap.to(sunLight, { intensity: isFlat ? 0.4 : 2.0, duration: 1.2 });
         gsap.to(ambientLight, { intensity: isFlat ? 1.1 : 0.85, duration: 1.2 });
 
-        // When flat, snap fleet to exact cell centers so the code scans cleanly
+        // When flat, snap fleet to exact cell centers
         if (isFlat && instancedMesh) {
           for (let f = 0; f < dynamicFleet.length; f++) {
             const unit = dynamicFleet[f];

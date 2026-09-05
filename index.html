@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Autonomous Intralogistics Facility - 3D QR</title>
-    <!-- Stable CDNs -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
@@ -116,13 +115,11 @@
     </style>
   </head>
   <body>
-    <!-- Floating Hint Badge -->
     <div id="tap-badge" class="tap-badge">
       <span class="pulse-dot"></span>
       <span id="badge-text">Tap the warehouse to see QR code</span>
     </div>
 
-    <!-- Bottom Input Bar -->
     <div class="bottom-bar">
       <input id="qr-input" class="bottom-input" type="text" value="https://yongming.vorky.fyi/" placeholder="Type any link or text..." />
       <button id="submit-btn" class="submit-btn" title="Update Grid">
@@ -138,7 +135,7 @@
     <script>
       // --- INDUSTRIAL COLOR PALETTE ---
       const PALETTE = {
-        // Floor in 3D: Dark Slate Gradient (Blends with dark void)
+        // Floor in 3D: Dark Slate Gradient (Blends naturally with dark void)
         floorCenter3D:  new THREE.Color('#475263'),
         floorEdge3D:    new THREE.Color('#11151e'),
         floorScanLight: new THREE.Color('#E2E8F0'), // Light concrete in Top View for scan contrast
@@ -147,14 +144,14 @@
         trackEdge3D:    new THREE.Color('#0a0d14'),
         trackScanDark:  new THREE.Color('#111827'), // Dark transit track in Top View
 
-        // Equipment Colors (Preserved in BOTH 3D & Top View!)
+        // Equipment Colors (Preserved in BOTH 3D & Top View)
         rackUpright: '#1D4ED8',   // RAL 5010 Blue Upright Frames
         rackBeam:    '#EA580C',   // RAL 2004 Pure Orange Beams
         woodPallet:  '#78350F',   // Timber Pallets
 
-        // Cargo Boxes (Warm Kraft & Amber - Never White!)
+        // Cargo Boxes
         cargoKraft:  '#B45309',   // Kraft Corrugated Carton
-        cargoAmber:  '#92400E',   // Storage Carton
+        cargoAmber:  '#92400E',   // Heavy Duty Storage Carton
         cargoTote:   '#2563EB',   // Industrial Blue Tote
 
         // Central High-Bay Red Priority Containers
@@ -186,12 +183,12 @@
 
       const camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 1000);
       
-      // Calibrated coordinates for centering above bottom UI bar
+      // Symmetrically aligned coordinates (X=Z for exact horizontal balance)
       const isoPos = new THREE.Vector3(48.0, 46.0, 48.0);
-      const isoTarget = new THREE.Vector3(0.0, -4.0, 3.0);
+      const isoTarget = new THREE.Vector3(0.0, -3.8, 0.0);
 
-      const flatPos = new THREE.Vector3(0.0, 88.0, 3.001);
-      const flatTarget = new THREE.Vector3(0.0, 0.0, 3.0);
+      const flatPos = new THREE.Vector3(0.0, 88.0, 2.501);
+      const flatTarget = new THREE.Vector3(0.0, 0.0, 2.5);
 
       camera.position.copy(isoPos);
       camera.lookAt(isoTarget);
@@ -203,7 +200,7 @@
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       container.appendChild(renderer.domElement);
 
-      // Orbit Controls
+      // Smooth Orbit Controls
       const controls = new THREE.OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
       controls.dampingFactor = 0.06;
@@ -212,7 +209,7 @@
       controls.maxDistance = 135;
       controls.target.copy(isoTarget);
 
-      // Material: Subtle reflections in 3D, matte in scan view
+      // Material System
       const boxGeo = new THREE.BoxGeometry(1, 1, 1);
       const unitMaterial = new THREE.MeshStandardMaterial({
         roughness: 0.35,
@@ -323,7 +320,7 @@
 
         dynamicFleet.push({
           baseX: x, baseZ: z, dir: dir,
-          range: 0.50, // Noticeable corridor cruising
+          range: 0.50,
           speed: 1.6 + Math.random() * 0.4,
           phase: Math.random() * Math.PI * 2,
           parts: parts
@@ -421,16 +418,13 @@
             const dist = Math.hypot(posX, posZ);
             const normDist = Math.min(1.0, dist / maxRadius);
 
-            // 3D Slate Gradient (Dark concrete floor that blends with background)
             const colLight3D = new THREE.Color().lerpColors(PALETTE.floorCenter3D, PALETTE.floorEdge3D, normDist * 0.95);
             const colDark3D  = new THREE.Color().lerpColors(PALETTE.trackCenter3D, PALETTE.trackEdge3D, normDist * 0.95);
 
             if (!isDark) {
-              // LIGHT MODULE: Slate concrete in 3D -> Light contrast in Scan mode
               const idx = addBlock(posX, 0, posZ, 0.98, 0.08, 0.98, colLight3D);
               floorData.push({ idx, col3D: colLight3D, colScan: PALETTE.floorScanLight });
             } else {
-              // DARK MODULE: Industrial Demarcation Slab
               const idx = addBlock(posX, 0, posZ, 0.98, 0.10, 0.98, colDark3D);
               floorData.push({ idx, col3D: colDark3D, colScan: PALETTE.trackScanDark });
 
@@ -474,7 +468,7 @@
       const input = document.getElementById('qr-input');
       generateFacility(input.value.trim());
 
-      // --- FLOOR TRANSITION (SLATE IN 3D -> CLEAN IN SCAN) ---
+      // --- FLOOR TRANSITION ---
       const contrastState = { progress: 0 };
 
       function updateFloorTransition(progress) {
@@ -489,7 +483,7 @@
         if (instancedMesh.instanceColor) instancedMesh.instanceColor.needsUpdate = true;
       }
 
-      // --- VIEW TOGGLE & CAMERA CENTERING ---
+      // --- VIEW TOGGLE & PERFECT CENTERING ---
       let isFlat = false;
       const tapBadge = document.getElementById('tap-badge');
       const badgeText = document.getElementById('badge-text');
@@ -544,7 +538,7 @@
         gsap.to(sunLight, { intensity: isFlat ? 0.4 : 2.0, duration: 1.2 });
         gsap.to(ambientLight, { intensity: isFlat ? 1.1 : 0.85, duration: 1.2 });
 
-        // When flat, snap fleet to exact cell centers
+        // Snap fleet to cell centers on scan mode
         if (isFlat && instancedMesh) {
           for (let f = 0; f < dynamicFleet.length; f++) {
             const unit = dynamicFleet[f];

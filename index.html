@@ -621,7 +621,7 @@
       });
 
       // ==========================================
-      // 1. SCENARIO PALETTES & THEME-COLORED SCAN ENGINE
+      // 1. SCENARIO PALETTES & REGIONAL COLOR REFLECTION
       // ==========================================
       let isFlat = false;
       let soundEnabled = false;
@@ -654,8 +654,10 @@
           trackCenter3D:  new THREE.Color('#1e2530'), 
           trackEdge3D:    new THREE.Color('#10151c'),
           
-          darkScanColor:  new THREE.Color('#9a3412'),
-          lightScanColor: new THREE.Color('#fef08a'),
+          // Regional Reflection Colors for Scan View: Finder Pattern (Outer Squares) = Rack Upright (#1D4ED8), Center = Rack Beam (#EA580C)
+          finderScanColor: new THREE.Color('#1D4ED8'),
+          darkScanColor:   new THREE.Color('#EA580C'),
+          lightScanColor:  new THREE.Color('#fef08a'),
           
           rackUpright:    '#1D4ED8',
           rackBeam:       '#EA580C',
@@ -706,8 +708,10 @@
           trackCenter3D:  new THREE.Color('#182432'), 
           trackEdge3D:    new THREE.Color('#0e1620'),
 
-          darkScanColor:  new THREE.Color('#0369a1'),
-          lightScanColor: new THREE.Color('#e0f2fe'),
+          // Regional Reflection Colors for Cold Storage: Finder Pattern = Rack Upright (#0284C7), Center = Rack Beam (#38BDF8)
+          finderScanColor: new THREE.Color('#0284C7'),
+          darkScanColor:   new THREE.Color('#0369a1'),
+          lightScanColor:  new THREE.Color('#e0f2fe'),
 
           rackUpright:    '#0284C7', 
           rackBeam:       '#38BDF8', 
@@ -758,8 +762,10 @@
           trackCenter3D:  new THREE.Color('#0F172A'), 
           trackEdge3D:    new THREE.Color('#020408'), 
 
-          darkScanColor:  new THREE.Color('#064e3b'),
-          lightScanColor: new THREE.Color('#a7f3d0'),
+          // Regional Reflection Colors for Night Shift: Finder Pattern = Upright (#1E293B), Center = Beam (#F59E0B)
+          finderScanColor: new THREE.Color('#1E293B'),
+          darkScanColor:   new THREE.Color('#F59E0B'),
+          lightScanColor:  new THREE.Color('#a7f3d0'),
           
           rackUpright:    '#1E293B',
           rackBeam:       '#F59E0B',
@@ -848,7 +854,6 @@
                 osc.type = 'triangle';
                 osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
 
-                // Lowered volume peak to 0.012 for soft background playback
                 gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
                 gain.gain.linearRampToValueAtTime(0.012, audioCtx.currentTime + 0.1);
                 gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 1.8);
@@ -1053,9 +1058,17 @@
       const contrastState = { progress: 0 };
 
       // ==========================================
-      // 4. GENERATOR FUNCTIONS (UNIFIED BLOCKS ENGINE)
+      // 4. GENERATOR FUNCTIONS (REGIONAL COLOR REFLECTION ENGINE)
       // ==========================================
-      function addBlock(x, y, z, sx, sy, sz, colorHex, isDarkModule = false) {
+      function isFinderPattern(r, c, size) {
+        // Finder patterns are 7x7 squares at top-left, top-right, bottom-left
+        if (r < 7 && c < 7) return true;
+        if (r < 7 && c >= size - 7) return true;
+        if (r >= size - 7 && c < 7) return true;
+        return false;
+      }
+
+      function addBlock(x, y, z, sx, sy, sz, colorHex, isDarkModule = false, isFinder = false) {
         if (!instancedMesh) return -1;
         const idx = currentInstance;
         dummy.position.set(x, y + sy / 2, z);
@@ -1067,32 +1080,41 @@
         const col = (colorHex instanceof THREE.Color) ? colorHex.clone() : new THREE.Color(colorHex);
         instancedMesh.setColorAt(idx, col);
 
-        const colScan = isDarkModule ? PALETTE.darkScanColor : PALETTE.lightScanColor;
+        // Map regional scannable colors: Finder patterns -> Upright color, Center data -> Beam color, Light modules -> Base
+        let colScan;
+        if (!isDarkModule) {
+          colScan = PALETTE.lightScanColor;
+        } else if (isFinder) {
+          colScan = PALETTE.finderScanColor;
+        } else {
+          colScan = PALETTE.darkScanColor;
+        }
+
         blocksData[idx] = { col3D: col.clone(), colScan: colScan.clone() };
 
         currentInstance++;
         return idx;
       }
 
-      function spawnAlignedRackBay(x, z, tiers, isHighBay = false, isDark = false) {
+      function spawnAlignedRackBay(x, z, tiers, isHighBay = false, isDark = false, isFinder = false) {
         const tierHeight = 0.88;
         const totalHeight = tiers * tierHeight;
         const postW = 0.08;
         const offset = 0.42;
 
-        addBlock(x - offset, 0, z - offset, postW, totalHeight, postW, PALETTE.rackUpright, isDark);
-        addBlock(x + offset, 0, z - offset, postW, totalHeight, postW, PALETTE.rackUpright, isDark);
-        addBlock(x - offset, 0, z + offset, postW, totalHeight, postW, PALETTE.rackUpright, isDark);
-        addBlock(x + offset, 0, z + offset, postW, totalHeight, postW, PALETTE.rackUpright, isDark);
+        addBlock(x - offset, 0, z - offset, postW, totalHeight, postW, PALETTE.rackUpright, isDark, isFinder);
+        addBlock(x + offset, 0, z - offset, postW, totalHeight, postW, PALETTE.rackUpright, isDark, isFinder);
+        addBlock(x - offset, 0, z + offset, postW, totalHeight, postW, PALETTE.rackUpright, isDark, isFinder);
+        addBlock(x + offset, 0, z + offset, postW, totalHeight, postW, PALETTE.rackUpright, isDark, isFinder);
 
         for (let t = 0; t < tiers; t++) {
           const y = t * tierHeight;
-          addBlock(x, y, z - offset, 0.92, 0.06, postW, PALETTE.rackBeam, isDark);
-          addBlock(x, y, z + offset, 0.92, 0.06, postW, PALETTE.rackBeam, isDark);
-          addBlock(x - offset, y, z, postW, 0.06, 0.92, PALETTE.rackBeam, isDark);
-          addBlock(x + offset, y, z, postW, 0.06, 0.92, PALETTE.rackBeam, isDark);
+          addBlock(x, y, z - offset, 0.92, 0.06, postW, PALETTE.rackBeam, isDark, isFinder);
+          addBlock(x, y, z + offset, 0.92, 0.06, postW, PALETTE.rackBeam, isDark, isFinder);
+          addBlock(x - offset, y, z, postW, 0.06, 0.92, PALETTE.rackBeam, isDark, isFinder);
+          addBlock(x + offset, y, z, postW, 0.06, 0.92, PALETTE.rackBeam, isDark, isFinder);
 
-          addBlock(x, y + 0.06, z, 0.78, 0.07, 0.78, PALETTE.woodPallet, isDark);
+          addBlock(x, y + 0.06, z, 0.78, 0.07, 0.78, PALETTE.woodPallet, isDark, isFinder);
 
           let boxColor;
           if (isHighBay) {
@@ -1101,11 +1123,11 @@
             const seed = (x + z + t);
             boxColor = seed % 3 === 0 ? PALETTE.cargoKraft : (seed % 3 === 1 ? PALETTE.cargoAmber : PALETTE.cargoTote);
           }
-          addBlock(x, y + 0.13, z, 0.68, 0.50, 0.68, boxColor, isDark);
+          addBlock(x, y + 0.13, z, 0.68, 0.50, 0.68, boxColor, isDark, isFinder);
         }
       }
 
-      function spawnForklift(x, z, dir = 'z', isDark = false) {
+      function spawnForklift(x, z, dir = 'z', isDark = false, isFinder = false) {
         const parts = [];
         function addPart(ox, oy, oz, sx, sy, sz, colorHex) {
           const rx = (dir === 'x') ? -oz : ox;
@@ -1113,7 +1135,7 @@
           const rsx = (dir === 'x') ? sz : sx;
           const rsz = (dir === 'x') ? sx : sz;
 
-          const idx = addBlock(x + rx, oy, z + rz, rsx, sy, rsz, colorHex, isDark);
+          const idx = addBlock(x + rx, oy, z + rz, rsx, sy, rsz, colorHex, isDark, isFinder);
           parts.push({ ox: rx, oy: oy, oz: rz, sx: rsx, sy: sy, sz: rsz, idx });
         }
 
@@ -1144,7 +1166,7 @@
         });
       }
 
-      function spawnAMR(x, z, dir = 'z', isDark = false) {
+      function spawnAMR(x, z, dir = 'z', isDark = false, isFinder = false) {
         const parts = [];
         function addPart(ox, oy, oz, sx, sy, sz, colorHex) {
           const rx = (dir === 'x') ? -oz : ox;
@@ -1152,7 +1174,7 @@
           const rsx = (dir === 'x') ? sz : sx;
           const rsz = (dir === 'x') ? sx : sz;
 
-          const idx = addBlock(x + rx, oy, z + rz, rsx, sy, rsz, colorHex, isDark);
+          const idx = addBlock(x + rx, oy, z + rz, rsx, sy, rsz, colorHex, isDark, isFinder);
           parts.push({ ox: rx, oy: oy, oz: rz, sx: rsx, sy: sy, sz: rsz, idx });
         }
 
@@ -1171,27 +1193,27 @@
         });
       }
 
-      function spawnPalletStack(x, z, isDark = false) {
+      function spawnPalletStack(x, z, isDark = false, isFinder = false) {
         for (let i = 0; i < 4; i++) {
-          addBlock(x, i * 0.11, z, 0.72, 0.08, 0.72, PALETTE.woodPallet, isDark);
+          addBlock(x, i * 0.11, z, 0.72, 0.08, 0.72, PALETTE.woodPallet, isDark, isFinder);
         }
       }
 
-      function spawnConveyor(x, z, horizontal, isDark = false) {
-        addBlock(x, 0.05, z, horizontal ? 0.90 : 0.55, 0.22, horizontal ? 0.55 : 0.90, PALETTE.conveyorLeg, isDark);
-        addBlock(x, 0.27, z, horizontal ? 0.86 : 0.48, 0.05, horizontal ? 0.48 : 0.86, PALETTE.conveyorRoller, isDark);
-        addBlock(x, 0.32, z, 0.44, 0.24, 0.44, PALETTE.amrTote, isDark);
+      function spawnConveyor(x, z, horizontal, isDark = false, isFinder = false) {
+        addBlock(x, 0.05, z, horizontal ? 0.90 : 0.55, 0.22, horizontal ? 0.55 : 0.90, PALETTE.conveyorLeg, isDark, isFinder);
+        addBlock(x, 0.27, z, horizontal ? 0.86 : 0.48, 0.05, horizontal ? 0.48 : 0.86, PALETTE.conveyorRoller, isDark, isFinder);
+        addBlock(x, 0.32, z, 0.44, 0.24, 0.44, PALETTE.amrTote, isDark, isFinder);
       }
 
-      function spawnChargingDock(x, z, isDark = false) {
-        addBlock(x, 0.04, z, 0.78, 0.06, 0.78, PALETTE.amrBase, isDark);
-        addBlock(x, 0.10, z, 0.46, 0.04, 0.46, PALETTE.chargePad, isDark);
+      function spawnChargingDock(x, z, isDark = false, isFinder = false) {
+        addBlock(x, 0.04, z, 0.78, 0.06, 0.78, PALETTE.amrBase, isDark, isFinder);
+        addBlock(x, 0.10, z, 0.46, 0.04, 0.46, PALETTE.chargePad, isDark, isFinder);
       }
 
-      function spawnSafetyBollards(x, z, isDark = false) {
+      function spawnSafetyBollards(x, z, isDark = false, isFinder = false) {
         const offset = 0.28;
-        addBlock(x - offset, 0.05, z - offset, 0.14, 0.70, 0.14, PALETTE.bollardYellow, isDark);
-        addBlock(x + offset, 0.05, z + offset, 0.14, 0.70, 0.14, PALETTE.bollardYellow, isDark);
+        addBlock(x - offset, 0.05, z - offset, 0.14, 0.70, 0.14, PALETTE.bollardYellow, isDark, isFinder);
+        addBlock(x + offset, 0.05, z + offset, 0.14, 0.70, 0.14, PALETTE.bollardYellow, isDark, isFinder);
       }
 
       function updateFloorTransition(progress) {
@@ -1268,38 +1290,39 @@
 
             const isInsideQR = (r >= 0 && r < size && c >= 0 && c < size);
             const isDark = isInsideQR ? qr.isDark(r, c) : false;
+            const isFinder = isInsideQR ? isFinderPattern(r, c, size) : false;
 
             if (!isDark) {
-              addBlock(posX, -1.25, posZ, 0.98, 1.25, 0.98, colLight3D, false);
+              addBlock(posX, -1.25, posZ, 0.98, 1.25, 0.98, colLight3D, false, false);
             } else {
-              addBlock(posX, -1.25, posZ, 0.98, 1.27, 0.98, colDark3D, true);
+              addBlock(posX, -1.25, posZ, 0.98, 1.27, 0.98, colDark3D, true, isFinder);
 
               if (dist < highBayRadius) {
-                spawnAlignedRackBay(posX, posZ, 5, true, true);
+                spawnAlignedRackBay(posX, posZ, 5, true, true, isFinder);
               } else if (dist < rackRadius) {
-                spawnAlignedRackBay(posX, posZ, 3, false, true);
+                spawnAlignedRackBay(posX, posZ, 3, false, true, isFinder);
               } else {
                 const seed = (r * 13 + c * 7);
                 const coordKey = `${c},${r}`;
 
                 if (!occupiedClearance.has(coordKey)) {
                   if (seed % 19 === 0) {
-                    spawnForklift(posX, posZ, (r % 2 === 0 ? 'z' : 'x'), true);
+                    spawnForklift(posX, posZ, (r % 2 === 0 ? 'z' : 'x'), true, isFinder);
                     markClearance(c, r);
                   } else if (seed % 17 === 2) {
-                    spawnPalletStack(posX, posZ, true);
+                    spawnPalletStack(posX, posZ, true, isFinder);
                     markClearance(c, r);
                   } else if (seed % 23 === 1) {
-                    spawnConveyor(posX, posZ, r % 2 === 0, true);
+                    spawnConveyor(posX, posZ, r % 2 === 0, true, isFinder);
                     markClearance(c, r);
                   } else if (seed % 29 === 3) {
-                    spawnChargingDock(posX, posZ, true);
+                    spawnChargingDock(posX, posZ, true, isFinder);
                     markClearance(c, r);
                   } else if (seed % 21 === 4) {
-                    spawnSafetyBollards(posX, posZ, true);
+                    spawnSafetyBollards(posX, posZ, true, isFinder);
                     markClearance(c, r);
                   } else if (seed % 7 === 0) {
-                    spawnAMR(posX, posZ, (c % 2 === 0 ? 'z' : 'x'), true);
+                    spawnAMR(posX, posZ, (c % 2 === 0 ? 'z' : 'x'), true, isFinder);
                     markClearance(c, r);
                   }
                 }

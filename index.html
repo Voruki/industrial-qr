@@ -42,10 +42,10 @@
         --text-main: #FFFFFF;
         --text-muted: #E5E5EA;
         
-        /* Precision Liquid Glass */
-        --glass-bg: rgba(14, 14, 18, 0.50);
-        --glass-border: rgba(255, 255, 255, 0.16);
-        --glass-highlight: inset 0 1px 1.5px rgba(255, 255, 255, 0.35), inset 0 -1px 2px rgba(0, 0, 0, 0.5);
+        /* Ultra-Lucid VisionOS Liquid Glass */
+        --glass-bg: rgba(18, 18, 24, 0.22);
+        --glass-border: rgba(255, 255, 255, 0.24);
+        --glass-highlight: inset 0 1.5px 2px rgba(255, 255, 255, 0.45), inset 0 -1.5px 2px rgba(0, 0, 0, 0.35);
       }
 
       * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -81,7 +81,7 @@
         transition: border-color 0.4s ease, transform 0.08s ease-out;
       }
 
-      /* --- ORIGINAL PASTEL HORIZON MESH GRADIENT --- */
+      /* --- RESTORED ORIGINAL PASTEL HORIZON MESH GRADIENT --- */
       #abstract-bg {
         position: fixed;
         inset: 0;
@@ -149,23 +149,12 @@
         100% { transform: translate3d(8vw, -5vh, 0) scale(1.14); }
       }
 
-      /* --- LEFT AND RIGHT SHAKING HOVER ANIMATIONS --- */
-      @keyframes shake-x {
-        0%, 100% { transform: translateX(0); }
-        16% { transform: translateX(-6px); }
-        32% { transform: translateX(5px); }
-        48% { transform: translateX(-4px); }
-        64% { transform: translateX(3px); }
-        80% { transform: translateX(-1.5px); }
-      }
-
-      @keyframes shake-x-centered {
-        0%, 100% { transform: translateX(-50%); }
-        16% { transform: translateX(calc(-50% - 6px)); }
-        32% { transform: translateX(calc(-50% + 5px)); }
-        48% { transform: translateX(calc(-50% - 4px)); }
-        64% { transform: translateX(calc(-50% + 3px)); }
-        80% { transform: translateX(calc(-50% - 1.5px)); }
+      /* --- LIQUID GLASS 3D INTERACTIVE TILT CONTAINER --- */
+      .tilt-3d {
+        transform-style: preserve-3d;
+        perspective: 900px;
+        will-change: transform;
+        transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.4, 1), border-color 0.4s ease, box-shadow 0.4s ease;
       }
 
       /* --- FLOATING LIQUID GLASS NAVBAR --- */
@@ -184,20 +173,18 @@
         padding: 0 32px;
         
         background: var(--glass-bg);
-        backdrop-filter: blur(28px) saturate(180%);
-        -webkit-backdrop-filter: blur(28px) saturate(180%);
+        backdrop-filter: blur(32px) saturate(210%);
+        -webkit-backdrop-filter: blur(32px) saturate(210%);
         border: 1px solid var(--glass-border);
-        box-shadow: var(--glass-highlight), 0 20px 40px rgba(0,0,0,0.6);
+        box-shadow: var(--glass-highlight), 0 20px 40px rgba(0,0,0,0.35);
         
         border-radius: 40px; 
         z-index: 1000;
-        transition: border-color 0.4s ease, box-shadow 0.4s ease;
       }
 
       .glass-nav:hover {
-        animation: shake-x 0.45s ease-in-out;
-        border-color: rgba(255, 255, 255, 0.35);
-        box-shadow: var(--glass-highlight), 0 20px 40px rgba(0,0,0,0.6), 0 0 25px var(--theme-accent-glow);
+        border-color: rgba(255, 255, 255, 0.45);
+        box-shadow: var(--glass-highlight), 0 25px 45px rgba(0,0,0,0.4), 0 0 25px var(--theme-accent-glow);
       }
 
       .nav-brand { 
@@ -235,7 +222,7 @@
 
       .nav-links a, .nav-links button { 
         color: #FFFFFF; 
-        opacity: 0.92; 
+        opacity: 0.95; 
         text-decoration: none; 
         font-size: 0.88rem; 
         font-weight: 500;
@@ -257,18 +244,23 @@
         transform: translateY(-1px);
       }
 
+      /* Translucent Semi-Glass Scan View Button (Photo 1 Fix: Crystal Legibility!) */
       .scan-pill {
-        padding: 6px 16px;
+        padding: 7px 18px;
         border-radius: 9999px;
-        background: rgba(255, 255, 255, 0.08) !important;
-        border: 1px solid var(--theme-accent) !important;
-        color: var(--theme-accent) !important;
-        box-shadow: 0 0 10px var(--theme-accent-glow);
+        background: rgba(255, 255, 255, 0.12) !important;
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.32) !important;
+        color: #FFFFFF !important;
+        font-weight: 600 !important;
+        box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.4), 0 4px 12px rgba(0, 0, 0, 0.2);
+        letter-spacing: 0.02em;
       }
       .scan-pill:hover {
-        background: var(--theme-accent) !important;
-        color: #FFFFFF !important;
-        box-shadow: 0 0 18px var(--theme-accent);
+        background: rgba(255, 255, 255, 0.24) !important;
+        border-color: rgba(255, 255, 255, 0.6) !important;
+        box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.6), 0 6px 18px var(--theme-accent-glow);
       }
 
       #webgl-container {
@@ -279,10 +271,10 @@
         z-index: 1;
       }
 
-      /* FLOATING SCAN HINT BADGE */
+      /* FLOATING SCAN HINT BADGE (Moved to bottom: 180px - completely separated from search input!) */
       .tap-badge {
         position: absolute;
-        bottom: 140px;
+        bottom: 180px;
         left: 50%;
         transform: translateX(-50%);
         padding: 9px 22px;
@@ -296,16 +288,15 @@
         font-weight: 500;
         color: #FFFFFF;
         background: var(--glass-bg);
-        backdrop-filter: blur(28px) saturate(180%);
-        -webkit-backdrop-filter: blur(28px) saturate(180%);
+        backdrop-filter: blur(32px) saturate(210%);
+        -webkit-backdrop-filter: blur(32px) saturate(210%);
         border: 1px solid var(--glass-border);
-        box-shadow: var(--glass-highlight), 0 20px 40px rgba(0,0,0,0.6);
-        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: var(--glass-highlight), 0 18px 36px rgba(0,0,0,0.35);
+        transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.4, 1), border-color 0.3s ease, box-shadow 0.3s ease;
       }
       .tap-badge:hover {
-        animation: shake-x-centered 0.45s ease-in-out;
-        border-color: rgba(255, 255, 255, 0.35);
-        box-shadow: var(--glass-highlight), 0 20px 40px rgba(0,0,0,0.6), 0 0 25px var(--theme-accent-glow);
+        border-color: rgba(255, 255, 255, 0.45);
+        box-shadow: var(--glass-highlight), 0 22px 42px rgba(0,0,0,0.4), 0 0 25px var(--theme-accent-glow);
       }
 
       .pulse-dot {
@@ -317,7 +308,7 @@
         transition: background-color 0.4s ease, box-shadow 0.4s ease;
       }
 
-      /* BOTTOM CONTROL PANEL */
+      /* BOTTOM LIQUID GLASS CONTROL PANEL */
       .bottom-control-panel {
         position: absolute;
         bottom: 22px;
@@ -337,22 +328,20 @@
         padding: 8px 10px;
         border-radius: 40px;
         background: var(--glass-bg);
-        backdrop-filter: blur(28px) saturate(180%);
-        -webkit-backdrop-filter: blur(28px) saturate(180%);
+        backdrop-filter: blur(32px) saturate(210%);
+        -webkit-backdrop-filter: blur(32px) saturate(210%);
         border: 1px solid var(--glass-border);
-        box-shadow: var(--glass-highlight), 0 20px 40px rgba(0,0,0,0.6);
-        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: var(--glass-highlight), 0 20px 40px rgba(0,0,0,0.35);
       }
       .bottom-bar:hover {
-        animation: shake-x 0.45s ease-in-out;
-        border-color: rgba(255, 255, 255, 0.35);
-        box-shadow: var(--glass-highlight), 0 20px 40px rgba(0,0,0,0.6), 0 0 25px var(--theme-accent-glow);
+        border-color: rgba(255, 255, 255, 0.45);
+        box-shadow: var(--glass-highlight), 0 25px 45px rgba(0,0,0,0.4), 0 0 25px var(--theme-accent-glow);
       }
 
       .bottom-input {
         flex: 1;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.16);
         padding: 12px 18px;
         border-radius: 20px;
         color: #ffffff;
@@ -363,10 +352,11 @@
       }
       .bottom-input:focus {
         border-color: var(--theme-accent);
-        background: rgba(255, 255, 255, 0.09);
-        box-shadow: 0 0 12px var(--theme-accent-glow);
+        background: rgba(255, 255, 255, 0.12);
+        box-shadow: 0 0 14px var(--theme-accent-glow);
       }
 
+      /* Submit Arrow Action Button */
       .action-btn {
         background: var(--theme-accent);
         color: #ffffff;
@@ -388,12 +378,12 @@
       .action-btn:active { transform: scale(0.96); }
 
       .share-btn {
-        background: rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.12);
         border: 1px solid var(--glass-border);
         box-shadow: none;
       }
       .share-btn:hover {
-        background: rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.22);
         box-shadow: 0 8px 18px rgba(255, 255, 255, 0.2);
       }
 
@@ -409,23 +399,21 @@
         padding: 5px;
         border-radius: 40px;
         background: var(--glass-bg);
-        backdrop-filter: blur(28px) saturate(180%);
-        -webkit-backdrop-filter: blur(28px) saturate(180%);
+        backdrop-filter: blur(32px) saturate(210%);
+        -webkit-backdrop-filter: blur(32px) saturate(210%);
         border: 1px solid var(--glass-border);
-        box-shadow: var(--glass-highlight), 0 20px 40px rgba(0,0,0,0.6);
-        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: var(--glass-highlight), 0 20px 40px rgba(0,0,0,0.35);
       }
       .mode-selector:hover {
-        animation: shake-x 0.45s ease-in-out;
-        border-color: rgba(255, 255, 255, 0.35);
-        box-shadow: var(--glass-highlight), 0 20px 40px rgba(0,0,0,0.6), 0 0 25px var(--theme-accent-glow);
+        border-color: rgba(255, 255, 255, 0.45);
+        box-shadow: var(--glass-highlight), 0 25px 45px rgba(0,0,0,0.4), 0 0 25px var(--theme-accent-glow);
       }
 
       .mode-tab {
         flex: 1;
         background: transparent;
         border: none;
-        color: rgba(255, 255, 255, 0.75);
+        color: rgba(255, 255, 255, 0.78);
         font-family: inherit;
         font-size: 12px;
         font-weight: 600;
@@ -437,13 +425,13 @@
         white-space: nowrap;
       }
       .mode-tab.active {
-        background: rgba(255, 255, 255, 0.18);
+        background: rgba(255, 255, 255, 0.22);
         color: #ffffff;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25), inset 0 1px 1.5px rgba(255, 255, 255, 0.45);
       }
       .mode-tab:hover:not(.active) {
         color: #ffffff;
-        background: rgba(255, 255, 255, 0.07);
+        background: rgba(255, 255, 255, 0.10);
       }
 
       .audio-btn {
@@ -454,18 +442,17 @@
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        color: rgba(255, 255, 255, 0.75);
+        color: rgba(255, 255, 255, 0.78);
         background: var(--glass-bg);
-        backdrop-filter: blur(28px) saturate(180%);
-        -webkit-backdrop-filter: blur(28px) saturate(180%);
+        backdrop-filter: blur(32px) saturate(210%);
+        -webkit-backdrop-filter: blur(32px) saturate(210%);
         border: 1px solid var(--glass-border);
-        box-shadow: var(--glass-highlight), 0 20px 40px rgba(0,0,0,0.6);
+        box-shadow: var(--glass-highlight), 0 20px 40px rgba(0,0,0,0.35);
         transition: all 0.2s ease;
       }
       .audio-btn:hover {
-        animation: shake-x 0.45s ease-in-out;
         color: #ffffff;
-        border-color: rgba(255, 255, 255, 0.35);
+        border-color: rgba(255, 255, 255, 0.45);
       }
       .audio-btn.active {
         color: var(--theme-accent);
@@ -482,10 +469,10 @@
         font-weight: 600;
         color: #ffffff;
         background: var(--glass-bg);
-        backdrop-filter: blur(28px) saturate(180%);
-        -webkit-backdrop-filter: blur(28px) saturate(180%);
+        backdrop-filter: blur(32px) saturate(210%);
+        -webkit-backdrop-filter: blur(32px) saturate(210%);
         border: 1px solid var(--glass-border);
-        box-shadow: var(--glass-highlight), 0 20px 40px rgba(0,0,0,0.6);
+        box-shadow: var(--glass-highlight), 0 20px 40px rgba(0,0,0,0.35);
         opacity: 0;
         pointer-events: none;
         transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -524,8 +511,8 @@
       <div id="bg-vignette" class="bg-vignette"></div>
     </div>
 
-    <!-- Liquid Glass Navbar (Unlinked Title, No GitHub) -->
-    <nav class="glass-nav">
+    <!-- Liquid Glass Navbar with 3D Tilt Hover Physics -->
+    <nav class="glass-nav tilt-3d">
       <div class="nav-brand">
         <span class="brand-dot"></span>
         <strong>Yong Ming Ngoh</strong> <span class="divider">/</span> <span class="subtitle">3D Warehouse QR Generator</span>
@@ -543,16 +530,16 @@
 
     <div id="toast" class="toast">Snapshot saved & link copied!</div>
 
-    <!-- Floating Hint Badge -->
-    <div id="tap-badge" class="tap-badge">
+    <!-- Floating Hint Badge (Lifted cleanly above input bar!) -->
+    <div id="tap-badge" class="tap-badge tilt-3d">
       <span class="pulse-dot"></span>
       <span id="badge-text">Tap the warehouse to see QR code</span>
     </div>
 
-    <!-- Bottom Liquid Glass Control Stack -->
+    <!-- Bottom Liquid Glass Control Stack with 3D Tilt Physics -->
     <div class="bottom-control-panel">
       <!-- Input & Action Bar -->
-      <div class="bottom-bar">
+      <div class="bottom-bar tilt-3d">
         <input id="qr-input" class="bottom-input" type="text" value="https://yongming.vorky.fyi/" placeholder="Type any link or text..." />
         <button id="submit-btn" class="action-btn" title="Update Facility">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -571,12 +558,12 @@
 
       <!-- Mode Switcher Row + Audio Button -->
       <div class="mode-row">
-        <div class="mode-selector">
+        <div class="mode-selector tilt-3d">
           <button class="mode-tab active" data-mode="day">☀️ Day Shift</button>
           <button class="mode-tab" data-mode="cold">❄️ Cold Storage</button>
           <button class="mode-tab" data-mode="night">🌙 Night Shift</button>
         </div>
-        <button id="audio-btn" class="audio-btn" title="Toggle Sound FX">
+        <button id="audio-btn" class="audio-btn tilt-3d" title="Toggle Sound FX">
           <svg id="audio-icon-on" style="display:none;" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
             <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
@@ -594,7 +581,7 @@
 
     <script>
       // ==========================================
-      // 0. CUSTOM CURSOR TRACKING
+      // 0. CUSTOM CURSOR & 3D PHYSICS TILT
       // ==========================================
       const cursor = document.querySelector('.custom-cursor');
       const follower = document.querySelector('.cursor-follower');
@@ -607,6 +594,35 @@
         });
       }
 
+      // Physics-based 3D Tilt for all Liquid Glass Bars
+      document.querySelectorAll('.tilt-3d').forEach((el) => {
+        el.addEventListener('mousemove', (e) => {
+          const rect = el.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          const centerX = rect.width / 2;
+          const centerY = rect.height / 2;
+
+          // Normalized mouse offset (-1 to 1)
+          const deltaX = (x - centerX) / centerX;
+          const deltaY = (y - centerY) / centerY;
+
+          // Mouse on left pushes left side down, lifts right side up
+          const rotateY = deltaX * 6.5; 
+          const rotateX = -deltaY * 5.0;
+
+          const isCentered = el.classList.contains('tap-badge');
+          const baseTranslate = isCentered ? 'translateX(-50%) ' : '';
+
+          el.style.transform = `${baseTranslate}perspective(900px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.015, 1.015, 1.015)`;
+        });
+
+        el.addEventListener('mouseleave', () => {
+          const isCentered = el.classList.contains('tap-badge');
+          el.style.transform = isCentered ? 'translateX(-50%)' : 'none';
+        });
+      });
+
       // ==========================================
       // 1. ORIGINAL 3D SCENARIO PALETTES & THEME ADAPTATION
       // ==========================================
@@ -617,12 +633,10 @@
 
       const THEMES = {
         day: {
-          // Orange Accents for Day Shift
           uiAccent: '#FF5500',
           uiAccentGlow: 'rgba(255, 85, 0, 0.45)',
           uiSecondary: '#FFA200',
 
-          // Original Day Shift Pastel Horizon Gradient
           bgBase: '#fef3c7',
           blob1:  'radial-gradient(circle, rgba(249, 115, 22, 0.58) 0%, rgba(251, 146, 60, 0.32) 48%, transparent 75%)',
           blob2:  'radial-gradient(circle, rgba(245, 158, 11, 0.52) 0%, rgba(252, 211, 77, 0.30) 50%, transparent 75%)',
@@ -637,7 +651,6 @@
           ambientColor: '#fffbeb',
           ambientIntensity: 0.85,
 
-          // Original Day Shift Palette
           floorCenter3D:  new THREE.Color('#3f4854'), 
           floorEdge3D:    new THREE.Color('#252d36'), 
           floorScanLight: new THREE.Color('#ffffff'),
@@ -671,12 +684,10 @@
           laserColor:     0x38bdf8
         },
         cold: {
-          // Glacial Cyan Accents for Cold Storage
           uiAccent: '#00C8FF',
           uiAccentGlow: 'rgba(0, 200, 255, 0.45)',
           uiSecondary: '#38BDF8',
 
-          // Original Cold Storage Pastel Horizon Gradient
           bgBase: '#e0f2fe',
           blob1:  'radial-gradient(circle, rgba(2, 132, 199, 0.55) 0%, rgba(56, 189, 248, 0.30) 48%, transparent 75%)',
           blob2:  'radial-gradient(circle, rgba(14, 165, 233, 0.50) 0%, rgba(125, 211, 252, 0.28) 50%, transparent 75%)',
@@ -691,7 +702,6 @@
           ambientColor: '#f0f9ff',
           ambientIntensity: 0.90,
 
-          // Original Cold Storage Palette
           floorCenter3D:  new THREE.Color('#334454'), 
           floorEdge3D:    new THREE.Color('#1e2a36'), 
           floorScanLight: new THREE.Color('#ffffff'),
@@ -725,12 +735,10 @@
           laserColor:     0x67e8f9
         },
         night: {
-          // EMERALD GREEN ACCENTS FOR NIGHT SHIFT (NO ORANGE!)
           uiAccent: '#10B981',
           uiAccentGlow: 'rgba(16, 185, 129, 0.45)',
           uiSecondary: '#34D399',
 
-          // Original Night Shift Gradient
           bgBase: '#020617',
           blob1:  'radial-gradient(circle, rgba(16, 185, 129, 0.50) 0%, rgba(5, 150, 105, 0.25) 48%, transparent 75%)',
           blob2:  'radial-gradient(circle, rgba(245, 158, 11, 0.40) 0%, rgba(217, 119, 6, 0.18) 50%, transparent 75%)',
@@ -745,7 +753,6 @@
           ambientColor: '#475569', 
           ambientIntensity: 1.0,
 
-          // Original Night Shift Palette
           floorCenter3D:  new THREE.Color('#181E29'), 
           floorEdge3D:    new THREE.Color('#05080F'), 
           floorScanLight: new THREE.Color('#ffffff'),
@@ -791,13 +798,11 @@
 
       function updateThemeAccents(themeKey) {
         const t = THEMES[themeKey];
-        // Dynamic Accent Colors (Cursor, Follower Ring, Brand Dot, Arrow, Pulse Dot)
         document.documentElement.style.setProperty('--theme-accent', t.uiAccent);
         document.documentElement.style.setProperty('--theme-accent-glow', t.uiAccentGlow);
         document.documentElement.style.setProperty('--theme-secondary', t.uiSecondary);
         document.body.style.backgroundColor = t.bgBase;
 
-        // Update Restored Fluid Mesh Gradient Blobs
         document.getElementById('abstract-bg').style.backgroundColor = t.bgBase;
         document.getElementById('blob-1').style.background = t.blob1;
         document.getElementById('blob-2').style.background = t.blob2;
@@ -1049,7 +1054,7 @@
         }
       }
 
-      // 3D Reach Truck (Chassis, Guard & Mast Always Intact)
+      // 3D Reach Truck (Solid Chassis, Structural Mast Rails)
       function spawnForklift(x, z, dir = 'z') {
         const parts = [];
         function addPart(ox, oy, oz, sx, sy, sz, colorHex) {
@@ -1066,7 +1071,7 @@
         addPart(0, 0.05, 0.05, 0.62, 0.55, 0.58, PALETTE.forkliftBody);
         addPart(0, 0.05, 0.28, 0.58, 0.40, 0.16, PALETTE.forkliftCab);
 
-        // 4 Structural Pillars
+        // 4 Cab Pillars
         addPart(-0.22, 0.60, -0.10, 0.09, 0.75, 0.09, PALETTE.forkliftCab);
         addPart(0.22, 0.60, -0.10, 0.09, 0.75, 0.09, PALETTE.forkliftCab);
         addPart(-0.22, 0.60, 0.20, 0.09, 0.75, 0.09, PALETTE.forkliftCab);
@@ -1206,7 +1211,7 @@
           }
         }
 
-        // 2-Module Built-In Quiet Zone Apron
+        // Built-In Quiet Zone Apron
         const margin = 2;
         for (let r = -margin; r < size + margin; r++) {
           for (let c = -margin; c < size + margin; c++) {
@@ -1305,7 +1310,6 @@
           ease: "power3.inOut"
         });
 
-        // Telephoto Overhead Camera (Eliminates perspective parallax)
         gsap.to(camera, {
           fov: isFlat ? 9.0 : 38.0,
           duration: 1.2,
@@ -1342,7 +1346,6 @@
           ease: "power2.inOut"
         });
 
-        // Zero Shadows & Pure High-Contrast White Illumination in Scan View
         if (isFlat) {
           sunLight.castShadow = false;
           fillLight.castShadow = false;
@@ -1361,7 +1364,6 @@
           gsap.to(ambientLight, { intensity: PALETTE.ambientIntensity, duration: 1.2 });
         }
 
-        // Snap Fleet to Exact Cell Centers
         if (isFlat && instancedMesh) {
           for (let f = 0; f < dynamicFleet.length; f++) {
             const unit = dynamicFleet[f];

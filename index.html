@@ -519,7 +519,25 @@
       </div>
       <div class="nav-links">
         <button id="nav-scan-toggle" class="scan-pill">
-          <i class="ph ph-qr-code" style="font-size: 16px;"></i>
+          <!-- Dynamic Gradient QR Code Icon -->
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="url(#navQrGrad)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;">
+            <defs>
+              <linearGradient id="navQrGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop id="gradStop1" offset="0%" stop-color="#FF5500" />
+                <stop id="gradStop2" offset="100%" stop-color="#FFA200" />
+              </linearGradient>
+            </defs>
+            <rect x="2" y="2" width="7" height="7" rx="1"/>
+            <rect x="15" y="2" width="7" height="7" rx="1"/>
+            <rect x="2" y="15" width="7" height="7" rx="1"/>
+            <path d="M15 15h3v3h-3z"/>
+            <path d="M19 19h3v3h-3z"/>
+            <path d="M11 6h2"/>
+            <path d="M11 12h2"/>
+            <path d="M6 11v2"/>
+            <path d="M12 18h2"/>
+            <path d="M18 11h2"/>
+          </svg>
           <span id="nav-btn-text">Scan View</span>
         </button>
         <a href="https://yongming.vorky.fyi/" target="_blank">
@@ -636,12 +654,16 @@
           uiAccentGlow: 'rgba(255, 85, 0, 0.45)',
           uiSecondary: '#FFA200',
 
+          // QR Icon Gradient Stops for Day Shift
+          iconGrad1: '#FF5500',
+          iconGrad2: '#FFA200',
+
           bgBase: '#fef3c7',
           blob1:  'radial-gradient(circle, rgba(249, 115, 22, 0.58) 0%, rgba(251, 146, 60, 0.32) 48%, transparent 75%)',
           blob2:  'radial-gradient(circle, rgba(245, 158, 11, 0.52) 0%, rgba(252, 211, 77, 0.30) 50%, transparent 75%)',
           blob3:  'radial-gradient(circle, rgba(225, 29, 72, 0.35) 0%, rgba(251, 113, 133, 0.18) 45%, transparent 70%)',
           vignette: 'radial-gradient(ellipse at 50% 45%, rgba(67, 20, 7, 0.42) 0%, rgba(154, 52, 18, 0.20) 42%, rgba(254, 240, 138, 0.65) 75%, #fde047 100%)',
-          dustColor: 0xb45309,
+          dustColor: 0xf59e0b,
 
           sunColor: '#fff1dc',
           sunIntensity: 2.4,
@@ -689,12 +711,16 @@
           uiAccentGlow: 'rgba(0, 200, 255, 0.45)',
           uiSecondary: '#38BDF8',
 
+          // QR Icon Gradient Stops for Cold Storage
+          iconGrad1: '#00C8FF',
+          iconGrad2: '#0077FF',
+
           bgBase: '#e0f2fe',
           blob1:  'radial-gradient(circle, rgba(2, 132, 199, 0.55) 0%, rgba(56, 189, 248, 0.30) 48%, transparent 75%)',
           blob2:  'radial-gradient(circle, rgba(14, 165, 233, 0.50) 0%, rgba(125, 211, 252, 0.28) 50%, transparent 75%)',
           blob3:  'radial-gradient(circle, rgba(99, 102, 241, 0.38) 0%, rgba(165, 180, 252, 0.20) 45%, transparent 70%)',
           vignette: 'radial-gradient(ellipse at 50% 45%, rgba(8, 47, 73, 0.45) 0%, rgba(3, 105, 161, 0.18) 42%, rgba(186, 230, 253, 0.65) 75%, #7dd3fc 100%)',
-          dustColor: 0x0284c7,
+          dustColor: 0x38bdf8,
 
           sunColor: '#e0f2fe',
           sunIntensity: 2.2,
@@ -742,12 +768,16 @@
           uiAccentGlow: 'rgba(16, 185, 129, 0.45)',
           uiSecondary: '#34D399',
 
+          // QR Icon Gradient Stops for Night Shift
+          iconGrad1: '#10B981',
+          iconGrad2: '#34D399',
+
           bgBase: '#020617',
           blob1:  'radial-gradient(circle, rgba(16, 185, 129, 0.50) 0%, rgba(5, 150, 105, 0.25) 48%, transparent 75%)',
           blob2:  'radial-gradient(circle, rgba(245, 158, 11, 0.40) 0%, rgba(217, 119, 6, 0.18) 50%, transparent 75%)',
           blob3:  'radial-gradient(circle, rgba(37, 99, 235, 0.35) 0%, rgba(30, 58, 138, 0.16) 45%, transparent 70%)',
           vignette: 'radial-gradient(ellipse at 50% 45%, transparent 35%, rgba(2, 6, 23, 0.65) 80%, #020617 100%)',
-          dustColor: 0x6ee7b7,
+          dustColor: 0x34d399,
 
           sunColor: '#e2e8f0', 
           sunIntensity: 2.8,   
@@ -813,6 +843,20 @@
         document.getElementById('blob-2').style.background = t.blob2;
         document.getElementById('blob-3').style.background = t.blob3;
         document.getElementById('bg-vignette').style.background = t.vignette;
+
+        // Update dust particle color and size
+        if (dustMat) {
+          dustMat.color.setHex(t.dustColor);
+          dustMat.size = 1.2; // Larger, clearly visible particles
+        }
+
+        // Update Scan QR Icon Gradient Stops
+        const stop1 = document.getElementById('gradStop1');
+        const stop2 = document.getElementById('gradStop2');
+        if (stop1 && stop2) {
+          stop1.setAttribute('stop-color', t.iconGrad1);
+          stop2.setAttribute('stop-color', t.iconGrad2);
+        }
       }
       updateThemeAccents(activeMode);
 
@@ -1012,7 +1056,7 @@
         return new THREE.CanvasTexture(canvas);
       }
 
-      const dustCount = 130;
+      const dustCount = 150;
       const dustGeo = new THREE.BufferGeometry();
       const dustPositions = new Float32Array(dustCount * 3);
       for (let i = 0; i < dustCount * 3; i += 3) {
@@ -1022,11 +1066,11 @@
       }
       dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPositions, 3));
       const dustMat = new THREE.PointsMaterial({
-        size: 0.48,
+        size: 1.2, // Larger, clearly visible floating particles
         map: createSoftParticleTexture(),
         color: PALETTE.dustColor,
         transparent: true,
-        opacity: 0.28,
+        opacity: 0.55,
         blending: THREE.AdditiveBlending,
         depthWrite: false
       });

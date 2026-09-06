@@ -197,16 +197,17 @@
         user-select: none;
       }
 
+      /* True Gradient Brand Dot */
       .brand-dot {
         display: inline-block;
-        width: 7px;
-        height: 7px;
-        margin-right: 9px;
-        background-color: var(--theme-accent);
+        width: 8px;
+        height: 8px;
+        margin-right: 10px;
+        background: linear-gradient(135deg, var(--theme-accent), var(--theme-secondary));
         border-radius: 50%;
-        box-shadow: 0 0 8px var(--theme-accent), 0 0 16px var(--theme-accent-glow);
+        box-shadow: 0 0 10px var(--theme-accent), 0 0 20px var(--theme-accent-glow);
         flex-shrink: 0;
-        transition: background-color 0.4s ease, box-shadow 0.4s ease;
+        transition: background 0.4s ease, box-shadow 0.4s ease;
       }
 
       .nav-brand strong { font-weight: 600; color: #FFFFFF; }
@@ -1297,7 +1298,8 @@
         const highBayRadius = size * 0.18;
         const rackRadius = size * 0.37;
 
-        instancedMesh = new THREE.InstancedMesh(boxGeo, unitMaterial, 28000);
+        // Expanded buffer size (55,000) to prevent overflow crashes
+        instancedMesh = new THREE.InstancedMesh(boxGeo, unitMaterial, 55000);
         instancedMesh.castShadow = true;
         instancedMesh.receiveShadow = true;
         currentInstance = 0;

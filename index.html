@@ -3,105 +3,247 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Autonomous Intralogistics Facility - 3D QR</title>
+    <title>Yong Ming Ngoh / Autonomous Intralogistics Facility</title>
 
-    <!-- Typography: Plus Jakarta Sans -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='42' fill='%23FF5500'/></svg>" />
+
+    <!-- Google Fonts Fallback + Local @font-face support -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+    <!-- Phosphor Icons CDN -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
-    <!-- Stable Browser CDNs -->
+    <!-- Stable Three.js & Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 
     <style>
+      @font-face {
+        font-family: 'Inter';
+        src: url('assets/fonts/Inter-VariableFont_opsz,wght.ttf') format('truetype');
+        font-weight: 100 900;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: 'Space Grotesk';
+        src: url('assets/fonts/SpaceGrotesk-VariableFont_wght.ttf') format('truetype');
+        font-weight: 300 700;
+        font-style: normal;
+      }
+
+      :root {
+        --bg-black: #050507; 
+        --hermes-orange: #FF5500; 
+        --hermes-amber: #FFA200;
+        
+        --text-main: #FFFFFF;
+        --text-muted: #E5E5EA;
+        
+        /* Precision Liquid Glass */
+        --glass-bg: rgba(14, 14, 18, 0.45);
+        --glass-border: rgba(255, 255, 255, 0.16);
+        --glass-highlight: inset 0 1px 1.5px rgba(255, 255, 255, 0.35), inset 0 -1px 2px rgba(0, 0, 0, 0.5);
+      }
+
       * { box-sizing: border-box; margin: 0; padding: 0; }
-      body {
-        background: #fef3c7;
-        color: #f8fafc;
-        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+      body, html {
+        background-color: var(--bg-black);
+        color: var(--text-main);
+        font-family: 'Inter', -apple-system, sans-serif;
         overflow: hidden;
-        user-select: none;
-        transition: background-color 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+        -webkit-font-smoothing: antialiased;
+        cursor: none; 
       }
 
-      /* Fluid Ambient Pastel Mesh Backdrop */
-      #abstract-bg {
-        position: fixed;
-        inset: 0;
-        width: 100vw;
-        height: 100vh;
+      h1, h2, .panel-header, strong, .role-title { font-family: 'Space Grotesk', sans-serif; }
+
+      /* --- Custom Cursor --- */
+      .custom-cursor {
+        position: fixed; top: 0; left: 0;
+        width: 6px; height: 6px; background-color: #FFFFFF;
+        border-radius: 50%; pointer-events: none; z-index: 10000;
+        transform: translate(-50%, -50%); transition: width 0.2s, height 0.2s;
+      }
+
+      .cursor-follower {
+        position: fixed; top: 0; left: 0;
+        width: 32px; height: 32px; border: 1.5px solid rgba(255, 162, 0, 0.85);
+        border-radius: 50%; pointer-events: none; z-index: 9999;
+        transform: translate(-50%, -50%); transition: transform 0.08s ease-out;
+      }
+
+      /* --- EXACT REFERENCE DUAL-CORNER LIGHT LEAKS (With 60px Bleed Buffer) --- */
+      .ambient-bg {
+        position: fixed; 
+        top: -60px;
+        left: -60px;
+        width: calc(100vw + 120px);
+        height: calc(100vh + 120px);
         z-index: 0;
-        pointer-events: none;
+        background-color: var(--bg-black);
         overflow: hidden;
-        background-color: #fef3c7;
-        transition: background-color 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+        pointer-events: none;
+        transition: background-color 1.2s ease;
       }
 
-      .glow-blob {
+      .orb {
         position: absolute;
         border-radius: 50%;
-        filter: blur(120px);
-        opacity: 0.70;
-        will-change: transform;
-        transition: background 1.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.4s ease;
-      }
-
-      .blob-1 {
-        width: 68vw;
-        height: 68vw;
-        min-width: 540px;
-        min-height: 540px;
-        bottom: -15%;
-        right: -8%;
-        animation: floatBlob1 22s infinite alternate ease-in-out;
-      }
-
-      .blob-2 {
-        width: 60vw;
-        height: 60vw;
-        min-width: 460px;
-        min-height: 460px;
-        top: -14%;
-        right: 15%;
-        animation: floatBlob2 26s infinite alternate ease-in-out;
-      }
-
-      .blob-3 {
-        width: 75vw;
-        height: 75vw;
-        min-width: 580px;
-        min-height: 580px;
-        bottom: -12%;
-        left: -16%;
-        animation: floatBlob3 30s infinite alternate ease-in-out;
-      }
-
-      .bg-vignette {
-        position: absolute;
-        inset: 0;
         pointer-events: none;
-        transition: background 1.4s ease;
+        will-change: transform, opacity;
+        transition: background 1.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.2s ease;
       }
 
-      @keyframes floatBlob1 {
-        0% { transform: translate3d(0, 0, 0) scale(1); }
-        50% { transform: translate3d(-16vw, -14vh, 0) scale(1.15); }
-        100% { transform: translate3d(-8vw, 6vh, 0) scale(0.92); }
+      /* 1. TOP-RIGHT AMBER FLARE */
+      .orb-1 {
+        width: 65vw; height: 65vw;
+        min-width: 650px; min-height: 650px;
+        top: -20vh; right: -15vw;
+        background: radial-gradient(circle at 60% 40%, #FFA000 0%, #FF5500 45%, #A62400 70%, transparent 85%);
+        filter: blur(85px); opacity: 0.92;
+        animation: breathe-top-right 10s ease-in-out infinite alternate;
       }
 
-      @keyframes floatBlob2 {
-        0% { transform: translate3d(0, 0, 0) scale(0.92); }
-        50% { transform: translate3d(14vw, 15vh, 0) scale(1.18); }
-        100% { transform: translate3d(-12vw, 8vh, 0) scale(1.02); }
+      /* 2. BOTTOM-LEFT FIERY ORANGE BLOOM */
+      .orb-2 {
+        display: block !important;
+        width: 75vw; height: 75vw;
+        min-width: 750px; min-height: 750px;
+        bottom: -25vh; left: -18vw;
+        background: radial-gradient(circle at 45% 55%, #FF5B00 0%, #E63500 45%, #7A0D00 70%, transparent 85%);
+        filter: blur(95px); opacity: 0.95;
+        animation: breathe-bottom-left 12s ease-in-out infinite alternate;
       }
 
-      @keyframes floatBlob3 {
-        0% { transform: translate3d(0, 0, 0) scale(1.05); }
-        50% { transform: translate3d(18vw, -14vh, 0) scale(0.88); }
-        100% { transform: translate3d(8vw, -5vh, 0) scale(1.14); }
+      /* 3. CORE HIGHLIGHT PULSE */
+      .orb-3 {
+        display: block !important;
+        width: 40vw; height: 40vw;
+        min-width: 400px; min-height: 400px;
+        bottom: -10vh; left: -5vw;
+        background: radial-gradient(circle, #FFB700 0%, rgba(255, 85, 0, 0.5) 50%, transparent 75%);
+        filter: blur(70px); opacity: 0.8;
+        animation: breathe-core 8s ease-in-out infinite alternate;
+      }
+
+      @keyframes breathe-top-right {
+        0% { transform: translate(0, 0) scale(1); opacity: 0.85; }
+        50% { transform: translate(-30px, 25px) scale(1.1); opacity: 1; }
+        100% { transform: translate(-50px, 10px) scale(0.95); opacity: 0.8; }
+      }
+
+      @keyframes breathe-bottom-left {
+        0% { transform: translate(0, 0) scale(1); opacity: 0.88; }
+        50% { transform: translate(35px, -30px) scale(1.12); opacity: 1; }
+        100% { transform: translate(20px, -45px) scale(0.94); opacity: 0.85; }
+      }
+
+      @keyframes breathe-core {
+        0% { transform: scale(1); opacity: 0.65; }
+        100% { transform: scale(1.2); opacity: 0.9; }
+      }
+
+      /* --- HIGH-CONTRAST FLOATING GLASS NAVBAR --- */
+      .glass-nav {
+        position: fixed; 
+        top: 24px; 
+        left: 0;
+        right: 0;
+        margin: 0 auto;
+        width: min(calc(92vw + 48px), calc(100vw - 32px));
+        max-width: 1680px; 
+        height: 60px;
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        padding: 0 32px;
+        
+        background: var(--glass-bg);
+        backdrop-filter: blur(28px) saturate(180%);
+        -webkit-backdrop-filter: blur(28px) saturate(180%);
+        border: 1px solid var(--glass-border);
+        box-shadow: var(--glass-highlight), 0 20px 40px rgba(0,0,0,0.6);
+        
+        border-radius: 40px; 
+        z-index: 1000;
+        transition: all 0.4s ease;
+      }
+
+      .glass-nav:hover {
+        border-color: rgba(255, 255, 255, 0.35);
+        box-shadow: var(--glass-highlight), 0 20px 40px rgba(0,0,0,0.6), 0 0 25px rgba(255, 162, 0, 0.25);
+      }
+
+      .nav-brand { 
+        display: inline-flex;
+        align-items: center;
+        font-size: 0.95rem; 
+        letter-spacing: 0.02em; 
+        text-decoration: none;
+        color: #FFFFFF;
+      }
+
+      /* Glowing Orange Dot beside title */
+      .brand-dot {
+        display: inline-block;
+        width: 7px;
+        height: 7px;
+        margin-right: 9px;
+        background-color: var(--hermes-orange);
+        border-radius: 50%;
+        box-shadow: 0 0 8px rgba(255, 85, 0, 0.9), 0 0 16px rgba(255, 85, 0, 0.45);
+        flex-shrink: 0;
+      }
+
+      .nav-brand strong { font-weight: 600; color: #FFFFFF; }
+      .nav-brand .divider { margin: 0 8px; color: rgba(255, 255, 255, 0.4); }
+
+      .nav-brand .subtitle { 
+        color: #FFFFFF; 
+        opacity: 0.95; 
+        font-weight: 400; 
+      }
+
+      .nav-links { display: flex; gap: 24px; align-items: center; }
+
+      .nav-links a, .nav-links button { 
+        color: #FFFFFF; 
+        opacity: 0.92; 
+        text-decoration: none; 
+        font-size: 0.88rem; 
+        font-weight: 500;
+        letter-spacing: 0.02em;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        font-family: inherit;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: opacity 0.25s ease, text-shadow 0.25s ease, transform 0.25s ease; 
+      }
+
+      .nav-links a:hover, .nav-links button:hover { 
+        opacity: 1; 
+        color: #FFFFFF;
+        text-shadow: 0 0 12px rgba(255, 255, 255, 0.9), 0 0 22px rgba(255, 162, 0, 0.5);
+        transform: translateY(-1px);
+      }
+
+      .scan-pill {
+        padding: 6px 14px;
+        border-radius: 9999px;
+        background: rgba(255, 85, 0, 0.15) !important;
+        border: 1px solid rgba(255, 85, 0, 0.4) !important;
+        color: #FFA200 !important;
+      }
+      .scan-pill:hover {
+        background: rgba(255, 85, 0, 0.35) !important;
+        box-shadow: 0 0 15px rgba(255, 85, 0, 0.45);
       }
 
       #webgl-container {
@@ -109,144 +251,16 @@
         width: 100vw;
         height: 100vh;
         display: block;
-        cursor: grab;
         z-index: 1;
       }
-      #webgl-container:active {
-        cursor: grabbing;
-      }
 
-      /* ==========================================
-         LIQUID GLASS COMPONENT ARCHITECTURE
-         ========================================== */
-      .liquid-glass {
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.03) 50%, rgba(255, 255, 255, 0.07) 100%), rgba(14, 18, 28, 0.62);
-        backdrop-filter: blur(28px) saturate(190%);
-        -webkit-backdrop-filter: blur(28px) saturate(190%);
-        border: 1px solid rgba(255, 255, 255, 0.18);
-        box-shadow: 
-          0 20px 45px -10px rgba(0, 0, 0, 0.55),
-          inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.35),
-          inset 0 -1px 2px 0 rgba(0, 0, 0, 0.35);
-        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-      }
-
-      /* TOP LIQUID GLASS NAVIGATION BAR */
-      .top-nav {
-        position: absolute;
-        top: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: calc(100% - 40px);
-        max-width: 1140px;
-        height: 56px;
-        border-radius: 9999px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0 10px 0 14px;
-        z-index: 10;
-      }
-
-      .nav-brand {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        text-decoration: none;
-      }
-
-      .status-radar {
-        position: relative;
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.08);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-      .radar-dot {
-        width: 7px;
-        height: 7px;
-        border-radius: 50%;
-        background: #f97316;
-        box-shadow: 0 0 10px #f97316;
-      }
-      .radar-wave {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        border-radius: 50%;
-        border: 1px solid #f97316;
-        animation: pingRadar 2s cubic-bezier(0, 0, 0.2, 1) infinite;
-      }
-      @keyframes pingRadar {
-        0% { transform: scale(0.7); opacity: 0.8; }
-        100% { transform: scale(1.6); opacity: 0; }
-      }
-
-      .brand-title {
-        font-size: 14px;
-        font-weight: 600;
-        letter-spacing: -0.01em;
-        color: #f8fafc;
-      }
-      .brand-divider {
-        color: rgba(255, 255, 255, 0.28);
-        font-weight: 400;
-      }
-      .brand-sub {
-        font-size: 13.5px;
-        font-weight: 400;
-        color: rgba(248, 250, 252, 0.72);
-      }
-
-      .nav-menu {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-      }
-
-      .nav-btn {
-        background: rgba(255, 255, 255, 0.06);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        color: rgba(248, 250, 252, 0.85);
-        font-family: inherit;
-        font-size: 13px;
-        font-weight: 500;
-        padding: 7px 16px;
-        border-radius: 9999px;
-        cursor: pointer;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        transition: all 0.2s ease;
-      }
-      .nav-btn:hover {
-        background: rgba(255, 255, 255, 0.14);
-        color: #ffffff;
-        border-color: rgba(255, 255, 255, 0.28);
-        transform: translateY(-1px);
-      }
-      .nav-btn.glow {
-        background: linear-gradient(135deg, rgba(37, 99, 235, 0.75), rgba(29, 78, 216, 0.85));
-        border-color: rgba(96, 165, 250, 0.4);
-        color: #ffffff;
-        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
-      }
-      .nav-btn.glow:hover {
-        background: linear-gradient(135deg, rgba(29, 78, 216, 0.85), rgba(30, 64, 175, 0.95));
-      }
-
-      /* FLOATING SCAN BADGE */
+      /* FLOATING SCAN HINT BADGE */
       .tap-badge {
         position: absolute;
-        bottom: 138px;
+        bottom: 140px;
         left: 50%;
         transform: translateX(-50%);
-        padding: 8px 20px;
+        padding: 9px 22px;
         border-radius: 9999px;
         cursor: pointer;
         z-index: 10;
@@ -255,22 +269,35 @@
         gap: 9px;
         font-size: 13px;
         font-weight: 500;
-        color: #e2e8f0;
+        color: #FFFFFF;
+        background: var(--glass-bg);
+        backdrop-filter: blur(28px) saturate(180%);
+        -webkit-backdrop-filter: blur(28px) saturate(180%);
+        border: 1px solid var(--glass-border);
+        box-shadow: var(--glass-highlight), 0 20px 40px rgba(0,0,0,0.6);
+        transition: all 0.3s ease;
       }
       .tap-badge:hover {
         transform: translateX(-50%) translateY(-2px);
-        border-color: rgba(255, 255, 255, 0.38);
-        box-shadow: 0 25px 50px -10px rgba(0, 0, 0, 0.65), inset 0 1px 2px rgba(255, 255, 255, 0.4);
+        border-color: rgba(255, 255, 255, 0.35);
+        box-shadow: var(--glass-highlight), 0 20px 40px rgba(0,0,0,0.6), 0 0 25px rgba(255, 162, 0, 0.35);
       }
 
-      /* BOTTOM CONTROL PANEL */
+      .pulse-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--hermes-amber);
+        box-shadow: 0 0 8px var(--hermes-amber);
+      }
+
+      /* BOTTOM LIQUID GLASS CONTROL PANEL */
       .bottom-control-panel {
         position: absolute;
-        bottom: 20px;
+        bottom: 22px;
         left: 50%;
         transform: translateX(-50%);
-        width: calc(100% - 36px);
-        max-width: 530px;
+        width: min(520px, calc(100vw - 32px));
         display: flex;
         flex-direction: column;
         gap: 10px;
@@ -281,8 +308,18 @@
         width: 100%;
         display: flex;
         gap: 8px;
-        padding: 7px 9px;
-        border-radius: 24px;
+        padding: 8px 10px;
+        border-radius: 40px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(28px) saturate(180%);
+        -webkit-backdrop-filter: blur(28px) saturate(180%);
+        border: 1px solid var(--glass-border);
+        box-shadow: var(--glass-highlight), 0 20px 40px rgba(0,0,0,0.6);
+        transition: all 0.3s ease;
+      }
+      .bottom-bar:hover {
+        border-color: rgba(255, 255, 255, 0.35);
+        box-shadow: var(--glass-highlight), 0 20px 40px rgba(0,0,0,0.6), 0 0 25px rgba(255, 85, 0, 0.25);
       }
 
       .bottom-input {
@@ -290,51 +327,50 @@
         background: rgba(255, 255, 255, 0.05);
         border: 1px solid rgba(255, 255, 255, 0.12);
         padding: 12px 18px;
-        border-radius: 16px;
+        border-radius: 20px;
         color: #ffffff;
         font-family: inherit;
         outline: none;
         font-size: 13.5px;
-        font-weight: 400;
-        letter-spacing: -0.01em;
         transition: all 0.2s ease;
-        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.25);
       }
       .bottom-input:focus {
-        border-color: #3b82f6;
-        background: rgba(255, 255, 255, 0.10);
-        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.25), 0 0 0 2px rgba(59, 130, 246, 0.25);
+        border-color: var(--hermes-orange);
+        background: rgba(255, 255, 255, 0.09);
+        box-shadow: 0 0 12px rgba(255, 85, 0, 0.3);
       }
 
       .action-btn {
-        background: linear-gradient(135deg, rgba(37, 99, 235, 0.88), rgba(29, 78, 216, 0.95));
+        background: var(--hermes-orange);
         color: #ffffff;
-        border: 1px solid rgba(255, 255, 255, 0.25);
+        border: none;
         width: 46px;
         height: 46px;
-        border-radius: 16px;
+        border-radius: 18px;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.35), 0 8px 16px rgba(37, 99, 235, 0.3);
+        box-shadow: 0 8px 18px rgba(255, 85, 0, 0.35);
         transition: all 0.2s ease;
       }
       .action-btn:hover {
-        transform: translateY(-1px);
-        box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.45), 0 12px 20px rgba(37, 99, 235, 0.4);
+        transform: translateY(-2px);
+        box-shadow: 0 12px 24px rgba(255, 85, 0, 0.5);
       }
       .action-btn:active { transform: scale(0.96); }
 
       .share-btn {
-        background: linear-gradient(135deg, rgba(234, 88, 12, 0.88), rgba(194, 65, 12, 0.95));
-        box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.35), 0 8px 16px rgba(234, 88, 12, 0.3);
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid var(--glass-border);
+        box-shadow: none;
       }
       .share-btn:hover {
-        box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.45), 0 12px 20px rgba(234, 88, 12, 0.4);
+        background: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 18px rgba(255, 255, 255, 0.2);
       }
 
-      /* MODE ROW */
+      /* MODE SELECTOR */
       .mode-row {
         width: 100%;
         display: flex;
@@ -344,65 +380,77 @@
         flex: 1;
         display: flex;
         padding: 5px;
-        border-radius: 18px;
+        border-radius: 40px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(28px) saturate(180%);
+        -webkit-backdrop-filter: blur(28px) saturate(180%);
+        border: 1px solid var(--glass-border);
+        box-shadow: var(--glass-highlight), 0 20px 40px rgba(0,0,0,0.6);
       }
       .mode-tab {
         flex: 1;
         background: transparent;
         border: none;
-        color: rgba(248, 250, 252, 0.68);
+        color: rgba(255, 255, 255, 0.75);
         font-family: inherit;
-        font-size: 12.5px;
+        font-size: 12px;
         font-weight: 600;
-        letter-spacing: -0.01em;
-        padding: 9px 4px;
-        border-radius: 13px;
+        padding: 8px 4px;
+        border-radius: 20px;
         cursor: pointer;
-        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        transition: all 0.25s ease;
         text-align: center;
         white-space: nowrap;
       }
       .mode-tab.active {
-        background: rgba(255, 255, 255, 0.16);
+        background: rgba(255, 255, 255, 0.18);
         color: #ffffff;
-        box-shadow: 
-          0 4px 12px rgba(0, 0, 0, 0.25),
-          inset 0 1px 1px rgba(255, 255, 255, 0.3);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.3);
       }
       .mode-tab:hover:not(.active) {
         color: #ffffff;
-        background: rgba(255, 255, 255, 0.06);
+        background: rgba(255, 255, 255, 0.07);
       }
 
       .audio-btn {
         width: 48px;
         height: 48px;
-        border-radius: 18px;
+        border-radius: 40px;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        color: rgba(248, 250, 252, 0.72);
+        color: rgba(255, 255, 255, 0.75);
+        background: var(--glass-bg);
+        backdrop-filter: blur(28px) saturate(180%);
+        -webkit-backdrop-filter: blur(28px) saturate(180%);
+        border: 1px solid var(--glass-border);
+        box-shadow: var(--glass-highlight), 0 20px 40px rgba(0,0,0,0.6);
+        transition: all 0.2s ease;
       }
       .audio-btn:hover {
         color: #ffffff;
-        border-color: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.35);
       }
       .audio-btn.active {
-        color: #38bdf8;
+        color: var(--hermes-amber);
       }
 
-      /* Toast Pill */
       .toast {
         position: absolute;
-        top: 86px;
+        top: 96px;
         left: 50%;
         transform: translateX(-50%) translateY(-25px);
-        padding: 10px 22px;
-        border-radius: 9999px;
+        padding: 10px 24px;
+        border-radius: 40px;
         font-size: 13px;
         font-weight: 600;
         color: #ffffff;
+        background: var(--glass-bg);
+        backdrop-filter: blur(28px) saturate(180%);
+        -webkit-backdrop-filter: blur(28px) saturate(180%);
+        border: 1px solid var(--glass-border);
+        box-shadow: var(--glass-highlight), 0 20px 40px rgba(0,0,0,0.6);
         opacity: 0;
         pointer-events: none;
         transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -413,60 +461,65 @@
         opacity: 1;
       }
 
-      @media (max-width: 768px) {
-        .brand-sub, .brand-divider { display: none; }
-        .top-nav { height: 50px; padding: 0 8px 0 12px; }
-        .nav-btn { padding: 6px 12px; font-size: 12px; }
+      @media (max-width: 860px) {
+        .custom-cursor, .cursor-follower { display: none !important; }
+        body, html { cursor: auto !important; }
+        .glass-nav {
+          top: 12px !important; height: auto !important; padding: 12px 18px !important;
+          flex-direction: column !important; gap: 10px !important; border-radius: 26px !important;
+        }
+        .nav-brand {
+          width: 100% !important; justify-content: center !important; padding-bottom: 8px !important;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.14) !important;
+        }
+        .nav-links { width: 100% !important; justify-content: center !important; gap: 12px !important; }
       }
     </style>
   </head>
   <body>
-    <!-- Fluid Abstract Pastel Mesh Layer -->
-    <div id="abstract-bg">
-      <div id="blob-1" class="glow-blob blob-1"></div>
-      <div id="blob-2" class="glow-blob blob-2"></div>
-      <div id="blob-3" class="glow-blob blob-3"></div>
-      <div id="bg-vignette" class="bg-vignette"></div>
+    <!-- VisionOS Custom Cursor -->
+    <div class="custom-cursor"></div>
+    <div class="cursor-follower"></div>
+
+    <!-- Dual-Corner Photographic Light Leak Background -->
+    <div id="ambient-bg" class="ambient-bg">
+      <div id="orb-1" class="orb orb-1"></div>
+      <div id="orb-2" class="orb orb-2"></div>
+      <div id="orb-3" class="orb orb-3"></div>
     </div>
 
-    <!-- TOP LIQUID GLASS NAVIGATION BAR -->
-    <header class="top-nav liquid-glass">
+    <!-- High-Contrast Floating Glass Navbar -->
+    <nav class="glass-nav">
       <a href="https://yongming.vorky.fyi/" target="_blank" class="nav-brand">
-        <div class="status-radar">
-          <span class="radar-wave"></span>
-          <span class="radar-dot"></span>
-        </div>
-        <span class="brand-title">Yong Ming Ngoh</span>
-        <span class="brand-divider">/</span>
-        <span class="brand-sub">Autonomous Intralogistics</span>
+        <span class="brand-dot"></span>
+        <strong>Yong Ming Ngoh</strong> <span class="divider">/</span> <span class="subtitle">Demonstration</span>
       </a>
-      <div class="nav-menu">
-        <button id="nav-scan-toggle" class="nav-btn glow">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="3" width="7" height="7"></rect>
-            <rect x="14" y="3" width="7" height="7"></rect>
-            <rect x="14" y="14" width="7" height="7"></rect>
-            <rect x="3" y="14" width="7" height="7"></rect>
-          </svg>
+      <div class="nav-links">
+        <button id="nav-scan-toggle" class="scan-pill">
+          <i class="ph ph-qr-code" style="font-size: 16px;"></i>
           <span id="nav-btn-text">Scan View</span>
         </button>
-        <a href="https://github.com/Voruki/industrial-qr" target="_blank" class="nav-btn">GitHub ↗</a>
-        <a href="https://yongming.vorky.fyi/" target="_blank" class="nav-btn">Portfolio ↗</a>
+        <a href="https://github.com/Voruki/industrial-qr" target="_blank">
+          GitHub <i class="ph ph-arrow-up-right"></i>
+        </a>
+        <a href="https://yongming.vorky.fyi/" target="_blank">
+          Portfolio <i class="ph ph-arrow-up-right"></i>
+        </a>
       </div>
-    </header>
+    </nav>
 
-    <div id="toast" class="toast liquid-glass">Snapshot saved & link copied!</div>
+    <div id="toast" class="toast">Snapshot saved & link copied!</div>
 
     <!-- Floating Hint Badge -->
-    <div id="tap-badge" class="tap-badge liquid-glass">
+    <div id="tap-badge" class="tap-badge">
       <span class="pulse-dot"></span>
       <span id="badge-text">Tap the warehouse to see QR code</span>
     </div>
 
-    <!-- Bottom Control Stack -->
+    <!-- Bottom Liquid Glass Control Stack -->
     <div class="bottom-control-panel">
       <!-- Input & Action Bar -->
-      <div class="bottom-bar liquid-glass">
+      <div class="bottom-bar">
         <input id="qr-input" class="bottom-input" type="text" value="https://yongming.vorky.fyi/" placeholder="Type any link or text..." />
         <button id="submit-btn" class="action-btn" title="Update Facility">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
@@ -485,12 +538,12 @@
 
       <!-- Mode Switcher Row + Audio Button -->
       <div class="mode-row">
-        <div class="mode-selector liquid-glass">
+        <div class="mode-selector">
           <button class="mode-tab active" data-mode="day">☀️ Day Shift</button>
           <button class="mode-tab" data-mode="cold">❄️ Cold Storage</button>
           <button class="mode-tab" data-mode="night">🌙 Night Shift</button>
         </div>
-        <button id="audio-btn" class="audio-btn liquid-glass" title="Toggle Sound FX">
+        <button id="audio-btn" class="audio-btn" title="Toggle Sound FX">
           <svg id="audio-icon-on" style="display:none;" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
             <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
@@ -508,6 +561,20 @@
 
     <script>
       // ==========================================
+      // 0. CUSTOM CURSOR TRACKING
+      // ==========================================
+      const cursor = document.querySelector('.custom-cursor');
+      const follower = document.querySelector('.cursor-follower');
+      if (cursor && follower) {
+        window.addEventListener('mousemove', (e) => {
+          cursor.style.left = `${e.clientX}px`;
+          cursor.style.top = `${e.clientY}px`;
+          follower.style.left = `${e.clientX}px`;
+          follower.style.top = `${e.clientY}px`;
+        });
+      }
+
+      // ==========================================
       // 1. STATE & SHIFT-SPECIFIC LIGHTING PALETTES
       // ==========================================
       let isFlat = false;
@@ -517,12 +584,11 @@
 
       const THEMES = {
         day: {
-          bgBase: '#fef3c7',
-          blob1:  'radial-gradient(circle, rgba(249, 115, 22, 0.58) 0%, rgba(251, 146, 60, 0.32) 48%, transparent 75%)',
-          blob2:  'radial-gradient(circle, rgba(245, 158, 11, 0.52) 0%, rgba(252, 211, 77, 0.30) 50%, transparent 75%)',
-          blob3:  'radial-gradient(circle, rgba(225, 29, 72, 0.35) 0%, rgba(251, 113, 133, 0.18) 45%, transparent 70%)',
-          vignette: 'radial-gradient(ellipse at 50% 45%, rgba(67, 20, 7, 0.42) 0%, rgba(154, 52, 18, 0.20) 42%, rgba(254, 240, 138, 0.65) 75%, #fde047 100%)',
-          dustColor: 0xb45309,
+          // Exact Reference Hermes Amber / Fiery Orange Orbs
+          orb1: 'radial-gradient(circle at 60% 40%, #FFA000 0%, #FF5500 45%, #A62400 70%, transparent 85%)',
+          orb2: 'radial-gradient(circle at 45% 55%, #FF5B00 0%, #E63500 45%, #7A0D00 70%, transparent 85%)',
+          orb3: 'radial-gradient(circle, #FFB700 0%, rgba(255, 85, 0, 0.5) 50%, transparent 75%)',
+          dustColor: 0xffedd5,
 
           sunColor: '#fff1dc',
           sunIntensity: 2.4,
@@ -564,12 +630,11 @@
           laserColor:     0x38bdf8
         },
         cold: {
-          bgBase: '#e0f2fe',
-          blob1:  'radial-gradient(circle, rgba(2, 132, 199, 0.55) 0%, rgba(56, 189, 248, 0.30) 48%, transparent 75%)',
-          blob2:  'radial-gradient(circle, rgba(14, 165, 233, 0.50) 0%, rgba(125, 211, 252, 0.28) 50%, transparent 75%)',
-          blob3:  'radial-gradient(circle, rgba(99, 102, 241, 0.38) 0%, rgba(165, 180, 252, 0.20) 45%, transparent 70%)',
-          vignette: 'radial-gradient(ellipse at 50% 45%, rgba(8, 47, 73, 0.45) 0%, rgba(3, 105, 161, 0.18) 42%, rgba(186, 230, 253, 0.65) 75%, #7dd3fc 100%)',
-          dustColor: 0x0284c7,
+          // Deep Sub-Zero Cryogenic Azure / Glacial Cyan Orbs
+          orb1: 'radial-gradient(circle at 60% 40%, #00C8FF 0%, #0077FF 45%, #002B7A 70%, transparent 85%)',
+          orb2: 'radial-gradient(circle at 45% 55%, #0099FF 0%, #0055D4 45%, #001A5E 70%, transparent 85%)',
+          orb3: 'radial-gradient(circle, #66E0FF 0%, rgba(0, 119, 255, 0.5) 50%, transparent 75%)',
+          dustColor: 0xbae6fd,
 
           sunColor: '#e0f2fe',
           sunIntensity: 2.2,
@@ -611,11 +676,10 @@
           laserColor:     0x67e8f9
         },
         night: {
-          bgBase: '#020617',
-          blob1:  'radial-gradient(circle, rgba(16, 185, 129, 0.50) 0%, rgba(5, 150, 105, 0.25) 48%, transparent 75%)',
-          blob2:  'radial-gradient(circle, rgba(245, 158, 11, 0.40) 0%, rgba(217, 119, 6, 0.18) 50%, transparent 75%)',
-          blob3:  'radial-gradient(circle, rgba(37, 99, 235, 0.35) 0%, rgba(30, 58, 138, 0.16) 45%, transparent 70%)',
-          vignette: 'radial-gradient(ellipse at 50% 45%, transparent 35%, rgba(2, 6, 23, 0.65) 80%, #020617 100%)',
+          // Bio-luminescent Emerald & Hazard Amber Stealth Orbs
+          orb1: 'radial-gradient(circle at 60% 40%, #10B981 0%, #047857 45%, #064E3B 70%, transparent 85%)',
+          orb2: 'radial-gradient(circle at 45% 55%, #F59E0B 0%, #B45309 45%, #451A03 70%, transparent 85%)',
+          orb3: 'radial-gradient(circle, #34D399 0%, rgba(16, 185, 129, 0.5) 50%, transparent 75%)',
           dustColor: 0x6ee7b7,
 
           sunColor: '#e2e8f0', 
@@ -670,12 +734,9 @@
 
       function updateBackdropBlobs(themeKey) {
         const t = THEMES[themeKey];
-        document.body.style.backgroundColor = t.bgBase;
-        document.getElementById('abstract-bg').style.backgroundColor = t.bgBase;
-        document.getElementById('blob-1').style.background = t.blob1;
-        document.getElementById('blob-2').style.background = t.blob2;
-        document.getElementById('blob-3').style.background = t.blob3;
-        document.getElementById('bg-vignette').style.background = t.vignette;
+        document.getElementById('orb-1').style.background = t.orb1;
+        document.getElementById('orb-2').style.background = t.orb2;
+        document.getElementById('orb-3').style.background = t.orb3;
       }
       updateBackdropBlobs(activeMode);
 
@@ -865,7 +926,6 @@
       laserPlane.position.y = 0.35;
       scene.add(laserPlane);
 
-      // Instanced System State
       let instancedMesh = null;
       const dummy = new THREE.Object3D();
       const tempColor = new THREE.Color();
@@ -875,7 +935,7 @@
       const contrastState = { progress: 0 };
 
       // ==========================================
-      // 4. GENERATOR FUNCTIONS (ROBUST 3D FLEET)
+      // 4. GENERATOR FUNCTIONS (REINFORCED 3D FLEET)
       // ==========================================
       function addBlock(x, y, z, sx, sy, sz, colorHex) {
         if (!instancedMesh) return -1;
@@ -923,7 +983,6 @@
         }
       }
 
-      // Robust 3D Reach Truck (Chassis, Frame, and Mast Firmly Attached)
       function spawnForklift(x, z, dir = 'z') {
         const parts = [];
         function addPart(ox, oy, oz, sx, sy, sz, colorHex) {
@@ -936,28 +995,27 @@
           parts.push({ ox: rx, oy: oy, oz: rz, sx: rsx, sy: sy, sz: rsz, idx });
         }
 
-        // 1. Heavy High-Vis Chassis Body
+        // Heavy chassis body
         addPart(0, 0.05, 0.05, 0.62, 0.55, 0.58, PALETTE.forkliftBody);
-        // 2. Rear Counterweight Block
         addPart(0, 0.05, 0.28, 0.58, 0.40, 0.16, PALETTE.forkliftCab);
 
-        // 3. 4 Heavy Steel Pillars (0.09 thickness)
+        // 4 Cab Pillars
         addPart(-0.22, 0.60, -0.10, 0.09, 0.75, 0.09, PALETTE.forkliftCab);
         addPart(0.22, 0.60, -0.10, 0.09, 0.75, 0.09, PALETTE.forkliftCab);
         addPart(-0.22, 0.60, 0.20, 0.09, 0.75, 0.09, PALETTE.forkliftCab);
         addPart(0.22, 0.60, 0.20, 0.09, 0.75, 0.09, PALETTE.forkliftCab);
-        // Cab Protective Roof
+        // Roof Guard
         addPart(0, 1.35, 0.05, 0.56, 0.08, 0.44, PALETTE.forkliftCab);
-        // Amber Warning Beacon Light
+        // Amber Warning Strobe
         addPart(0, 1.43, 0.05, 0.14, 0.12, 0.14, PALETTE.forkliftBeacon);
 
-        // 4. Twin Mast Lifting Steel Rails (Up to 1.70m)
+        // Twin Mast Rails
         addPart(-0.16, 0.05, -0.22, 0.09, 1.65, 0.09, PALETTE.forkliftMast);
         addPart(0.16, 0.05, -0.22, 0.09, 1.65, 0.09, PALETTE.forkliftMast);
         addPart(0, 0.90, -0.22, 0.32, 0.08, 0.06, PALETTE.forkliftMast);
         addPart(0, 1.55, -0.22, 0.32, 0.08, 0.06, PALETTE.forkliftMast);
 
-        // 5. Forks Carriage Plate & Timber Pallet
+        // Forks & Pallet
         addPart(0, 0.18, -0.26, 0.44, 0.08, 0.08, PALETTE.forkliftCab);
         addPart(0, 0.20, -0.38, 0.46, 0.08, 0.28, PALETTE.woodPallet);
         addPart(0, 0.28, -0.38, 0.38, 0.38, 0.24, PALETTE.cargoKraft);
@@ -971,7 +1029,6 @@
         });
       }
 
-      // Layered 3D AMR
       function spawnAMR(x, z, dir = 'z') {
         const parts = [];
         function addPart(ox, oy, oz, sx, sy, sz, colorHex) {
@@ -1047,7 +1104,6 @@
         });
       }
 
-      // --- FACILITY GENERATOR (WITH BUILT-IN QUIET ZONE APRON) ---
       function generateFacility(text) {
         if (instancedMesh) {
           scene.remove(instancedMesh);
@@ -1081,7 +1137,7 @@
           }
         }
 
-        // 2-Module Built-In White Quiet Zone Apron
+        // 2-Module Built-In Quiet Zone Apron
         const margin = 2;
         for (let r = -margin; r < size + margin; r++) {
           for (let c = -margin; c < size + margin; c++) {
@@ -1180,7 +1236,6 @@
           ease: "power3.inOut"
         });
 
-        // Telephoto Overhead Camera (Eliminates perspective parallax)
         gsap.to(camera, {
           fov: isFlat ? 9.0 : 38.0,
           duration: 1.2,
@@ -1217,7 +1272,6 @@
           ease: "power2.inOut"
         });
 
-        // Zero Shadows & Pure High-Contrast White Illumination in Scan View
         if (isFlat) {
           sunLight.castShadow = false;
           fillLight.castShadow = false;
@@ -1236,7 +1290,6 @@
           gsap.to(ambientLight, { intensity: PALETTE.ambientIntensity, duration: 1.2 });
         }
 
-        // Snap Fleet to Exact Cell Centers
         if (isFlat && instancedMesh) {
           for (let f = 0; f < dynamicFleet.length; f++) {
             const unit = dynamicFleet[f];
@@ -1262,7 +1315,7 @@
         pointerDownPos = { x: e.clientX, y: e.clientY };
       });
       window.addEventListener('pointerup', (e) => {
-        if (e.target.closest('.bottom-control-panel') || e.target.closest('.tap-badge') || e.target.closest('.top-nav')) return;
+        if (e.target.closest('.bottom-control-panel') || e.target.closest('.tap-badge') || e.target.closest('.glass-nav')) return;
         const dist = Math.hypot(e.clientX - pointerDownPos.x, e.clientY - pointerDownPos.y);
         if (dist < 6) {
           toggleView();
@@ -1379,7 +1432,6 @@
           controls.update();
         }
 
-        // Delicate Dust Drift
         if (dustParticles) {
           const positions = dustGeo.attributes.position.array;
           for (let i = 0; i < dustPositions.length; i += 3) {
@@ -1393,7 +1445,7 @@
           dustParticles.rotation.y = elapsedTime * 0.02;
         }
 
-        // Active Cruising Motion in 3D
+        // Active Fleet Cruising
         if (instancedMesh && !isFlat) {
           for (let f = 0; f < dynamicFleet.length; f++) {
             const unit = dynamicFleet[f];

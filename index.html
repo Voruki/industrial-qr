@@ -4,6 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Autonomous Intralogistics Facility - 3D QR</title>
+
+    <!-- Typography: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
     <!-- Stable Browser CDNs -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
@@ -15,7 +21,7 @@
       body {
         background: #fef3c7;
         color: #f8fafc;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         overflow: hidden;
         user-select: none;
         transition: background-color 1.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -110,105 +116,225 @@
         cursor: grabbing;
       }
 
-      /* Floating Hint Badge */
-      .tap-badge {
+      /* ==========================================
+         LIQUID GLASS COMPONENT ARCHITECTURE
+         ========================================== */
+      .liquid-glass {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.03) 50%, rgba(255, 255, 255, 0.07) 100%), rgba(14, 18, 28, 0.62);
+        backdrop-filter: blur(28px) saturate(190%);
+        -webkit-backdrop-filter: blur(28px) saturate(190%);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        box-shadow: 
+          0 20px 45px -10px rgba(0, 0, 0, 0.55),
+          inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.35),
+          inset 0 -1px 2px 0 rgba(0, 0, 0, 0.35);
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      /* TOP LIQUID GLASS NAVIGATION BAR */
+      .top-nav {
         position: absolute;
-        bottom: 136px;
+        top: 20px;
         left: 50%;
         transform: translateX(-50%);
-        background: rgba(15, 23, 42, 0.88);
-        backdrop-filter: blur(14px);
-        color: #f1f5f9;
+        width: calc(100% - 40px);
+        max-width: 1140px;
+        height: 56px;
+        border-radius: 9999px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 10px 0 14px;
+        z-index: 10;
+      }
+
+      .nav-brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+      }
+
+      .status-radar {
+        position: relative;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .radar-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #f97316;
+        box-shadow: 0 0 10px #f97316;
+      }
+      .radar-wave {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        border: 1px solid #f97316;
+        animation: pingRadar 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+      }
+      @keyframes pingRadar {
+        0% { transform: scale(0.7); opacity: 0.8; }
+        100% { transform: scale(1.6); opacity: 0; }
+      }
+
+      .brand-title {
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        color: #f8fafc;
+      }
+      .brand-divider {
+        color: rgba(255, 255, 255, 0.28);
+        font-weight: 400;
+      }
+      .brand-sub {
+        font-size: 13.5px;
+        font-weight: 400;
+        color: rgba(248, 250, 252, 0.72);
+      }
+
+      .nav-menu {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .nav-btn {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: rgba(248, 250, 252, 0.85);
+        font-family: inherit;
         font-size: 13px;
         font-weight: 500;
-        padding: 7px 18px;
+        padding: 7px 16px;
         border-radius: 9999px;
-        border: 1px solid rgba(255, 255, 255, 0.22);
-        box-shadow: 0 12px 25px -5px rgba(0, 0, 0, 0.35);
         cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
         transition: all 0.2s ease;
+      }
+      .nav-btn:hover {
+        background: rgba(255, 255, 255, 0.14);
+        color: #ffffff;
+        border-color: rgba(255, 255, 255, 0.28);
+        transform: translateY(-1px);
+      }
+      .nav-btn.glow {
+        background: linear-gradient(135deg, rgba(37, 99, 235, 0.75), rgba(29, 78, 216, 0.85));
+        border-color: rgba(96, 165, 250, 0.4);
+        color: #ffffff;
+        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+      }
+      .nav-btn.glow:hover {
+        background: linear-gradient(135deg, rgba(29, 78, 216, 0.85), rgba(30, 64, 175, 0.95));
+      }
+
+      /* FLOATING SCAN BADGE */
+      .tap-badge {
+        position: absolute;
+        bottom: 138px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 8px 20px;
+        border-radius: 9999px;
+        cursor: pointer;
         z-index: 10;
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 9px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #e2e8f0;
       }
       .tap-badge:hover {
-        background: rgba(37, 99, 235, 0.95);
-        color: #ffffff;
-        border-color: rgba(255, 255, 255, 0.45);
         transform: translateX(-50%) translateY(-2px);
-      }
-      .pulse-dot {
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        background: #38bdf8;
-        box-shadow: 0 0 8px #38bdf8;
+        border-color: rgba(255, 255, 255, 0.38);
+        box-shadow: 0 25px 50px -10px rgba(0, 0, 0, 0.65), inset 0 1px 2px rgba(255, 255, 255, 0.4);
       }
 
-      /* Bottom Control Panel Stack */
+      /* BOTTOM CONTROL PANEL */
       .bottom-control-panel {
         position: absolute;
-        bottom: 18px;
+        bottom: 20px;
         left: 50%;
         transform: translateX(-50%);
-        width: calc(100% - 32px);
-        max-width: 520px;
+        width: calc(100% - 36px);
+        max-width: 530px;
         display: flex;
         flex-direction: column;
         gap: 10px;
         z-index: 10;
       }
 
-      /* Typing & Action Bar */
       .bottom-bar {
         width: 100%;
         display: flex;
         gap: 8px;
-        background: rgba(15, 23, 42, 0.92);
-        backdrop-filter: blur(18px);
         padding: 7px 9px;
-        border-radius: 20px;
-        border: 1px solid rgba(255, 255, 255, 0.18);
-        box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.4);
+        border-radius: 24px;
       }
+
       .bottom-input {
         flex: 1;
-        background: rgba(255, 255, 255, 0.08);
-        border: 1px solid rgba(255, 255, 255, 0.18);
-        padding: 11px 16px;
-        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        padding: 12px 18px;
+        border-radius: 16px;
         color: #ffffff;
+        font-family: inherit;
         outline: none;
-        font-size: 14px;
-        transition: border-color 0.2s;
+        font-size: 13.5px;
+        font-weight: 400;
+        letter-spacing: -0.01em;
+        transition: all 0.2s ease;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.25);
       }
       .bottom-input:focus {
         border-color: #3b82f6;
-        background: rgba(255, 255, 255, 0.14);
+        background: rgba(255, 255, 255, 0.10);
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.25), 0 0 0 2px rgba(59, 130, 246, 0.25);
       }
+
       .action-btn {
-        background: #2563eb;
+        background: linear-gradient(135deg, rgba(37, 99, 235, 0.88), rgba(29, 78, 216, 0.95));
         color: #ffffff;
-        border: none;
-        width: 44px;
-        height: 44px;
-        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        width: 46px;
+        height: 46px;
+        border-radius: 16px;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        transition: background 0.2s, transform 0.1s;
+        box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.35), 0 8px 16px rgba(37, 99, 235, 0.3);
+        transition: all 0.2s ease;
       }
-      .action-btn:hover { background: #1d4ed8; }
-      .action-btn:active { transform: scale(0.95); }
+      .action-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.45), 0 12px 20px rgba(37, 99, 235, 0.4);
+      }
+      .action-btn:active { transform: scale(0.96); }
 
       .share-btn {
-        background: rgba(217, 119, 6, 0.95);
+        background: linear-gradient(135deg, rgba(234, 88, 12, 0.88), rgba(194, 65, 12, 0.95));
+        box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.35), 0 8px 16px rgba(234, 88, 12, 0.3);
       }
-      .share-btn:hover { background: rgb(180, 83, 9); }
+      .share-btn:hover {
+        box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.45), 0 12px 20px rgba(234, 88, 12, 0.4);
+      }
 
-      /* Modes and Audio Switcher Row */
+      /* MODE ROW */
       .mode-row {
         width: 100%;
         display: flex;
@@ -217,72 +343,66 @@
       .mode-selector {
         flex: 1;
         display: flex;
-        background: rgba(15, 23, 42, 0.90);
-        backdrop-filter: blur(16px);
-        padding: 4px;
-        border-radius: 16px;
-        border: 1px solid rgba(255, 255, 255, 0.18);
-        box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.3);
+        padding: 5px;
+        border-radius: 18px;
       }
       .mode-tab {
         flex: 1;
         background: transparent;
         border: none;
-        color: #94a3b8;
-        font-size: 12px;
+        color: rgba(248, 250, 252, 0.68);
+        font-family: inherit;
+        font-size: 12.5px;
         font-weight: 600;
-        padding: 8px 4px;
-        border-radius: 12px;
+        letter-spacing: -0.01em;
+        padding: 9px 4px;
+        border-radius: 13px;
         cursor: pointer;
-        transition: all 0.2s;
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         text-align: center;
         white-space: nowrap;
       }
       .mode-tab.active {
-        background: rgba(255, 255, 255, 0.20);
+        background: rgba(255, 255, 255, 0.16);
         color: #ffffff;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+        box-shadow: 
+          0 4px 12px rgba(0, 0, 0, 0.25),
+          inset 0 1px 1px rgba(255, 255, 255, 0.3);
       }
       .mode-tab:hover:not(.active) {
-        color: #f1f5f9;
-        background: rgba(255, 255, 255, 0.08);
+        color: #ffffff;
+        background: rgba(255, 255, 255, 0.06);
       }
+
       .audio-btn {
-        background: rgba(15, 23, 42, 0.90);
-        backdrop-filter: blur(16px);
-        border: 1px solid rgba(255, 255, 255, 0.18);
-        color: #94a3b8;
-        width: 44px;
-        height: 44px;
-        border-radius: 16px;
+        width: 48px;
+        height: 48px;
+        border-radius: 18px;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        transition: all 0.2s;
-        box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.3);
+        color: rgba(248, 250, 252, 0.72);
       }
       .audio-btn:hover {
         color: #ffffff;
-        border-color: rgba(255, 255, 255, 0.35);
+        border-color: rgba(255, 255, 255, 0.3);
       }
       .audio-btn.active {
         color: #38bdf8;
       }
 
-      /* Notification Toast */
+      /* Toast Pill */
       .toast {
         position: absolute;
-        top: 24px;
+        top: 86px;
         left: 50%;
-        transform: translateX(-50%) translateY(-30px);
-        background: rgba(16, 185, 129, 0.95);
-        color: #ffffff;
+        transform: translateX(-50%) translateY(-25px);
+        padding: 10px 22px;
+        border-radius: 9999px;
         font-size: 13px;
         font-weight: 600;
-        padding: 9px 20px;
-        border-radius: 9999px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+        color: #ffffff;
         opacity: 0;
         pointer-events: none;
         transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -291,6 +411,12 @@
       .toast.show {
         transform: translateX(-50%) translateY(0);
         opacity: 1;
+      }
+
+      @media (max-width: 768px) {
+        .brand-sub, .brand-divider { display: none; }
+        .top-nav { height: 50px; padding: 0 8px 0 12px; }
+        .nav-btn { padding: 6px 12px; font-size: 12px; }
       }
     </style>
   </head>
@@ -303,10 +429,36 @@
       <div id="bg-vignette" class="bg-vignette"></div>
     </div>
 
-    <div id="toast" class="toast">Snapshot saved & link copied!</div>
+    <!-- TOP LIQUID GLASS NAVIGATION BAR -->
+    <header class="top-nav liquid-glass">
+      <a href="https://yongming.vorky.fyi/" target="_blank" class="nav-brand">
+        <div class="status-radar">
+          <span class="radar-wave"></span>
+          <span class="radar-dot"></span>
+        </div>
+        <span class="brand-title">Yong Ming Ngoh</span>
+        <span class="brand-divider">/</span>
+        <span class="brand-sub">Autonomous Intralogistics</span>
+      </a>
+      <div class="nav-menu">
+        <button id="nav-scan-toggle" class="nav-btn glow">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <span id="nav-btn-text">Scan View</span>
+        </button>
+        <a href="https://github.com/Voruki/industrial-qr" target="_blank" class="nav-btn">GitHub ↗</a>
+        <a href="https://yongming.vorky.fyi/" target="_blank" class="nav-btn">Portfolio ↗</a>
+      </div>
+    </header>
+
+    <div id="toast" class="toast liquid-glass">Snapshot saved & link copied!</div>
 
     <!-- Floating Hint Badge -->
-    <div id="tap-badge" class="tap-badge">
+    <div id="tap-badge" class="tap-badge liquid-glass">
       <span class="pulse-dot"></span>
       <span id="badge-text">Tap the warehouse to see QR code</span>
     </div>
@@ -314,7 +466,7 @@
     <!-- Bottom Control Stack -->
     <div class="bottom-control-panel">
       <!-- Input & Action Bar -->
-      <div class="bottom-bar">
+      <div class="bottom-bar liquid-glass">
         <input id="qr-input" class="bottom-input" type="text" value="https://yongming.vorky.fyi/" placeholder="Type any link or text..." />
         <button id="submit-btn" class="action-btn" title="Update Facility">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
@@ -333,12 +485,12 @@
 
       <!-- Mode Switcher Row + Audio Button -->
       <div class="mode-row">
-        <div class="mode-selector">
+        <div class="mode-selector liquid-glass">
           <button class="mode-tab active" data-mode="day">☀️ Day Shift</button>
           <button class="mode-tab" data-mode="cold">❄️ Cold Storage</button>
           <button class="mode-tab" data-mode="night">🌙 Night Shift</button>
         </div>
-        <button id="audio-btn" class="audio-btn" title="Toggle Sound FX">
+        <button id="audio-btn" class="audio-btn liquid-glass" title="Toggle Sound FX">
           <svg id="audio-icon-on" style="display:none;" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
             <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
@@ -356,7 +508,7 @@
 
     <script>
       // ==========================================
-      // 1. STATE & CALIBRATED SHIFT PALETTES
+      // 1. STATE & SHIFT-SPECIFIC LIGHTING PALETTES
       // ==========================================
       let isFlat = false;
       let soundEnabled = false;
@@ -433,13 +585,12 @@
           trackEdge3D:    new THREE.Color('#0e1620'),
           trackScanDark:  new THREE.Color('#03172e'),
 
-          // Deep, Saturated Cryogenic Colors (Guarantees Instant Scan Contrast!)
           rackUpright:    '#0284C7', 
           rackBeam:       '#0369A1', 
           woodPallet:     '#334155',
-          cargoKraft:     '#0c4a6e', // Deep oceanic blue
+          cargoKraft:     '#0c4a6e',
           cargoAmber:     '#075985', 
-          cargoTote:      '#1e40af', // Royal blue picking tote (high contrast!)
+          cargoTote:      '#1e40af',
           highBayCargo:   '#0284C7',
           highBayCargoAlt:'#0c4a6e',
 
@@ -467,7 +618,6 @@
           vignette: 'radial-gradient(ellipse at 50% 45%, transparent 35%, rgba(2, 6, 23, 0.65) 80%, #020617 100%)',
           dustColor: 0x6ee7b7,
 
-          // Luminous Moonlit Night Rig
           sunColor: '#e2e8f0', 
           sunIntensity: 2.8,   
           fillColor: '#93c5fd', 
@@ -483,7 +633,7 @@
           trackScanDark:  new THREE.Color('#020408'),
           
           rackUpright:    '#1E293B',
-          rackBeam:       '#D97706', // Saturated Industrial Amber (Scans cleanly!)
+          rackBeam:       '#D97706',
           woodPallet:     '#451A03',
           cargoKraft:     '#78350F',
           cargoAmber:     '#92400E',
@@ -491,10 +641,9 @@
           highBayCargo:   '#DC2626',
           highBayCargoAlt:'#991B1B',
 
-          // Forklift in Night Mode (Distinct, Visible, Never Invisible!)
-          forkliftBody:   '#10B981', // Emerald High-Vis Shell
-          forkliftCab:    '#1E293B', // Charcoal Steel Cage
-          forkliftMast:   '#64748B', // Galvanized Silver Rails (Clearly seen!)
+          forkliftBody:   '#10B981',
+          forkliftCab:    '#1E293B',
+          forkliftMast:   '#64748B',
           forkliftBeacon: '#F59E0B',
 
           amrChassis:     '#10B981',
@@ -531,7 +680,7 @@
       updateBackdropBlobs(activeMode);
 
       // ==========================================
-      // 2. AUDIO ENGINE
+      // 2. SYNTHETIC AUDIO ENGINE
       // ==========================================
       function initAudio() {
         if (!audioCtx) {
@@ -726,7 +875,7 @@
       const contrastState = { progress: 0 };
 
       // ==========================================
-      // 4. GENERATOR FUNCTIONS (REINFORCED ASSETS)
+      // 4. GENERATOR FUNCTIONS (ROBUST 3D FLEET)
       // ==========================================
       function addBlock(x, y, z, sx, sy, sz, colorHex) {
         if (!instancedMesh) return -1;
@@ -774,7 +923,7 @@
         }
       }
 
-      // --- ROBUST 3D REACH TRUCK (NEVER DISAPPEARS!) ---
+      // Robust 3D Reach Truck (Chassis, Frame, and Mast Firmly Attached)
       function spawnForklift(x, z, dir = 'z') {
         const parts = [];
         function addPart(ox, oy, oz, sx, sy, sz, colorHex) {
@@ -787,29 +936,28 @@
           parts.push({ ox: rx, oy: oy, oz: rz, sx: rsx, sy: sy, sz: rsz, idx });
         }
 
-        // 1. Solid High-Vis Chassis (0.55m tall, firmly grounded!)
+        // 1. Heavy High-Vis Chassis Body
         addPart(0, 0.05, 0.05, 0.62, 0.55, 0.58, PALETTE.forkliftBody);
-        // 2. Rear Counterweight
+        // 2. Rear Counterweight Block
         addPart(0, 0.05, 0.28, 0.58, 0.40, 0.16, PALETTE.forkliftCab);
 
-        // 3. 4 Heavy Steel Cab Pillars (Thick 0.09m, sitting firmly on chassis up to 1.35m!)
+        // 3. 4 Heavy Steel Pillars (0.09 thickness)
         addPart(-0.22, 0.60, -0.10, 0.09, 0.75, 0.09, PALETTE.forkliftCab);
         addPart(0.22, 0.60, -0.10, 0.09, 0.75, 0.09, PALETTE.forkliftCab);
         addPart(-0.22, 0.60, 0.20, 0.09, 0.75, 0.09, PALETTE.forkliftCab);
         addPart(0.22, 0.60, 0.20, 0.09, 0.75, 0.09, PALETTE.forkliftCab);
-        // Cab Roof
+        // Cab Protective Roof
         addPart(0, 1.35, 0.05, 0.56, 0.08, 0.44, PALETTE.forkliftCab);
         // Amber Warning Beacon Light
         addPart(0, 1.43, 0.05, 0.14, 0.12, 0.14, PALETTE.forkliftBeacon);
 
-        // 4. Twin Vertical Mast Rails (Thick 0.09m, rising up to 1.70m!)
+        // 4. Twin Mast Lifting Steel Rails (Up to 1.70m)
         addPart(-0.16, 0.05, -0.22, 0.09, 1.65, 0.09, PALETTE.forkliftMast);
         addPart(0.16, 0.05, -0.22, 0.09, 1.65, 0.09, PALETTE.forkliftMast);
-        // Mast Crossbeams
         addPart(0, 0.90, -0.22, 0.32, 0.08, 0.06, PALETTE.forkliftMast);
         addPart(0, 1.55, -0.22, 0.32, 0.08, 0.06, PALETTE.forkliftMast);
 
-        // 5. Forks Carriage Plate & Loaded Pallet
+        // 5. Forks Carriage Plate & Timber Pallet
         addPart(0, 0.18, -0.26, 0.44, 0.08, 0.08, PALETTE.forkliftCab);
         addPart(0, 0.20, -0.38, 0.46, 0.08, 0.28, PALETTE.woodPallet);
         addPart(0, 0.28, -0.38, 0.38, 0.38, 0.24, PALETTE.cargoKraft);
@@ -933,8 +1081,7 @@
           }
         }
 
-        // GENERATE FLOOR WITH A 2-MODULE QUIET ZONE APRON AROUND THE QR CODE!
-        // This guarantees the 3 corner finder patterns are surrounded by white in EVERY mode!
+        // 2-Module Built-In White Quiet Zone Apron
         const margin = 2;
         for (let r = -margin; r < size + margin; r++) {
           for (let c = -margin; c < size + margin; c++) {
@@ -950,11 +1097,9 @@
             const isDark = isInsideQR ? qr.isDark(r, c) : false;
 
             if (!isDark) {
-              // PURE WHITE IN SCAN VIEW (Ensures 100% reliable quiet zone margin!)
               const idx = addBlock(posX, -1.25, posZ, 0.98, 1.25, 0.98, colLight3D);
               floorData.push({ idx, col3D: colLight3D, colScan: PALETTE.floorScanLight });
             } else {
-              // SOLID DARK MODULE SLAB
               const idx = addBlock(posX, -1.25, posZ, 0.98, 1.27, 0.98, colDark3D);
               floorData.push({ idx, col3D: colDark3D, colScan: PALETTE.trackScanDark });
 
@@ -1008,15 +1153,18 @@
       }
 
       // ==========================================
-      // 5. VIEW TOGGLE (BULLETPROOF SCAN LIGHTING)
+      // 5. VIEW TOGGLE (BULLETPROOF SCAN ENGINE)
       // ==========================================
       const tapBadge = document.getElementById('tap-badge');
       const badgeText = document.getElementById('badge-text');
+      const navScanToggle = document.getElementById('nav-scan-toggle');
+      const navBtnText = document.getElementById('nav-btn-text');
 
       function toggleView() {
         initAudio();
         isFlat = !isFlat;
         badgeText.textContent = isFlat ? "Tap to see 3D view" : "Tap the warehouse to see QR code";
+        navBtnText.textContent = isFlat ? "3D Model" : "Scan View";
 
         const destPos = isFlat ? flatPos : isoPos;
         const destTarget = isFlat ? flatTarget : isoTarget;
@@ -1069,8 +1217,7 @@
           ease: "power2.inOut"
         });
 
-        // BULLETPROOF SCAN LIGHTING:
-        // In scan mode, zero shadows and pure neutral white illumination across ALL modes!
+        // Zero Shadows & Pure High-Contrast White Illumination in Scan View
         if (isFlat) {
           sunLight.castShadow = false;
           fillLight.castShadow = false;
@@ -1107,6 +1254,7 @@
       }
 
       tapBadge.addEventListener('click', toggleView);
+      navScanToggle.addEventListener('click', toggleView);
 
       // Canvas Tap Handler
       let pointerDownPos = { x: 0, y: 0 };
@@ -1114,7 +1262,7 @@
         pointerDownPos = { x: e.clientX, y: e.clientY };
       });
       window.addEventListener('pointerup', (e) => {
-        if (e.target.closest('.bottom-control-panel') || e.target.closest('.tap-badge')) return;
+        if (e.target.closest('.bottom-control-panel') || e.target.closest('.tap-badge') || e.target.closest('.top-nav')) return;
         const dist = Math.hypot(e.clientX - pointerDownPos.x, e.clientY - pointerDownPos.y);
         if (dist < 6) {
           toggleView();
@@ -1231,6 +1379,7 @@
           controls.update();
         }
 
+        // Delicate Dust Drift
         if (dustParticles) {
           const positions = dustGeo.attributes.position.array;
           for (let i = 0; i < dustPositions.length; i += 3) {

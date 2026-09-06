@@ -13,7 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
-    <!-- Stable Three.js & Animation CDNs -->
+    <!-- Three.js & Animation CDNs -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
@@ -34,7 +34,7 @@
       }
 
       :root {
-        --bg-black: #050507; 
+        --bg-black: #fef3c7; 
         --theme-accent: #FF5500; 
         --theme-accent-glow: rgba(255, 85, 0, 0.45);
         --theme-secondary: #FFA200;
@@ -43,7 +43,7 @@
         --text-muted: #E5E5EA;
         
         /* Precision Liquid Glass */
-        --glass-bg: rgba(14, 14, 18, 0.45);
+        --glass-bg: rgba(14, 14, 18, 0.50);
         --glass-border: rgba(255, 255, 255, 0.16);
         --glass-highlight: inset 0 1px 1.5px rgba(255, 255, 255, 0.35), inset 0 -1px 2px rgba(0, 0, 0, 0.5);
       }
@@ -57,6 +57,7 @@
         overflow: hidden;
         -webkit-font-smoothing: antialiased;
         cursor: none; 
+        transition: background-color 1.4s cubic-bezier(0.16, 1, 0.3, 1);
       }
 
       h1, h2, .panel-header, strong { font-family: 'Space Grotesk', sans-serif; }
@@ -64,85 +65,88 @@
       /* --- Custom Cursor --- */
       .custom-cursor {
         position: fixed; top: 0; left: 0;
-        width: 6px; height: 6px; background-color: #FFFFFF;
+        width: 6px; height: 6px; 
+        background-color: var(--theme-accent);
         border-radius: 50%; pointer-events: none; z-index: 10000;
-        transform: translate(-50%, -50%); transition: width 0.2s, height 0.2s;
+        transform: translate(-50%, -50%); 
+        transition: background-color 0.4s ease, width 0.2s, height 0.2s;
       }
 
       .cursor-follower {
         position: fixed; top: 0; left: 0;
         width: 32px; height: 32px; 
-        border: 1.5px solid var(--theme-secondary);
+        border: 1.5px solid var(--theme-accent);
         border-radius: 50%; pointer-events: none; z-index: 9999;
         transform: translate(-50%, -50%); 
         transition: border-color 0.4s ease, transform 0.08s ease-out;
       }
 
-      /* --- DUAL-CORNER PHOTOGRAPHIC LIGHT LEAKS --- */
-      .ambient-bg {
-        position: fixed; 
-        top: -60px;
-        left: -60px;
-        width: calc(100vw + 120px);
-        height: calc(100vh + 120px);
+      /* --- ORIGINAL PASTEL HORIZON MESH GRADIENT --- */
+      #abstract-bg {
+        position: fixed;
+        inset: 0;
+        width: 100vw;
+        height: 100vh;
         z-index: 0;
-        background-color: var(--bg-black);
-        overflow: hidden;
         pointer-events: none;
+        overflow: hidden;
+        background-color: #fef3c7;
+        transition: background-color 1.4s cubic-bezier(0.16, 1, 0.3, 1);
       }
 
-      .orb {
+      .glow-blob {
         position: absolute;
         border-radius: 50%;
-        pointer-events: none;
-        will-change: transform, opacity;
-        transition: background 1.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.2s ease;
+        filter: blur(120px);
+        opacity: 0.70;
+        will-change: transform;
+        transition: background 1.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.4s ease;
       }
 
-      .orb-1 {
-        width: 65vw; height: 65vw;
-        min-width: 650px; min-height: 650px;
-        top: -20vh; right: -15vw;
-        background: radial-gradient(circle at 60% 40%, #FFA000 0%, #FF5500 45%, #A62400 70%, transparent 85%);
-        filter: blur(85px); opacity: 0.92;
-        animation: breathe-top-right 10s ease-in-out infinite alternate;
+      .blob-1 {
+        width: 68vw; height: 68vw;
+        min-width: 540px; min-height: 540px;
+        bottom: -15%; right: -8%;
+        animation: floatBlob1 22s infinite alternate ease-in-out;
       }
 
-      .orb-2 {
-        display: block !important;
+      .blob-2 {
+        width: 60vw; height: 60vw;
+        min-width: 460px; min-height: 460px;
+        top: -14%; right: 15%;
+        animation: floatBlob2 26s infinite alternate ease-in-out;
+      }
+
+      .blob-3 {
         width: 75vw; height: 75vw;
-        min-width: 750px; min-height: 750px;
-        bottom: -25vh; left: -18vw;
-        background: radial-gradient(circle at 45% 55%, #FF5B00 0%, #E63500 45%, #7A0D00 70%, transparent 85%);
-        filter: blur(95px); opacity: 0.95;
-        animation: breathe-bottom-left 12s ease-in-out infinite alternate;
+        min-width: 580px; min-height: 580px;
+        bottom: -12%; left: -16%;
+        animation: floatBlob3 30s infinite alternate ease-in-out;
       }
 
-      .orb-3 {
-        display: block !important;
-        width: 40vw; height: 40vw;
-        min-width: 400px; min-height: 400px;
-        bottom: -10vh; left: -5vw;
-        background: radial-gradient(circle, #FFB700 0%, rgba(255, 85, 0, 0.5) 50%, transparent 75%);
-        filter: blur(70px); opacity: 0.8;
-        animation: breathe-core 8s ease-in-out infinite alternate;
+      .bg-vignette {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        transition: background 1.4s ease;
       }
 
-      @keyframes breathe-top-right {
-        0% { transform: translate(0, 0) scale(1); opacity: 0.85; }
-        50% { transform: translate(-30px, 25px) scale(1.1); opacity: 1; }
-        100% { transform: translate(-50px, 10px) scale(0.95); opacity: 0.8; }
+      @keyframes floatBlob1 {
+        0% { transform: translate3d(0, 0, 0) scale(1); }
+        50% { transform: translate3d(-16vw, -14vh, 0) scale(1.15); }
+        100% { transform: translate3d(-8vw, 6vh, 0) scale(0.92); }
       }
 
-      @keyframes breathe-bottom-left {
-        0% { transform: translate(0, 0) scale(1); opacity: 0.88; }
-        50% { transform: translate(35px, -30px) scale(1.12); opacity: 1; }
-        100% { transform: translate(20px, -45px) scale(0.94); opacity: 0.85; }
+      @keyframes floatBlob2 {
+        0% { transform: translate3d(0, 0, 0) scale(0.92); }
+        50% { transform: translate3d(14vw, 15vh, 0) scale(1.18); }
+        100% { transform: translate3d(-12vw, 8vh, 0) scale(1.02); }
       }
 
-      @keyframes breathe-core {
-        0% { transform: scale(1); opacity: 0.65; }
-        100% { transform: scale(1.2); opacity: 0.9; }
+      @keyframes floatBlob3 {
+        0% { transform: translate3d(0, 0, 0) scale(1.05); }
+        50% { transform: translate3d(18vw, -14vh, 0) scale(0.88); }
+        100% { transform: translate3d(8vw, -5vh, 0) scale(1.14); }
       }
 
       /* --- LEFT AND RIGHT SHAKING HOVER ANIMATIONS --- */
@@ -164,7 +168,7 @@
         80% { transform: translateX(calc(-50% - 1.5px)); }
       }
 
-      /* --- HIGH-CONTRAST FLOATING GLASS NAVBAR --- */
+      /* --- FLOATING LIQUID GLASS NAVBAR --- */
       .glass-nav {
         position: fixed; 
         top: 24px; 
@@ -205,7 +209,7 @@
         user-select: none;
       }
 
-      /* Glowing Dot beside title (Theme-Adaptive!) */
+      /* Dynamic Theme Dot beside title */
       .brand-dot {
         display: inline-block;
         width: 7px;
@@ -253,13 +257,12 @@
         transform: translateY(-1px);
       }
 
-      /* Scan View Pill (Theme-Adaptive!) */
       .scan-pill {
         padding: 6px 16px;
         border-radius: 9999px;
         background: rgba(255, 255, 255, 0.08) !important;
         border: 1px solid var(--theme-accent) !important;
-        color: var(--theme-secondary) !important;
+        color: var(--theme-accent) !important;
         box-shadow: 0 0 10px var(--theme-accent-glow);
       }
       .scan-pill:hover {
@@ -309,12 +312,12 @@
         width: 6px;
         height: 6px;
         border-radius: 50%;
-        background: var(--theme-secondary);
-        box-shadow: 0 0 8px var(--theme-secondary);
+        background: var(--theme-accent);
+        box-shadow: 0 0 8px var(--theme-accent);
         transition: background-color 0.4s ease, box-shadow 0.4s ease;
       }
 
-      /* BOTTOM LIQUID GLASS CONTROL PANEL */
+      /* BOTTOM CONTROL PANEL */
       .bottom-control-panel {
         position: absolute;
         bottom: 22px;
@@ -364,7 +367,6 @@
         box-shadow: 0 0 12px var(--theme-accent-glow);
       }
 
-      /* Submit Arrow Action Button (Theme-Adaptive!) */
       .action-btn {
         background: var(--theme-accent);
         color: #ffffff;
@@ -466,7 +468,7 @@
         border-color: rgba(255, 255, 255, 0.35);
       }
       .audio-btn.active {
-        color: var(--theme-secondary);
+        color: var(--theme-accent);
       }
 
       .toast {
@@ -514,14 +516,15 @@
     <div class="custom-cursor"></div>
     <div class="cursor-follower"></div>
 
-    <!-- Dual-Corner Photographic Light Leak Background -->
-    <div id="ambient-bg" class="ambient-bg">
-      <div id="orb-1" class="orb orb-1"></div>
-      <div id="orb-2" class="orb orb-2"></div>
-      <div id="orb-3" class="orb orb-3"></div>
+    <!-- Restored Original Fluid Pastel Horizon Mesh -->
+    <div id="abstract-bg">
+      <div id="blob-1" class="glow-blob blob-1"></div>
+      <div id="blob-2" class="glow-blob blob-2"></div>
+      <div id="blob-3" class="glow-blob blob-3"></div>
+      <div id="bg-vignette" class="bg-vignette"></div>
     </div>
 
-    <!-- High-Contrast Floating Glass Navbar (No GitHub, Unlinked Title) -->
+    <!-- Liquid Glass Navbar (Unlinked Title, No GitHub) -->
     <nav class="glass-nav">
       <div class="nav-brand">
         <span class="brand-dot"></span>
@@ -614,16 +617,18 @@
 
       const THEMES = {
         day: {
-          // Dynamic Accent Colors (Dot, Arrow, Cursor, Pulse)
+          // Orange Accents for Day Shift
           uiAccent: '#FF5500',
           uiAccentGlow: 'rgba(255, 85, 0, 0.45)',
           uiSecondary: '#FFA200',
 
-          // Dual-Corner Light Leak Orbs
-          orb1: 'radial-gradient(circle at 60% 40%, #FFA000 0%, #FF5500 45%, #A62400 70%, transparent 85%)',
-          orb2: 'radial-gradient(circle at 45% 55%, #FF5B00 0%, #E63500 45%, #7A0D00 70%, transparent 85%)',
-          orb3: 'radial-gradient(circle, #FFB700 0%, rgba(255, 85, 0, 0.5) 50%, transparent 75%)',
-          dustColor: 0xffedd5,
+          // Original Day Shift Pastel Horizon Gradient
+          bgBase: '#fef3c7',
+          blob1:  'radial-gradient(circle, rgba(249, 115, 22, 0.58) 0%, rgba(251, 146, 60, 0.32) 48%, transparent 75%)',
+          blob2:  'radial-gradient(circle, rgba(245, 158, 11, 0.52) 0%, rgba(252, 211, 77, 0.30) 50%, transparent 75%)',
+          blob3:  'radial-gradient(circle, rgba(225, 29, 72, 0.35) 0%, rgba(251, 113, 133, 0.18) 45%, transparent 70%)',
+          vignette: 'radial-gradient(ellipse at 50% 45%, rgba(67, 20, 7, 0.42) 0%, rgba(154, 52, 18, 0.20) 42%, rgba(254, 240, 138, 0.65) 75%, #fde047 100%)',
+          dustColor: 0xb45309,
 
           sunColor: '#fff1dc',
           sunIntensity: 2.4,
@@ -632,16 +637,16 @@
           ambientColor: '#fffbeb',
           ambientIntensity: 0.85,
 
-          // ORIGINAL DAY SHIFT PALETTE
-          floorCenter3D:  new THREE.Color('#475263'),
-          floorEdge3D:    new THREE.Color('#11151e'),
+          // Original Day Shift Palette
+          floorCenter3D:  new THREE.Color('#3f4854'), 
+          floorEdge3D:    new THREE.Color('#252d36'), 
           floorScanLight: new THREE.Color('#ffffff'),
-          trackCenter3D:  new THREE.Color('#222834'),
-          trackEdge3D:    new THREE.Color('#0a0d14'),
-          trackScanDark:  new THREE.Color('#111827'),
+          trackCenter3D:  new THREE.Color('#1e2530'), 
+          trackEdge3D:    new THREE.Color('#10151c'),
+          trackScanDark:  new THREE.Color('#0a0e14'),
           
-          rackUpright:    '#1D4ED8', // Royal Blue
-          rackBeam:       '#EA580C', // Orange
+          rackUpright:    '#1D4ED8',
+          rackBeam:       '#EA580C',
           woodPallet:     '#78350F',
           cargoKraft:     '#B45309',
           cargoAmber:     '#92400E',
@@ -649,7 +654,7 @@
           highBayCargo:   '#DC2626',
           highBayCargoAlt:'#991B1B',
 
-          forkliftBody:   '#EAB308', // Traffic Yellow
+          forkliftBody:   '#EAB308',
           forkliftCab:    '#0F172A',
           forkliftMast:   '#334155',
           forkliftBeacon: '#F97316',
@@ -666,15 +671,18 @@
           laserColor:     0x38bdf8
         },
         cold: {
-          // Glacial Electric Cyan / Blue Accents
+          // Glacial Cyan Accents for Cold Storage
           uiAccent: '#00C8FF',
           uiAccentGlow: 'rgba(0, 200, 255, 0.45)',
           uiSecondary: '#38BDF8',
 
-          orb1: 'radial-gradient(circle at 60% 40%, #00C8FF 0%, #0077FF 45%, #002B7A 70%, transparent 85%)',
-          orb2: 'radial-gradient(circle at 45% 55%, #0099FF 0%, #0055D4 45%, #001A5E 70%, transparent 85%)',
-          orb3: 'radial-gradient(circle, #66E0FF 0%, rgba(0, 119, 255, 0.5) 50%, transparent 75%)',
-          dustColor: 0xbae6fd,
+          // Original Cold Storage Pastel Horizon Gradient
+          bgBase: '#e0f2fe',
+          blob1:  'radial-gradient(circle, rgba(2, 132, 199, 0.55) 0%, rgba(56, 189, 248, 0.30) 48%, transparent 75%)',
+          blob2:  'radial-gradient(circle, rgba(14, 165, 233, 0.50) 0%, rgba(125, 211, 252, 0.28) 50%, transparent 75%)',
+          blob3:  'radial-gradient(circle, rgba(99, 102, 241, 0.38) 0%, rgba(165, 180, 252, 0.20) 45%, transparent 70%)',
+          vignette: 'radial-gradient(ellipse at 50% 45%, rgba(8, 47, 73, 0.45) 0%, rgba(3, 105, 161, 0.18) 42%, rgba(186, 230, 253, 0.65) 75%, #7dd3fc 100%)',
+          dustColor: 0x0284c7,
 
           sunColor: '#e0f2fe',
           sunIntensity: 2.2,
@@ -683,24 +691,24 @@
           ambientColor: '#f0f9ff',
           ambientIntensity: 0.90,
 
-          // ORIGINAL COLD STORAGE PALETTE
-          floorCenter3D:  new THREE.Color('#334155'),
-          floorEdge3D:    new THREE.Color('#0b1120'),
+          // Original Cold Storage Palette
+          floorCenter3D:  new THREE.Color('#334454'), 
+          floorEdge3D:    new THREE.Color('#1e2a36'), 
           floorScanLight: new THREE.Color('#ffffff'),
-          trackCenter3D:  new THREE.Color('#1e293b'),
-          trackEdge3D:    new THREE.Color('#070b14'),
-          trackScanDark:  new THREE.Color('#0c1a30'),
+          trackCenter3D:  new THREE.Color('#182432'), 
+          trackEdge3D:    new THREE.Color('#0e1620'),
+          trackScanDark:  new THREE.Color('#03172e'),
 
-          rackUpright:    '#0284C7',
-          rackBeam:       '#38BDF8',
+          rackUpright:    '#0284C7', 
+          rackBeam:       '#38BDF8', 
           woodPallet:     '#475569',
           cargoKraft:     '#0369A1',
-          cargoAmber:     '#0284C7',
+          cargoAmber:     '#0284C7', 
           cargoTote:      '#7DD3FC',
           highBayCargo:   '#0284C7',
           highBayCargoAlt:'#075985',
 
-          forkliftBody:   '#06B6D4', // Cryo Cyan
+          forkliftBody:   '#06B6D4',
           forkliftCab:    '#0B132B',
           forkliftMast:   '#475569',
           forkliftBeacon: '#38BDF8',
@@ -717,14 +725,17 @@
           laserColor:     0x67e8f9
         },
         night: {
-          // Emerald Green & Hazard Amber Accents
+          // EMERALD GREEN ACCENTS FOR NIGHT SHIFT (NO ORANGE!)
           uiAccent: '#10B981',
           uiAccentGlow: 'rgba(16, 185, 129, 0.45)',
-          uiSecondary: '#F59E0B',
+          uiSecondary: '#34D399',
 
-          orb1: 'radial-gradient(circle at 60% 40%, #10B981 0%, #047857 45%, #064E3B 70%, transparent 85%)',
-          orb2: 'radial-gradient(circle at 45% 55%, #F59E0B 0%, #B45309 45%, #451A03 70%, transparent 85%)',
-          orb3: 'radial-gradient(circle, #34D399 0%, rgba(16, 185, 129, 0.5) 50%, transparent 75%)',
+          // Original Night Shift Gradient
+          bgBase: '#020617',
+          blob1:  'radial-gradient(circle, rgba(16, 185, 129, 0.50) 0%, rgba(5, 150, 105, 0.25) 48%, transparent 75%)',
+          blob2:  'radial-gradient(circle, rgba(245, 158, 11, 0.40) 0%, rgba(217, 119, 6, 0.18) 50%, transparent 75%)',
+          blob3:  'radial-gradient(circle, rgba(37, 99, 235, 0.35) 0%, rgba(30, 58, 138, 0.16) 45%, transparent 70%)',
+          vignette: 'radial-gradient(ellipse at 50% 45%, transparent 35%, rgba(2, 6, 23, 0.65) 80%, #020617 100%)',
           dustColor: 0x6ee7b7,
 
           sunColor: '#e2e8f0', 
@@ -734,16 +745,16 @@
           ambientColor: '#475569', 
           ambientIntensity: 1.0,
 
-          // ORIGINAL NIGHT SHIFT PALETTE
-          floorCenter3D:  new THREE.Color('#181E29'),
-          floorEdge3D:    new THREE.Color('#05080F'),
+          // Original Night Shift Palette
+          floorCenter3D:  new THREE.Color('#181E29'), 
+          floorEdge3D:    new THREE.Color('#05080F'), 
           floorScanLight: new THREE.Color('#ffffff'),
-          trackCenter3D:  new THREE.Color('#0F172A'),
-          trackEdge3D:    new THREE.Color('#020408'),
+          trackCenter3D:  new THREE.Color('#0F172A'), 
+          trackEdge3D:    new THREE.Color('#020408'), 
           trackScanDark:  new THREE.Color('#050811'),
           
           rackUpright:    '#1E293B',
-          rackBeam:       '#F59E0B', // Hazard Amber
+          rackBeam:       '#F59E0B',
           woodPallet:     '#451A03',
           cargoKraft:     '#78350F',
           cargoAmber:     '#B45309',
@@ -751,7 +762,7 @@
           highBayCargo:   '#EF4444',
           highBayCargoAlt:'#B91C1C',
 
-          forkliftBody:   '#10B981', // Emerald High-Vis Shell
+          forkliftBody:   '#10B981',
           forkliftCab:    '#050811',
           forkliftMast:   '#1E293B',
           forkliftBeacon: '#F59E0B',
@@ -780,15 +791,18 @@
 
       function updateThemeAccents(themeKey) {
         const t = THEMES[themeKey];
-        // Dynamic CSS Variables
+        // Dynamic Accent Colors (Cursor, Follower Ring, Brand Dot, Arrow, Pulse Dot)
         document.documentElement.style.setProperty('--theme-accent', t.uiAccent);
         document.documentElement.style.setProperty('--theme-accent-glow', t.uiAccentGlow);
         document.documentElement.style.setProperty('--theme-secondary', t.uiSecondary);
+        document.body.style.backgroundColor = t.bgBase;
 
-        // Update Dual-Corner Light Leaks
-        document.getElementById('orb-1').style.background = t.orb1;
-        document.getElementById('orb-2').style.background = t.orb2;
-        document.getElementById('orb-3').style.background = t.orb3;
+        // Update Restored Fluid Mesh Gradient Blobs
+        document.getElementById('abstract-bg').style.backgroundColor = t.bgBase;
+        document.getElementById('blob-1').style.background = t.blob1;
+        document.getElementById('blob-2').style.background = t.blob2;
+        document.getElementById('blob-3').style.background = t.blob3;
+        document.getElementById('bg-vignette').style.background = t.vignette;
       }
       updateThemeAccents(activeMode);
 
@@ -1035,7 +1049,7 @@
         }
       }
 
-      // 3D Reach Truck (Solid Chassis, Structural Mast Rails)
+      // 3D Reach Truck (Chassis, Guard & Mast Always Intact)
       function spawnForklift(x, z, dir = 'z') {
         const parts = [];
         function addPart(ox, oy, oz, sx, sy, sz, colorHex) {
@@ -1052,7 +1066,7 @@
         addPart(0, 0.05, 0.05, 0.62, 0.55, 0.58, PALETTE.forkliftBody);
         addPart(0, 0.05, 0.28, 0.58, 0.40, 0.16, PALETTE.forkliftCab);
 
-        // 4 Cab Pillars
+        // 4 Structural Pillars
         addPart(-0.22, 0.60, -0.10, 0.09, 0.75, 0.09, PALETTE.forkliftCab);
         addPart(0.22, 0.60, -0.10, 0.09, 0.75, 0.09, PALETTE.forkliftCab);
         addPart(-0.22, 0.60, 0.20, 0.09, 0.75, 0.09, PALETTE.forkliftCab);
@@ -1192,7 +1206,7 @@
           }
         }
 
-        // Built-In Quiet Zone Apron
+        // 2-Module Built-In Quiet Zone Apron
         const margin = 2;
         for (let r = -margin; r < size + margin; r++) {
           for (let c = -margin; c < size + margin; c++) {
@@ -1291,6 +1305,7 @@
           ease: "power3.inOut"
         });
 
+        // Telephoto Overhead Camera (Eliminates perspective parallax)
         gsap.to(camera, {
           fov: isFlat ? 9.0 : 38.0,
           duration: 1.2,
@@ -1327,6 +1342,7 @@
           ease: "power2.inOut"
         });
 
+        // Zero Shadows & Pure High-Contrast White Illumination in Scan View
         if (isFlat) {
           sunLight.castShadow = false;
           fillLight.castShadow = false;
@@ -1345,6 +1361,7 @@
           gsap.to(ambientLight, { intensity: PALETTE.ambientIntensity, duration: 1.2 });
         }
 
+        // Snap Fleet to Exact Cell Centers
         if (isFlat && instancedMesh) {
           for (let f = 0; f < dynamicFleet.length; f++) {
             const unit = dynamicFleet[f];

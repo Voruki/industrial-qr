@@ -654,7 +654,6 @@
           trackCenter3D:  new THREE.Color('#1e2530'), 
           trackEdge3D:    new THREE.Color('#10151c'),
           
-          // Regional Reflection Colors for Scan View: Finder Pattern (Outer Squares) = Rack Upright (#1D4ED8), Center = Rack Beam (#EA580C)
           finderScanColor: new THREE.Color('#1D4ED8'),
           darkScanColor:   new THREE.Color('#EA580C'),
           lightScanColor:  new THREE.Color('#fef08a'),
@@ -708,9 +707,8 @@
           trackCenter3D:  new THREE.Color('#182432'), 
           trackEdge3D:    new THREE.Color('#0e1620'),
 
-          // Regional Reflection Colors for Cold Storage: Finder Pattern = Rack Upright (#0284C7), Center = Rack Beam (#38BDF8)
           finderScanColor: new THREE.Color('#0284C7'),
-          darkScanColor:   new THREE.Color('#0369a1'),
+          darkScanColor:   new THREE.Color('#38BDF8'),
           lightScanColor:  new THREE.Color('#e0f2fe'),
 
           rackUpright:    '#0284C7', 
@@ -762,7 +760,6 @@
           trackCenter3D:  new THREE.Color('#0F172A'), 
           trackEdge3D:    new THREE.Color('#020408'), 
 
-          // Regional Reflection Colors for Night Shift: Finder Pattern = Upright (#1E293B), Center = Beam (#F59E0B)
           finderScanColor: new THREE.Color('#1E293B'),
           darkScanColor:   new THREE.Color('#F59E0B'),
           lightScanColor:  new THREE.Color('#a7f3d0'),
@@ -1061,7 +1058,6 @@
       // 4. GENERATOR FUNCTIONS (REGIONAL COLOR REFLECTION ENGINE)
       // ==========================================
       function isFinderPattern(r, c, size) {
-        // Finder patterns are 7x7 squares at top-left, top-right, bottom-left
         if (r < 7 && c < 7) return true;
         if (r < 7 && c >= size - 7) return true;
         if (r >= size - 7 && c < 7) return true;
@@ -1080,7 +1076,6 @@
         const col = (colorHex instanceof THREE.Color) ? colorHex.clone() : new THREE.Color(colorHex);
         instancedMesh.setColorAt(idx, col);
 
-        // Map regional scannable colors: Finder patterns -> Upright color, Center data -> Beam color, Light modules -> Base
         let colScan;
         if (!isDarkModule) {
           colScan = PALETTE.lightScanColor;

@@ -810,7 +810,7 @@
       updateThemeAccents(activeMode);
 
       // ==========================================
-      // 2. HAPPY VIBE AMBIENT BGM (INCREASED VOLUME)
+      // 2. HAPPY VIBE AMBIENT BGM (PERFECTED VOLUME)
       // ==========================================
       function initAudio() {
         if (!audioCtx) {
@@ -823,7 +823,6 @@
 
       function startAmbientMusic() {
         if (ambientMusicInterval) return;
-        // Upbeat major chord progression (C -> F -> G -> Am)
         const chords = [
           [261.63, 329.63, 392.00, 523.25],
           [349.23, 440.00, 523.25, 659.25],
@@ -846,9 +845,9 @@
                 osc.type = 'triangle';
                 osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
 
-                // Increased volume for clear upbeat presence
+                // Slightly smaller, comfortable background music volume
                 gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
-                gain.gain.linearRampToValueAtTime(0.045, audioCtx.currentTime + 0.1);
+                gain.gain.linearRampToValueAtTime(0.018, audioCtx.currentTime + 0.1);
                 gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 1.8);
 
                 osc.connect(gain);
@@ -1046,13 +1045,12 @@
       const dummy = new THREE.Object3D();
       const tempColor = new THREE.Color();
       let currentInstance = 0;
-      let floorData = [];
+      let blocksData = [];
       let dynamicFleet = [];
-      let allBlocksColorData = [];
       const contrastState = { progress: 0 };
 
       // ==========================================
-      // 4. GENERATOR FUNCTIONS (ZERO-CLASH & SCAN ENGINE)
+      // 4. GENERATOR FUNCTIONS (UNIFIED BLOCKS ENGINE)
       // ==========================================
       function addBlock(x, y, z, sx, sy, sz, colorHex, isDarkModule = false) {
         if (!instancedMesh) return -1;
@@ -1066,8 +1064,9 @@
         const col = (colorHex instanceof THREE.Color) ? colorHex.clone() : new THREE.Color(colorHex);
         instancedMesh.setColorAt(idx, col);
 
+        // Universal Scan Contrast Mapping: Dark modules -> Pure Black, Light modules -> Pure White
         const colScan = isDarkModule ? new THREE.Color('#000000') : new THREE.Color('#ffffff');
-        allBlocksColorData[idx] = { col3D: col.clone(), colScan };
+        blocksData[idx] = { col3D: col.clone(), colScan };
 
         currentInstance++;
         return idx;
@@ -1193,18 +1192,17 @@
         addBlock(x + offset, 0.05, z + offset, 0.14, 0.70, 0.14, PALETTE.bollardYellow, isDark);
       }
 
+      // Universal transition loop covering ALL blocks (floors, racks, boxes, vehicles)
       function updateFloorTransition(progress) {
         if (!instancedMesh) return;
         const scratch = new THREE.Color();
-        for (let i = 0; i < floorData.length; i++) {
-          const item = floorData[i];
-          scratch.lerpColors(item.col3D, item.colScan, progress);
-          instancedMesh.setColorAt(item.idx, scratch);
-        }
-        for (let i = floorData.length; i < currentInstance; i++) {
-          const blockData = allBlocksColorData[i];
-          if (blockData) {
-            scratch.lerpColors(blockData.col3D, blockData.colScan, progress);
+        // Expand floor tile width from 0.98 to 1.0 in scan mode so there are zero grid lines
+        const currentScale = 0.98 + (0.02 * progress);
+
+        for (let i = 0; i < currentInstance; i++) {
+          const item = blocksData[i];
+          if (item) {
+            scratch.lerpColors(item.col3D, item.colScan, progress);
             instancedMesh.setColorAt(i, scratch);
           }
         }
@@ -1232,9 +1230,8 @@
           instancedMesh = null;
         }
 
-        floorData = [];
         dynamicFleet = [];
-        allBlocksColorData = [];
+        blocksData = [];
         const qr = qrcode(0, 'H');
         qr.addData(text);
         qr.make();
@@ -1245,7 +1242,7 @@
         const highBayRadius = size * 0.18;
         const rackRadius = size * 0.37;
 
-        instancedMesh = new THREE.InstancedMesh(boxGeo, unitMaterial, 25000);
+        instancedMesh = new THREE.InstancedMesh(boxGeo, unitMaterial, 28000);
         instancedMesh.castShadow = true;
         instancedMesh.receiveShadow = true;
         currentInstance = 0;
@@ -1275,11 +1272,9 @@
             const isDark = isInsideQR ? qr.isDark(r, c) : false;
 
             if (!isDark) {
-              const idx = addBlock(posX, -1.25, posZ, 0.98, 1.25, 0.98, colLight3D, false);
-              floorData.push({ idx, col3D: colLight3D, colScan: PALETTE.floorScanLight });
+              addBlock(posX, -1.25, posZ, 0.98, 1.25, 0.98, colLight3D, false);
             } else {
-              const idx = addBlock(posX, -1.25, posZ, 0.98, 1.27, 0.98, colDark3D, true);
-              floorData.push({ idx, col3D: colDark3D, colScan: PALETTE.trackScanDark });
+              addBlock(posX, -1.25, posZ, 0.98, 1.27, 0.98, colDark3D, true);
 
               if (dist < highBayRadius) {
                 spawnAlignedRackBay(posX, posZ, 5, true, true);

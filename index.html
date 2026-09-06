@@ -270,7 +270,7 @@
         z-index: 1;
       }
 
-      /* FLOATING SCAN HINT BADGE (Moved up to bottom: 180px, auto-hides in scan mode) */
+      /* FLOATING SCAN HINT BADGE (Moved to bottom: 180px, auto-hides in scan mode) */
       .tap-badge {
         position: absolute;
         bottom: 180px;
@@ -810,7 +810,7 @@
       updateThemeAccents(activeMode);
 
       // ==========================================
-      // 2. SYNTHETIC AUDIO ENGINE & AMBIENT BGM
+      // 2. HAPPY VIBE AMBIENT BGM & AUDIO
       // ==========================================
       function initAudio() {
         if (!audioCtx) {
@@ -823,12 +823,12 @@
 
       function startAmbientMusic() {
         if (ambientMusicInterval) return;
-        // Soothing ambient chord frequencies (pentatonic pad)
+        // Upbeat, cheerful major-scale chord progression (C Major -> F Major -> G Major -> Am)
         const chords = [
-          [220.0, 329.63, 440.0], // A3, E4, A4
-          [196.0, 293.66, 392.0], // G3, D4, G4
-          [174.61, 261.63, 349.23], // F3, C4, F4
-          [164.81, 246.94, 329.63]  // E3, B3, E4
+          [261.63, 329.63, 392.00, 523.25], // C Major
+          [349.23, 440.00, 523.25, 659.25], // F Major
+          [392.00, 493.88, 587.33, 783.99], // G Major
+          [440.00, 523.25, 659.25, 880.00]  // A Minor
         ];
         let chordIdx = 0;
 
@@ -838,23 +838,27 @@
             const chord = chords[chordIdx % chords.length];
             chordIdx++;
 
-            chord.forEach(freq => {
-              const osc = audioCtx.createOscillator();
-              const gain = audioCtx.createGain();
-              osc.type = 'sine';
-              osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            chord.forEach((freq, idx) => {
+              setTimeout(() => {
+                if (!soundEnabled || !audioCtx) return;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'triangle'; // Bright, happy timbre
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
 
-              gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
-              gain.gain.linearRampToValueAtTime(0.012, audioCtx.currentTime + 1.5);
-              gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 5.0);
+                // Slightly increased volume for clear enjoyment
+                gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.028, audioCtx.currentTime + 0.1);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 1.8);
 
-              osc.connect(gain);
-              gain.connect(audioCtx.destination);
-              osc.start();
-              osc.stop(audioCtx.currentTime + 5.0);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 1.8);
+              }, idx * 120); // Arpeggiated upbeat rhythm
             });
           } catch (e) {}
-        }, 5000);
+        }, 1800);
       }
 
       function stopAmbientMusic() {
@@ -1044,12 +1048,13 @@
       let currentInstance = 0;
       let floorData = [];
       let dynamicFleet = [];
+      let allBlocksColorData = [];
       const contrastState = { progress: 0 };
 
       // ==========================================
-      // 4. GENERATOR FUNCTIONS (1.25 SOLID PLINTH)
+      // 4. GENERATOR FUNCTIONS (ZERO-CLASH & SCAN ENGINE)
       // ==========================================
-      function addBlock(x, y, z, sx, sy, sz, colorHex) {
+      function addBlock(x, y, z, sx, sy, sz, colorHex, isDarkModule = false) {
         if (!instancedMesh) return -1;
         const idx = currentInstance;
         dummy.position.set(x, y + sy / 2, z);
@@ -1060,29 +1065,34 @@
 
         const col = (colorHex instanceof THREE.Color) ? colorHex.clone() : new THREE.Color(colorHex);
         instancedMesh.setColorAt(idx, col);
+
+        // Universal Scan Contrast Engine: Dark modules morph to black, light modules morph to white
+        const colScan = isDarkModule ? new THREE.Color('#000000') : new THREE.Color('#ffffff');
+        allBlocksColorData[idx] = { col3D: col.clone(), colScan };
+
         currentInstance++;
         return idx;
       }
 
-      function spawnAlignedRackBay(x, z, tiers, isHighBay = false) {
+      function spawnAlignedRackBay(x, z, tiers, isHighBay = false, isDark = false) {
         const tierHeight = 0.88;
         const totalHeight = tiers * tierHeight;
         const postW = 0.08;
         const offset = 0.42;
 
-        addBlock(x - offset, 0, z - offset, postW, totalHeight, postW, PALETTE.rackUpright);
-        addBlock(x + offset, 0, z - offset, postW, totalHeight, postW, PALETTE.rackUpright);
-        addBlock(x - offset, 0, z + offset, postW, totalHeight, postW, PALETTE.rackUpright);
-        addBlock(x + offset, 0, z + offset, postW, totalHeight, postW, PALETTE.rackUpright);
+        addBlock(x - offset, 0, z - offset, postW, totalHeight, postW, PALETTE.rackUpright, isDark);
+        addBlock(x + offset, 0, z - offset, postW, totalHeight, postW, PALETTE.rackUpright, isDark);
+        addBlock(x - offset, 0, z + offset, postW, totalHeight, postW, PALETTE.rackUpright, isDark);
+        addBlock(x + offset, 0, z + offset, postW, totalHeight, postW, PALETTE.rackUpright, isDark);
 
         for (let t = 0; t < tiers; t++) {
           const y = t * tierHeight;
-          addBlock(x, y, z - offset, 0.92, 0.06, postW, PALETTE.rackBeam);
-          addBlock(x, y, z + offset, 0.92, 0.06, postW, PALETTE.rackBeam);
-          addBlock(x - offset, y, z, postW, 0.06, 0.92, PALETTE.rackBeam);
-          addBlock(x + offset, y, z, postW, 0.06, 0.92, PALETTE.rackBeam);
+          addBlock(x, y, z - offset, 0.92, 0.06, postW, PALETTE.rackBeam, isDark);
+          addBlock(x, y, z + offset, 0.92, 0.06, postW, PALETTE.rackBeam, isDark);
+          addBlock(x - offset, y, z, postW, 0.06, 0.92, PALETTE.rackBeam, isDark);
+          addBlock(x + offset, y, z, postW, 0.06, 0.92, PALETTE.rackBeam, isDark);
 
-          addBlock(x, y + 0.06, z, 0.78, 0.07, 0.78, PALETTE.woodPallet);
+          addBlock(x, y + 0.06, z, 0.78, 0.07, 0.78, PALETTE.woodPallet, isDark);
 
           let boxColor;
           if (isHighBay) {
@@ -1091,11 +1101,11 @@
             const seed = (x + z + t);
             boxColor = seed % 3 === 0 ? PALETTE.cargoKraft : (seed % 3 === 1 ? PALETTE.cargoAmber : PALETTE.cargoTote);
           }
-          addBlock(x, y + 0.13, z, 0.68, 0.50, 0.68, boxColor);
+          addBlock(x, y + 0.13, z, 0.68, 0.50, 0.68, boxColor, isDark);
         }
       }
 
-      function spawnForklift(x, z, dir = 'z') {
+      function spawnForklift(x, z, dir = 'z', isDark = false) {
         const parts = [];
         function addPart(ox, oy, oz, sx, sy, sz, colorHex) {
           const rx = (dir === 'x') ? -oz : ox;
@@ -1103,7 +1113,7 @@
           const rsx = (dir === 'x') ? sz : sx;
           const rsz = (dir === 'x') ? sx : sz;
 
-          const idx = addBlock(x + rx, oy, z + rz, rsx, sy, rsz, colorHex);
+          const idx = addBlock(x + rx, oy, z + rz, rsx, sy, rsz, colorHex, isDark);
           parts.push({ ox: rx, oy: oy, oz: rz, sx: rsx, sy: sy, sz: rsz, idx });
         }
 
@@ -1134,7 +1144,7 @@
         });
       }
 
-      function spawnAMR(x, z, dir = 'z') {
+      function spawnAMR(x, z, dir = 'z', isDark = false) {
         const parts = [];
         function addPart(ox, oy, oz, sx, sy, sz, colorHex) {
           const rx = (dir === 'x') ? -oz : ox;
@@ -1142,7 +1152,7 @@
           const rsx = (dir === 'x') ? sz : sx;
           const rsz = (dir === 'x') ? sx : sz;
 
-          const idx = addBlock(x + rx, oy, z + rz, rsx, sy, rsz, colorHex);
+          const idx = addBlock(x + rx, oy, z + rz, rsx, sy, rsz, colorHex, isDark);
           parts.push({ ox: rx, oy: oy, oz: rz, sx: rsx, sy: sy, sz: rsz, idx });
         }
 
@@ -1161,27 +1171,27 @@
         });
       }
 
-      function spawnPalletStack(x, z) {
+      function spawnPalletStack(x, z, isDark = false) {
         for (let i = 0; i < 4; i++) {
-          addBlock(x, i * 0.11, z, 0.72, 0.08, 0.72, PALETTE.woodPallet);
+          addBlock(x, i * 0.11, z, 0.72, 0.08, 0.72, PALETTE.woodPallet, isDark);
         }
       }
 
-      function spawnConveyor(x, z, horizontal) {
-        addBlock(x, 0.05, z, horizontal ? 0.90 : 0.55, 0.22, horizontal ? 0.55 : 0.90, PALETTE.conveyorLeg);
-        addBlock(x, 0.27, z, horizontal ? 0.86 : 0.48, 0.05, horizontal ? 0.48 : 0.86, PALETTE.conveyorRoller);
-        addBlock(x, 0.32, z, 0.44, 0.24, 0.44, PALETTE.amrTote);
+      function spawnConveyor(x, z, horizontal, isDark = false) {
+        addBlock(x, 0.05, z, horizontal ? 0.90 : 0.55, 0.22, horizontal ? 0.55 : 0.90, PALETTE.conveyorLeg, isDark);
+        addBlock(x, 0.27, z, horizontal ? 0.86 : 0.48, 0.05, horizontal ? 0.48 : 0.86, PALETTE.conveyorRoller, isDark);
+        addBlock(x, 0.32, z, 0.44, 0.24, 0.44, PALETTE.amrTote, isDark);
       }
 
-      function spawnChargingDock(x, z) {
-        addBlock(x, 0.04, z, 0.78, 0.06, 0.78, PALETTE.amrBase);
-        addBlock(x, 0.10, z, 0.46, 0.04, 0.46, PALETTE.chargePad);
+      function spawnChargingDock(x, z, isDark = false) {
+        addBlock(x, 0.04, z, 0.78, 0.06, 0.78, PALETTE.amrBase, isDark);
+        addBlock(x, 0.10, z, 0.46, 0.04, 0.46, PALETTE.chargePad, isDark);
       }
 
-      function spawnSafetyBollards(x, z) {
+      function spawnSafetyBollards(x, z, isDark = false) {
         const offset = 0.28;
-        addBlock(x - offset, 0.05, z - offset, 0.14, 0.70, 0.14, PALETTE.bollardYellow);
-        addBlock(x + offset, 0.05, z + offset, 0.14, 0.70, 0.14, PALETTE.bollardYellow);
+        addBlock(x - offset, 0.05, z - offset, 0.14, 0.70, 0.14, PALETTE.bollardYellow, isDark);
+        addBlock(x + offset, 0.05, z + offset, 0.14, 0.70, 0.14, PALETTE.bollardYellow, isDark);
       }
 
       function updateFloorTransition(progress) {
@@ -1192,7 +1202,6 @@
           scratch.lerpColors(item.col3D, item.colScan, progress);
           instancedMesh.setColorAt(item.idx, scratch);
         }
-        // Universal Scan Contrast Engine: Racks/boxes/vehicles on dark modules morph to black, light modules morph to white
         for (let i = floorData.length; i < currentInstance; i++) {
           const blockData = allBlocksColorData[i];
           if (blockData) {
@@ -1202,22 +1211,6 @@
         }
         if (instancedMesh.instanceColor) instancedMesh.instanceColor.needsUpdate = true;
       }
-
-      function triggerLidarSweep() {
-        laserPlane.position.z = -17;
-        laserMat.opacity = 0.85;
-        gsap.to(laserPlane.position, {
-          z: 17,
-          duration: 1.1,
-          ease: "power2.inOut",
-          onComplete: () => {
-            gsap.to(laserMat, { opacity: 0.0, duration: 0.3 });
-            playScanChime();
-          }
-        });
-      }
-
-      let allBlocksColorData = [];
 
       function generateFacility(text) {
         if (instancedMesh) {
@@ -1253,22 +1246,7 @@
           }
         }
 
-        // Helper override to track all instanced blocks for 100% reliable scanning
-        const _origAddBlock = addBlock;
-        // We override addBlock temporarily during generation to record scan target color
-        // Light modules scan to white (#ffffff), dark modules scan to black (#000000)
-        let evaluatingDarkModule = false;
-
-        function addBlockWithScan(x, y, z, sx, sy, sz, colorHex) {
-          const idx = _origAddBlock(x, y, z, sx, sy, sz, colorHex);
-          if (idx !== -1) {
-            const col3D = (colorHex instanceof THREE.Color) ? colorHex.clone() : new THREE.Color(colorHex);
-            const colScan = evaluatingDarkModule ? new THREE.Color('#000000') : new THREE.Color('#ffffff');
-            allBlocksColorData[idx] = { col3D, colScan };
-          }
-          return idx;
-        }
-
+        // Built-In Quiet Zone Apron
         const margin = 2;
         for (let r = -margin; r < size + margin; r++) {
           for (let c = -margin; c < size + margin; c++) {
@@ -1282,42 +1260,42 @@
 
             const isInsideQR = (r >= 0 && r < size && c >= 0 && c < size);
             const isDark = isInsideQR ? qr.isDark(r, c) : false;
-            evaluatingDarkModule = isDark;
 
             if (!isDark) {
-              const idx = addBlockWithScan(posX, -1.25, posZ, 0.98, 1.25, 0.98, colLight3D);
+              const idx = addBlock(posX, -1.25, posZ, 0.98, 1.25, 0.98, colLight3D, false);
               floorData.push({ idx, col3D: colLight3D, colScan: PALETTE.floorScanLight });
             } else {
-              const idx = addBlockWithScan(posX, -1.25, posZ, 0.98, 1.27, 0.98, colDark3D);
+              const idx = addBlock(posX, -1.25, posZ, 0.98, 1.27, 0.98, colDark3D, true);
               floorData.push({ idx, col3D: colDark3D, colScan: PALETTE.trackScanDark });
 
               if (dist < highBayRadius) {
-                // temporarily redirect addBlock to addBlockWithScan inside structures
-                const oldAdd = addBlock;
-                window._tempAddBlock = addBlockWithScan;
-                // We map spawn calls
-                spawnAlignedRackBay(posX, posZ, 5, true);
+                spawnAlignedRackBay(posX, posZ, 5, true, true);
               } else if (dist < rackRadius) {
-                spawnAlignedRackBay(posX, posZ, 3, false);
+                spawnAlignedRackBay(posX, posZ, 3, false, true);
               } else {
                 const seed = (r * 13 + c * 7);
                 const coordKey = `${c},${r}`;
 
-                if (seed % 19 === 0 && !occupiedClearance.has(coordKey)) {
-                  const driveDir = (r % 2 === 0) ? 'z' : 'x';
-                  spawnForklift(posX, posZ, driveDir);
-                  markClearance(c, r);
-                } else if (seed % 17 === 2 && !occupiedClearance.has(coordKey)) {
-                  spawnPalletStack(posX, posZ);
-                  markClearance(c, r);
-                } else if (seed % 23 === 1) {
-                  spawnConveyor(posX, posZ, r % 2 === 0);
-                } else if (seed % 29 === 3) {
-                  spawnChargingDock(posX, posZ);
-                } else if (seed % 21 === 4) {
-                  spawnSafetyBollards(posX, posZ);
-                } else if (seed % 5 === 0) {
-                  spawnAMR(posX, posZ, (c % 2 === 0 ? 'z' : 'x'));
+                if (!occupiedClearance.has(coordKey)) {
+                  if (seed % 19 === 0) {
+                    spawnForklift(posX, posZ, (r % 2 === 0 ? 'z' : 'x'), true);
+                    markClearance(c, r);
+                  } else if (seed % 17 === 2) {
+                    spawnPalletStack(posX, posZ, true);
+                    markClearance(c, r);
+                  } else if (seed % 23 === 1) {
+                    spawnConveyor(posX, posZ, r % 2 === 0, true);
+                    markClearance(c, r);
+                  } else if (seed % 29 === 3) {
+                    spawnChargingDock(posX, posZ, true);
+                    markClearance(c, r);
+                  } else if (seed % 21 === 4) {
+                    spawnSafetyBollards(posX, posZ, true);
+                    markClearance(c, r);
+                  } else if (seed % 7 === 0) {
+                    spawnAMR(posX, posZ, (c % 2 === 0 ? 'z' : 'x'), true);
+                    markClearance(c, r);
+                  }
                 }
               }
             }
@@ -1343,15 +1321,6 @@
 
         updateFloorTransition(isFlat ? 1 : 0);
       }
-
-      // Override addBlock to use addBlockWithScan globally during generation
-      // We redefine addBlock to check if evaluatingDarkModule is active
-      const originalAddBlock = addBlock;
-      // Re-assign addBlock implementation:
-      window.addBlock = function(x, y, z, sx, sy, sz, colorHex) {
-        // We capture context via evaluatingDarkModule scope
-        return originalAddBlock(x, y, z, sx, sy, sz, colorHex);
-      };
 
       // ==========================================
       // 5. VIEW TOGGLE (AUTO-HIDDEN HINT BADGE)
@@ -1542,7 +1511,7 @@
         });
       });
 
-      // Audio Toggle Button (Controls Sound FX + Ambient BGM)
+      // Audio Toggle Button (Controls Sound FX + Happy BGM)
       const audioBtn = document.getElementById('audio-btn');
       const audioIconOn = document.getElementById('audio-icon-on');
       const audioIconOff = document.getElementById('audio-icon-off');

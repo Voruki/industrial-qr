@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Autonomous Intralogistics Facility - 3D QR</title>
-    <!-- Stable CDNs -->
+    <!-- Stable Browser CDNs -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
@@ -43,7 +43,6 @@
         transition: background 1.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.4s ease;
       }
 
-      /* Blob 1: Large primary floating studio pool */
       .blob-1 {
         width: 68vw;
         height: 68vw;
@@ -54,7 +53,6 @@
         animation: floatBlob1 22s infinite alternate ease-in-out;
       }
 
-      /* Blob 2: Secondary top-right pastel accent flare */
       .blob-2 {
         width: 60vw;
         height: 60vw;
@@ -65,7 +63,6 @@
         animation: floatBlob2 26s infinite alternate ease-in-out;
       }
 
-      /* Blob 3: Deep ambient fill warmth */
       .blob-3 {
         width: 75vw;
         height: 75vw;
@@ -76,7 +73,6 @@
         animation: floatBlob3 30s infinite alternate ease-in-out;
       }
 
-      /* Screen Horizon Vignette: Blooms into pastel at screen edges */
       .bg-vignette {
         position: absolute;
         inset: 0;
@@ -435,16 +431,16 @@
           floorScanLight: new THREE.Color('#ffffff'),
           trackCenter3D:  new THREE.Color('#182432'), 
           trackEdge3D:    new THREE.Color('#0e1620'),
-          trackScanDark:  new THREE.Color('#03172e'), // Deep navy in scan mode (High contrast!)
+          trackScanDark:  new THREE.Color('#03172e'),
 
-          // High-Contrast Deep Arctic Blue Palettes (Guarantees instant scanning!)
-          rackUpright:    '#0369A1', 
-          rackBeam:       '#0284C7', 
-          woodPallet:     '#475569',
-          cargoKraft:     '#0c4a6e', // Deep oceanic carton (Low luminance)
+          // Deep, Saturated Cryogenic Colors (Guarantees Instant Scan Contrast!)
+          rackUpright:    '#0284C7', 
+          rackBeam:       '#0369A1', 
+          woodPallet:     '#334155',
+          cargoKraft:     '#0c4a6e', // Deep oceanic blue
           cargoAmber:     '#075985', 
-          cargoTote:      '#1e40af', // Deep royal cryo tote (Replaces light #7DD3FC that washed out!)
-          highBayCargo:   '#0369A1',
+          cargoTote:      '#1e40af', // Royal blue picking tote (high contrast!)
+          highBayCargo:   '#0284C7',
           highBayCargoAlt:'#0c4a6e',
 
           forkliftBody:   '#0284C7',
@@ -471,12 +467,12 @@
           vignette: 'radial-gradient(ellipse at 50% 45%, transparent 35%, rgba(2, 6, 23, 0.65) 80%, #020617 100%)',
           dustColor: 0x6ee7b7,
 
-          // 🌙 Bright Lunar Moonlight Rig (Eliminates muddy darkness!)
-          sunColor: '#e2e8f0', // Crisp luminous silver moonlight
-          sunIntensity: 2.8,   // High-lux moonlight
-          fillColor: '#93c5fd', // Bright moonlight fill
+          // Luminous Moonlit Night Rig
+          sunColor: '#e2e8f0', 
+          sunIntensity: 2.8,   
+          fillColor: '#93c5fd', 
           fillIntensity: 0.85,
-          ambientColor: '#475569', // Bright slate ambient in 3D
+          ambientColor: '#475569', 
           ambientIntensity: 1.0,
 
           floorCenter3D:  new THREE.Color('#384252'), 
@@ -487,26 +483,27 @@
           trackScanDark:  new THREE.Color('#020408'),
           
           rackUpright:    '#1E293B',
-          rackBeam:       '#F59E0B',
+          rackBeam:       '#D97706', // Saturated Industrial Amber (Scans cleanly!)
           woodPallet:     '#451A03',
           cargoKraft:     '#78350F',
-          cargoAmber:     '#B45309',
-          cargoTote:      '#F59E0B',
-          highBayCargo:   '#EF4444',
-          highBayCargoAlt:'#B91C1C',
+          cargoAmber:     '#92400E',
+          cargoTote:      '#B45309',
+          highBayCargo:   '#DC2626',
+          highBayCargoAlt:'#991B1B',
 
-          forkliftBody:   '#10B981',
-          forkliftCab:    '#050811',
-          forkliftMast:   '#1E293B',
+          // Forklift in Night Mode (Distinct, Visible, Never Invisible!)
+          forkliftBody:   '#10B981', // Emerald High-Vis Shell
+          forkliftCab:    '#1E293B', // Charcoal Steel Cage
+          forkliftMast:   '#64748B', // Galvanized Silver Rails (Clearly seen!)
           forkliftBeacon: '#F59E0B',
 
           amrChassis:     '#10B981',
           amrBase:        '#050811',
-          amrTray:        '#F59E0B',
-          amrTote:        '#3B82F6',
+          amrTray:        '#D97706',
+          amrTote:        '#1E40AF',
 
           conveyorLeg:    '#1E293B',
-          conveyorRoller: '#F59E0B',
+          conveyorRoller: '#D97706',
           bollardYellow:  '#F59E0B',
           chargePad:      '#10B981',
           laserColor:     0xf59e0b
@@ -668,7 +665,7 @@
       fillLight.position.set(-30, 20, -30);
       scene.add(fillLight);
 
-      // Procedural Soft Gaussian Texture
+      // Dust Particles
       function createSoftParticleTexture() {
         const canvas = document.createElement('canvas');
         canvas.width = 64;
@@ -705,6 +702,7 @@
       const dustParticles = new THREE.Points(dustGeo, dustMat);
       scene.add(dustParticles);
 
+      // Lidar Laser Plane
       const laserGeo = new THREE.PlaneGeometry(36, 0.45);
       const laserMat = new THREE.MeshBasicMaterial({
         color: PALETTE.laserColor,
@@ -718,6 +716,7 @@
       laserPlane.position.y = 0.35;
       scene.add(laserPlane);
 
+      // Instanced System State
       let instancedMesh = null;
       const dummy = new THREE.Object3D();
       const tempColor = new THREE.Color();
@@ -727,7 +726,7 @@
       const contrastState = { progress: 0 };
 
       // ==========================================
-      // 4. GENERATOR FUNCTIONS (1.25 SOLID PLINTH)
+      // 4. GENERATOR FUNCTIONS (REINFORCED ASSETS)
       // ==========================================
       function addBlock(x, y, z, sx, sy, sz, colorHex) {
         if (!instancedMesh) return -1;
@@ -775,6 +774,7 @@
         }
       }
 
+      // --- ROBUST 3D REACH TRUCK (NEVER DISAPPEARS!) ---
       function spawnForklift(x, z, dir = 'z') {
         const parts = [];
         function addPart(ox, oy, oz, sx, sy, sz, colorHex) {
@@ -784,26 +784,35 @@
           const rsz = (dir === 'x') ? sx : sz;
 
           const idx = addBlock(x + rx, oy, z + rz, rsx, sy, rsz, colorHex);
-          parts.push({ ox: rx, oy: oy, oz: rz, sx: rsx, sy: sz, rsz, idx });
+          parts.push({ ox: rx, oy: oy, oz: rz, sx: rsx, sy: sy, sz: rsz, idx });
         }
 
-        addPart(0, 0.08, 0.12, 0.52, 0.45, 0.42, PALETTE.forkliftBody);
-        addPart(0, 0.05, 0.30, 0.50, 0.28, 0.14, PALETTE.forkliftCab);
+        // 1. Solid High-Vis Chassis (0.55m tall, firmly grounded!)
+        addPart(0, 0.05, 0.05, 0.62, 0.55, 0.58, PALETTE.forkliftBody);
+        // 2. Rear Counterweight
+        addPart(0, 0.05, 0.28, 0.58, 0.40, 0.16, PALETTE.forkliftCab);
 
-        addPart(-0.20, 0.53, -0.04, 0.05, 1.05, 0.05, PALETTE.forkliftCab);
-        addPart(0.20, 0.53, -0.04, 0.05, 1.05, 0.05, PALETTE.forkliftCab);
-        addPart(-0.20, 0.53, 0.22, 0.05, 1.05, 0.05, PALETTE.forkliftCab);
-        addPart(0.20, 0.53, 0.22, 0.05, 1.05, 0.05, PALETTE.forkliftCab);
-        addPart(0, 1.58, 0.09, 0.46, 0.05, 0.42, PALETTE.forkliftCab);
-        addPart(0, 1.63, 0.09, 0.12, 0.10, 0.12, PALETTE.forkliftBeacon);
+        // 3. 4 Heavy Steel Cab Pillars (Thick 0.09m, sitting firmly on chassis up to 1.35m!)
+        addPart(-0.22, 0.60, -0.10, 0.09, 0.75, 0.09, PALETTE.forkliftCab);
+        addPart(0.22, 0.60, -0.10, 0.09, 0.75, 0.09, PALETTE.forkliftCab);
+        addPart(-0.22, 0.60, 0.20, 0.09, 0.75, 0.09, PALETTE.forkliftCab);
+        addPart(0.22, 0.60, 0.20, 0.09, 0.75, 0.09, PALETTE.forkliftCab);
+        // Cab Roof
+        addPart(0, 1.35, 0.05, 0.56, 0.08, 0.44, PALETTE.forkliftCab);
+        // Amber Warning Beacon Light
+        addPart(0, 1.43, 0.05, 0.14, 0.12, 0.14, PALETTE.forkliftBeacon);
 
-        addPart(-0.15, 0.05, -0.16, 0.06, 1.80, 0.06, PALETTE.forkliftMast);
-        addPart(0.15, 0.05, -0.16, 0.06, 1.80, 0.06, PALETTE.forkliftMast);
-        addPart(0, 1.40, -0.16, 0.30, 0.06, 0.04, PALETTE.forkliftMast);
+        // 4. Twin Vertical Mast Rails (Thick 0.09m, rising up to 1.70m!)
+        addPart(-0.16, 0.05, -0.22, 0.09, 1.65, 0.09, PALETTE.forkliftMast);
+        addPart(0.16, 0.05, -0.22, 0.09, 1.65, 0.09, PALETTE.forkliftMast);
+        // Mast Crossbeams
+        addPart(0, 0.90, -0.22, 0.32, 0.08, 0.06, PALETTE.forkliftMast);
+        addPart(0, 1.55, -0.22, 0.32, 0.08, 0.06, PALETTE.forkliftMast);
 
-        addPart(0, 0.20, -0.22, 0.42, 0.06, 0.10, PALETTE.forkliftCab);
-        addPart(0, 0.22, -0.32, 0.44, 0.08, 0.32, PALETTE.woodPallet);
-        addPart(0, 0.30, -0.32, 0.38, 0.44, 0.28, PALETTE.cargoKraft);
+        // 5. Forks Carriage Plate & Loaded Pallet
+        addPart(0, 0.18, -0.26, 0.44, 0.08, 0.08, PALETTE.forkliftCab);
+        addPart(0, 0.20, -0.38, 0.46, 0.08, 0.28, PALETTE.woodPallet);
+        addPart(0, 0.28, -0.38, 0.38, 0.38, 0.24, PALETTE.cargoKraft);
 
         dynamicFleet.push({
           baseX: x, baseZ: z, dir: dir,
@@ -814,6 +823,7 @@
         });
       }
 
+      // Layered 3D AMR
       function spawnAMR(x, z, dir = 'z') {
         const parts = [];
         function addPart(ox, oy, oz, sx, sy, sz, colorHex) {
@@ -889,6 +899,7 @@
         });
       }
 
+      // --- FACILITY GENERATOR (WITH BUILT-IN QUIET ZONE APRON) ---
       function generateFacility(text) {
         if (instancedMesh) {
           scene.remove(instancedMesh);
@@ -908,7 +919,7 @@
         const highBayRadius = size * 0.18;
         const rackRadius = size * 0.37;
 
-        instancedMesh = new THREE.InstancedMesh(boxGeo, unitMaterial, 22000);
+        instancedMesh = new THREE.InstancedMesh(boxGeo, unitMaterial, 25000);
         instancedMesh.castShadow = true;
         instancedMesh.receiveShadow = true;
         currentInstance = 0;
@@ -922,9 +933,11 @@
           }
         }
 
-        for (let r = 0; r < size; r++) {
-          for (let c = 0; c < size; c++) {
-            const isDark = qr.isDark(r, c);
+        // GENERATE FLOOR WITH A 2-MODULE QUIET ZONE APRON AROUND THE QR CODE!
+        // This guarantees the 3 corner finder patterns are surrounded by white in EVERY mode!
+        const margin = 2;
+        for (let r = -margin; r < size + margin; r++) {
+          for (let c = -margin; c < size + margin; c++) {
             const posX = c - center + 0.5;
             const posZ = r - center + 0.5;
             const dist = Math.hypot(posX, posZ);
@@ -933,10 +946,15 @@
             const colLight3D = new THREE.Color().lerpColors(PALETTE.floorCenter3D, PALETTE.floorEdge3D, normDist * 0.95);
             const colDark3D  = new THREE.Color().lerpColors(PALETTE.trackCenter3D, PALETTE.trackEdge3D, normDist * 0.95);
 
+            const isInsideQR = (r >= 0 && r < size && c >= 0 && c < size);
+            const isDark = isInsideQR ? qr.isDark(r, c) : false;
+
             if (!isDark) {
+              // PURE WHITE IN SCAN VIEW (Ensures 100% reliable quiet zone margin!)
               const idx = addBlock(posX, -1.25, posZ, 0.98, 1.25, 0.98, colLight3D);
               floorData.push({ idx, col3D: colLight3D, colScan: PALETTE.floorScanLight });
             } else {
+              // SOLID DARK MODULE SLAB
               const idx = addBlock(posX, -1.25, posZ, 0.98, 1.27, 0.98, colDark3D);
               floorData.push({ idx, col3D: colDark3D, colScan: PALETTE.trackScanDark });
 
@@ -974,7 +992,6 @@
         if (instancedMesh.instanceColor) instancedMesh.instanceColor.needsUpdate = true;
         scene.add(instancedMesh);
 
-        // Update Dynamic Lights
         if (!isFlat) {
           gsap.to(sunLight.color, { r: new THREE.Color(PALETTE.sunColor).r, g: new THREE.Color(PALETTE.sunColor).g, b: new THREE.Color(PALETTE.sunColor).b, duration: 1.2 });
           gsap.to(sunLight, { intensity: PALETTE.sunIntensity, duration: 1.2 });
@@ -991,7 +1008,7 @@
       }
 
       // ==========================================
-      // 5. VIEW TOGGLE (SCAN FIX: PURE WHITE SCAN LIGHT)
+      // 5. VIEW TOGGLE (BULLETPROOF SCAN LIGHTING)
       // ==========================================
       const tapBadge = document.getElementById('tap-badge');
       const badgeText = document.getElementById('badge-text');
@@ -1015,7 +1032,7 @@
           ease: "power3.inOut"
         });
 
-        // Telephoto Overhead Camera (Eliminates rack leaning parallax)
+        // Telephoto Overhead Camera (Eliminates perspective parallax)
         gsap.to(camera, {
           fov: isFlat ? 9.0 : 38.0,
           duration: 1.2,
@@ -1052,16 +1069,15 @@
           ease: "power2.inOut"
         });
 
-        // SHADOW & COLOR KILL ONLY IN SCAN MODE:
-        // Ensures the QR background floor is brilliant, pure white across all themes!
+        // BULLETPROOF SCAN LIGHTING:
+        // In scan mode, zero shadows and pure neutral white illumination across ALL modes!
         if (isFlat) {
           sunLight.castShadow = false;
           fillLight.castShadow = false;
           gsap.to(sunLight, { intensity: 0.0, duration: 0.8 });
           gsap.to(fillLight, { intensity: 0.0, duration: 0.8 });
-          // Force pure neutral white lighting so night mode is never dim/muddy!
           gsap.to(ambientLight.color, { r: 1.0, g: 1.0, b: 1.0, duration: 0.8 });
-          gsap.to(ambientLight, { intensity: 1.60, duration: 0.8 });
+          gsap.to(ambientLight, { intensity: 1.70, duration: 0.8 });
         } else {
           sunLight.castShadow = true;
           fillLight.castShadow = true;

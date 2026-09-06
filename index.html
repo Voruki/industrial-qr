@@ -621,7 +621,7 @@
       });
 
       // ==========================================
-      // 1. ORIGINAL 3D SCENARIO PALETTES & THEME ADAPTATION
+      // 1. SCENARIO PALETTES & THEME-COLORED SCAN ENGINE
       // ==========================================
       let isFlat = false;
       let soundEnabled = false;
@@ -651,10 +651,12 @@
 
           floorCenter3D:  new THREE.Color('#3f4854'), 
           floorEdge3D:    new THREE.Color('#252d36'), 
-          floorScanLight: new THREE.Color('#ffffff'),
           trackCenter3D:  new THREE.Color('#1e2530'), 
           trackEdge3D:    new THREE.Color('#10151c'),
-          trackScanDark:  new THREE.Color('#0a0e14'),
+          
+          // Theme-colored scannable tones for Day Shift (Rust Amber & Warm Butter-Yellow)
+          darkScanColor:  new THREE.Color('#9a3412'),
+          lightScanColor: new THREE.Color('#fef08a'),
           
           rackUpright:    '#1D4ED8',
           rackBeam:       '#EA580C',
@@ -702,10 +704,12 @@
 
           floorCenter3D:  new THREE.Color('#334454'), 
           floorEdge3D:    new THREE.Color('#1e2a36'), 
-          floorScanLight: new THREE.Color('#ffffff'),
           trackCenter3D:  new THREE.Color('#182432'), 
           trackEdge3D:    new THREE.Color('#0e1620'),
-          trackScanDark:  new THREE.Color('#03172e'),
+
+          // Theme-colored scannable tones for Cold Storage (Deep Cryo Sapphire & Frost Ice-Blue)
+          darkScanColor:  new THREE.Color('#0369a1'),
+          lightScanColor: new THREE.Color('#e0f2fe'),
 
           rackUpright:    '#0284C7', 
           rackBeam:       '#38BDF8', 
@@ -753,16 +757,18 @@
 
           floorCenter3D:  new THREE.Color('#181E29'), 
           floorEdge3D:    new THREE.Color('#05080F'), 
-          floorScanLight: new THREE.Color('#ffffff'),
           trackCenter3D:  new THREE.Color('#0F172A'), 
           trackEdge3D:    new THREE.Color('#020408'), 
-          trackScanDark:  new THREE.Color('#050811'),
+
+          // Theme-colored scannable tones for Night Shift (Deep Emerald & Luminous Mint)
+          darkScanColor:  new THREE.Color('#064e3b'),
+          lightScanColor: new THREE.Color('#a7f3d0'),
           
           rackUpright:    '#1E293B',
           rackBeam:       '#F59E0B',
           woodPallet:     '#451A03',
           cargoKraft:     '#78350F',
-          cargoAmber:     '#B45309',
+          cargoAmber:     '#92400E',
           cargoTote:      '#F59E0B',
           highBayCargo:   '#EF4444',
           highBayCargoAlt:'#B91C1C',
@@ -810,7 +816,7 @@
       updateThemeAccents(activeMode);
 
       // ==========================================
-      // 2. HAPPY VIBE AMBIENT BGM (PERFECTED VOLUME)
+      // 2. HAPPY VIBE AMBIENT BGM (SOFTENED VOLUME)
       // ==========================================
       function initAudio() {
         if (!audioCtx) {
@@ -845,9 +851,9 @@
                 osc.type = 'triangle';
                 osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
 
-                // Slightly smaller, comfortable background music volume
+                // Lowered volume peak to 0.012 for soft, pleasant background playback
                 gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
-                gain.gain.linearRampToValueAtTime(0.018, audioCtx.currentTime + 0.1);
+                gain.gain.linearRampToValueAtTime(0.012, audioCtx.currentTime + 0.1);
                 gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 1.8);
 
                 osc.connect(gain);
@@ -1064,9 +1070,9 @@
         const col = (colorHex instanceof THREE.Color) ? colorHex.clone() : new THREE.Color(colorHex);
         instancedMesh.setColorAt(idx, col);
 
-        // Universal Scan Contrast Mapping: Dark modules -> Pure Black, Light modules -> Pure White
-        const colScan = isDarkModule ? new THREE.Color('#000000') : new THREE.Color('#ffffff');
-        blocksData[idx] = { col3D: col.clone(), colScan };
+        // Map scan colors to theme-matched dark & light scannable tones
+        const colScan = isDarkModule ? PALETTE.darkScanColor : PALETTE.lightScanColor;
+        blocksData[idx] = { col3D: col.clone(), colScan: colScan.clone() };
 
         currentInstance++;
         return idx;
@@ -1196,9 +1202,6 @@
       function updateFloorTransition(progress) {
         if (!instancedMesh) return;
         const scratch = new THREE.Color();
-        // Expand floor tile width from 0.98 to 1.0 in scan mode so there are zero grid lines
-        const currentScale = 0.98 + (0.02 * progress);
-
         for (let i = 0; i < currentInstance; i++) {
           const item = blocksData[i];
           if (item) {
@@ -1592,6 +1595,7 @@
               dummy.position.set(curX, curY, curZ);
               dummy.scale.set(part.sx, part.sy, part.sz);
               dummy.rotation.set(0, 0, 0);
+              dummy.updateManager = true;
               dummy.updateMatrix();
               instancedMesh.setMatrixAt(part.idx, dummy.matrix);
             }

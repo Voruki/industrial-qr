@@ -380,7 +380,7 @@
           ambientColor: '#fffbeb',
           ambientIntensity: 0.85,
 
-          // Medium Slate-Grey Concrete Floor Slab
+          // Reinforced Medium Slate-Grey Concrete Slab
           floorCenter3D:  new THREE.Color('#3f4854'), 
           floorEdge3D:    new THREE.Color('#252d36'), 
           floorScanLight: new THREE.Color('#ffffff'),
@@ -429,6 +429,7 @@
           ambientColor: '#f0f9ff',
           ambientIntensity: 0.85,
 
+          // Reinforced Cool Bluish-Grey Concrete Slab
           floorCenter3D:  new THREE.Color('#334454'), 
           floorEdge3D:    new THREE.Color('#1e2a36'), 
           floorScanLight: new THREE.Color('#ffffff'),
@@ -469,19 +470,20 @@
           vignette: 'radial-gradient(ellipse at 50% 45%, transparent 35%, rgba(2, 6, 23, 0.65) 80%, #020617 100%)',
           dustColor: 0x6ee7b7,
 
-          // 🌙 Cool Silver Moonlight Reflections
-          sunColor: '#93c5fd',
-          sunIntensity: 1.45,
-          fillColor: '#1e3a8a',
-          fillIntensity: 0.40,
-          ambientColor: '#0f172a',
-          ambientIntensity: 0.55,
+          // 🌙 High-Lux Silvery Moonlight (Substantially Brightened!)
+          sunColor: '#c7dfff',
+          sunIntensity: 2.3,
+          fillColor: '#60a5fa',
+          fillIntensity: 0.70,
+          ambientColor: '#1e293b',
+          ambientIntensity: 0.85,
 
-          floorCenter3D:  new THREE.Color('#202632'), 
-          floorEdge3D:    new THREE.Color('#0e1218'), 
+          // Reinforced Dark Charcoal Concrete Floor Slab (Lightened for moonlight bounce)
+          floorCenter3D:  new THREE.Color('#2d3748'), 
+          floorEdge3D:    new THREE.Color('#1a202c'), 
           floorScanLight: new THREE.Color('#ffffff'),
-          trackCenter3D:  new THREE.Color('#111620'), 
-          trackEdge3D:    new THREE.Color('#06090e'),
+          trackCenter3D:  new THREE.Color('#1f2937'), 
+          trackEdge3D:    new THREE.Color('#111827'),
           trackScanDark:  new THREE.Color('#020408'),
           
           rackUpright:    '#1E293B',
@@ -727,7 +729,7 @@
       const contrastState = { progress: 0 };
 
       // ==========================================
-      // 4. GENERATOR FUNCTIONS (3D SOLID SLAB)
+      // 4. GENERATOR FUNCTIONS (HEAVY BASE PLINTH)
       // ==========================================
       function addBlock(x, y, z, sx, sy, sz, colorHex) {
         if (!instancedMesh) return -1;
@@ -936,10 +938,12 @@
             const colDark3D  = new THREE.Color().lerpColors(PALETTE.trackCenter3D, PALETTE.trackEdge3D, normDist * 0.95);
 
             if (!isDark) {
-              const idx = addBlock(posX, -0.45, posZ, 0.98, 0.45, 0.98, colLight3D);
+              // REINFORCED 1.25 THICK INDUSTRIAL CONCRETE PLINTH!
+              const idx = addBlock(posX, -1.25, posZ, 0.98, 1.25, 0.98, colLight3D);
               floorData.push({ idx, col3D: colLight3D, colScan: PALETTE.floorScanLight });
             } else {
-              const idx = addBlock(posX, -0.45, posZ, 0.98, 0.47, 0.98, colDark3D);
+              // REINFORCED 1.27 THICK TRANSIT GUIDE SLAB!
+              const idx = addBlock(posX, -1.25, posZ, 0.98, 1.27, 0.98, colDark3D);
               floorData.push({ idx, col3D: colDark3D, colScan: PALETTE.trackScanDark });
 
               if (dist < highBayRadius) {

@@ -73,6 +73,7 @@
         animation: floatBlob3 30s infinite alternate ease-in-out;
       }
 
+      /* Screen Horizon Vignette: Blooms into pastel at screen edges */
       .bg-vignette {
         position: absolute;
         inset: 0;
@@ -372,7 +373,7 @@
           vignette: 'radial-gradient(ellipse at 50% 45%, rgba(67, 20, 7, 0.42) 0%, rgba(154, 52, 18, 0.20) 42%, rgba(254, 240, 138, 0.65) 75%, #fde047 100%)',
           dustColor: 0xb45309,
 
-          // ☀️ Warm Golden Sunlight Reflections
+          // ☀️ Warm Golden Sunlight Reflections in 3D
           sunColor: '#fff1dc',
           sunIntensity: 2.4,
           fillColor: '#fed7aa',
@@ -421,7 +422,7 @@
           vignette: 'radial-gradient(ellipse at 50% 45%, rgba(8, 47, 73, 0.45) 0%, rgba(3, 105, 161, 0.18) 42%, rgba(186, 230, 253, 0.65) 75%, #7dd3fc 100%)',
           dustColor: 0x0284c7,
 
-          // ❄️ Glacial Cyan Frost Light Reflections
+          // ❄️ Glacial Cyan Frost Light Reflections in 3D
           sunColor: '#e0f2fe',
           sunIntensity: 2.0,
           fillColor: '#38bdf8',
@@ -470,7 +471,7 @@
           vignette: 'radial-gradient(ellipse at 50% 45%, transparent 35%, rgba(2, 6, 23, 0.65) 80%, #020617 100%)',
           dustColor: 0x6ee7b7,
 
-          // 🌙 High-Lux Silvery Moonlight (Substantially Brightened!)
+          // 🌙 High-Lux Silvery Moonlight in 3D
           sunColor: '#c7dfff',
           sunIntensity: 2.3,
           fillColor: '#60a5fa',
@@ -478,7 +479,7 @@
           ambientColor: '#1e293b',
           ambientIntensity: 0.85,
 
-          // Reinforced Dark Charcoal Concrete Floor Slab (Lightened for moonlight bounce)
+          // Reinforced Dark Charcoal Concrete Floor Slab
           floorCenter3D:  new THREE.Color('#2d3748'), 
           floorEdge3D:    new THREE.Color('#1a202c'), 
           floorScanLight: new THREE.Color('#ffffff'),
@@ -612,7 +613,9 @@
       const camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 1000);
       const isoPos = new THREE.Vector3(48.0, 46.0, 48.0);
       const isoTarget = new THREE.Vector3(0.0, -3.8, 0.0);
-      const flatPos = new THREE.Vector3(0.0, 88.0, 2.501);
+
+      // Telephoto Overhead Scan Position (Pulls far up with small FOV to eliminate rack parallax leaning!)
+      const flatPos = new THREE.Vector3(0.0, 380.0, 2.501);
       const flatTarget = new THREE.Vector3(0.0, 0.0, 2.5);
 
       camera.position.copy(isoPos);
@@ -644,7 +647,7 @@
         metalness: 0.16
       });
 
-      // Lighting Rig (Shift-Adaptive Colors)
+      // Lighting Rig
       const ambientLight = new THREE.AmbientLight(PALETTE.ambientColor, PALETTE.ambientIntensity);
       scene.add(ambientLight);
 
@@ -729,7 +732,7 @@
       const contrastState = { progress: 0 };
 
       // ==========================================
-      // 4. GENERATOR FUNCTIONS (HEAVY BASE PLINTH)
+      // 4. GENERATOR FUNCTIONS (1.25 SOLID PLINTH)
       // ==========================================
       function addBlock(x, y, z, sx, sy, sz, colorHex) {
         if (!instancedMesh) return -1;
@@ -777,7 +780,6 @@
         }
       }
 
-      // Tall 3D Reach Truck
       function spawnForklift(x, z, dir = 'z') {
         const parts = [];
         function addPart(ox, oy, oz, sx, sy, sz, colorHex) {
@@ -817,7 +819,6 @@
         });
       }
 
-      // Layered 3D AMR
       function spawnAMR(x, z, dir = 'z') {
         const parts = [];
         function addPart(ox, oy, oz, sx, sy, sz, colorHex) {
@@ -938,11 +939,11 @@
             const colDark3D  = new THREE.Color().lerpColors(PALETTE.trackCenter3D, PALETTE.trackEdge3D, normDist * 0.95);
 
             if (!isDark) {
-              // REINFORCED 1.25 THICK INDUSTRIAL CONCRETE PLINTH!
+              // 1.25 THICK REINFORCED CONCRETE BASE PLINTH
               const idx = addBlock(posX, -1.25, posZ, 0.98, 1.25, 0.98, colLight3D);
               floorData.push({ idx, col3D: colLight3D, colScan: PALETTE.floorScanLight });
             } else {
-              // REINFORCED 1.27 THICK TRANSIT GUIDE SLAB!
+              // 1.27 THICK GUIDE SLAB
               const idx = addBlock(posX, -1.25, posZ, 0.98, 1.27, 0.98, colDark3D);
               floorData.push({ idx, col3D: colDark3D, colScan: PALETTE.trackScanDark });
 
@@ -980,15 +981,15 @@
         if (instancedMesh.instanceColor) instancedMesh.instanceColor.needsUpdate = true;
         scene.add(instancedMesh);
 
-        // Smooth Lighting & Reflection Transition
+        // Update Theme-Specific Dynamic Lights & Reflection Tones
         gsap.to(sunLight.color, { r: new THREE.Color(PALETTE.sunColor).r, g: new THREE.Color(PALETTE.sunColor).g, b: new THREE.Color(PALETTE.sunColor).b, duration: 1.2 });
-        gsap.to(sunLight, { intensity: PALETTE.sunIntensity, duration: 1.2 });
+        gsap.to(sunLight, { intensity: isFlat ? 0.0 : PALETTE.sunIntensity, duration: 1.2 });
 
         gsap.to(fillLight.color, { r: new THREE.Color(PALETTE.fillColor).r, g: new THREE.Color(PALETTE.fillColor).g, b: new THREE.Color(PALETTE.fillColor).b, duration: 1.2 });
-        gsap.to(fillLight, { intensity: PALETTE.fillIntensity, duration: 1.2 });
+        gsap.to(fillLight, { intensity: isFlat ? 0.0 : PALETTE.fillIntensity, duration: 1.2 });
 
         gsap.to(ambientLight.color, { r: new THREE.Color(PALETTE.ambientColor).r, g: new THREE.Color(PALETTE.ambientColor).g, b: new THREE.Color(PALETTE.ambientColor).b, duration: 1.2 });
-        gsap.to(ambientLight, { intensity: PALETTE.ambientIntensity, duration: 1.2 });
+        gsap.to(ambientLight, { intensity: isFlat ? 1.55 : PALETTE.ambientIntensity, duration: 1.2 });
 
         laserMat.color.setHex(PALETTE.laserColor);
         dustMat.color.setHex(PALETTE.dustColor);
@@ -1013,6 +1014,7 @@
         controls.enabled = false;
         playServoHum();
 
+        // 1. Move Camera Position
         gsap.to(camera.position, {
           x: destPos.x,
           y: destPos.y,
@@ -1021,6 +1023,15 @@
           ease: "power3.inOut"
         });
 
+        // 2. Telephoto Zoom Transition (Eliminates perspective parallax in top view!)
+        gsap.to(camera, {
+          fov: isFlat ? 9.0 : 38.0,
+          duration: 1.2,
+          ease: "power3.inOut",
+          onUpdate: () => camera.updateProjectionMatrix()
+        });
+
+        // 3. Move Camera Orbit Target
         gsap.to(controls.target, {
           x: destTarget.x,
           y: destTarget.y,
@@ -1036,6 +1047,7 @@
           }
         });
 
+        // 4. Floor Contrast Interpolation
         gsap.to(contrastState, {
           progress: isFlat ? 1 : 0,
           duration: 1.2,
@@ -1043,16 +1055,31 @@
           onUpdate: () => updateFloorTransition(contrastState.progress)
         });
 
+        // 5. Specular Reflection Kill in Scan Mode (Stays high-gloss in 3D!)
         gsap.to(unitMaterial, {
-          roughness: isFlat ? 0.95 : 0.35,
-          metalness: isFlat ? 0.02 : 0.16,
+          roughness: isFlat ? 0.98 : 0.35,
+          metalness: isFlat ? 0.00 : 0.16,
           duration: 1.2,
           ease: "power2.inOut"
         });
 
-        gsap.to(sunLight, { intensity: isFlat ? 0.6 : PALETTE.sunIntensity, duration: 1.2 });
-        gsap.to(ambientLight, { intensity: isFlat ? 1.2 : PALETTE.ambientIntensity, duration: 1.2 });
+        // 6. SHADOW KILL ONLY DURING SCAN VIEW:
+        // Turns off castShadow and direct sunlight to prevent any shadow bleed on white modules!
+        if (isFlat) {
+          sunLight.castShadow = false;
+          fillLight.castShadow = false;
+          gsap.to(sunLight, { intensity: 0.0, duration: 1.0 });
+          gsap.to(fillLight, { intensity: 0.0, duration: 1.0 });
+          gsap.to(ambientLight, { intensity: 1.55, duration: 1.0 }); // Pure flat ambient overhead light
+        } else {
+          sunLight.castShadow = true;
+          fillLight.castShadow = true;
+          gsap.to(sunLight, { intensity: PALETTE.sunIntensity, duration: 1.2 });
+          gsap.to(fillLight, { intensity: PALETTE.fillIntensity, duration: 1.2 });
+          gsap.to(ambientLight, { intensity: PALETTE.ambientIntensity, duration: 1.2 });
+        }
 
+        // 7. Snap Fleet to Exact Cell Centers
         if (isFlat && instancedMesh) {
           for (let f = 0; f < dynamicFleet.length; f++) {
             const unit = dynamicFleet[f];

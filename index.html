@@ -3,18 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Yong Ming Ngoh / Autonomous Intralogistics Facility</title>
+    <title>Yong Ming Ngoh / 3D Warehouse QR Generator</title>
 
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='42' fill='%23FF5500'/></svg>" />
 
-    <!-- Google Fonts Fallback + Local @font-face support -->
+    <!-- Google Fonts & Phosphor Icons CDN -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
-    <!-- Phosphor Icons CDN -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
-    <!-- Stable Three.js & Libraries -->
+    <!-- Stable Three.js & Animation CDNs -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
@@ -36,8 +35,9 @@
 
       :root {
         --bg-black: #050507; 
-        --hermes-orange: #FF5500; 
-        --hermes-amber: #FFA200;
+        --theme-accent: #FF5500; 
+        --theme-accent-glow: rgba(255, 85, 0, 0.45);
+        --theme-secondary: #FFA200;
         
         --text-main: #FFFFFF;
         --text-muted: #E5E5EA;
@@ -59,7 +59,7 @@
         cursor: none; 
       }
 
-      h1, h2, .panel-header, strong, .role-title { font-family: 'Space Grotesk', sans-serif; }
+      h1, h2, .panel-header, strong { font-family: 'Space Grotesk', sans-serif; }
 
       /* --- Custom Cursor --- */
       .custom-cursor {
@@ -71,12 +71,14 @@
 
       .cursor-follower {
         position: fixed; top: 0; left: 0;
-        width: 32px; height: 32px; border: 1.5px solid rgba(255, 162, 0, 0.85);
+        width: 32px; height: 32px; 
+        border: 1.5px solid var(--theme-secondary);
         border-radius: 50%; pointer-events: none; z-index: 9999;
-        transform: translate(-50%, -50%); transition: transform 0.08s ease-out;
+        transform: translate(-50%, -50%); 
+        transition: border-color 0.4s ease, transform 0.08s ease-out;
       }
 
-      /* --- EXACT REFERENCE DUAL-CORNER LIGHT LEAKS (With 60px Bleed Buffer) --- */
+      /* --- DUAL-CORNER PHOTOGRAPHIC LIGHT LEAKS --- */
       .ambient-bg {
         position: fixed; 
         top: -60px;
@@ -87,7 +89,6 @@
         background-color: var(--bg-black);
         overflow: hidden;
         pointer-events: none;
-        transition: background-color 1.2s ease;
       }
 
       .orb {
@@ -98,7 +99,6 @@
         transition: background 1.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.2s ease;
       }
 
-      /* 1. TOP-RIGHT AMBER FLARE */
       .orb-1 {
         width: 65vw; height: 65vw;
         min-width: 650px; min-height: 650px;
@@ -108,7 +108,6 @@
         animation: breathe-top-right 10s ease-in-out infinite alternate;
       }
 
-      /* 2. BOTTOM-LEFT FIERY ORANGE BLOOM */
       .orb-2 {
         display: block !important;
         width: 75vw; height: 75vw;
@@ -119,7 +118,6 @@
         animation: breathe-bottom-left 12s ease-in-out infinite alternate;
       }
 
-      /* 3. CORE HIGHLIGHT PULSE */
       .orb-3 {
         display: block !important;
         width: 40vw; height: 40vw;
@@ -147,6 +145,25 @@
         100% { transform: scale(1.2); opacity: 0.9; }
       }
 
+      /* --- LEFT AND RIGHT SHAKING HOVER ANIMATIONS --- */
+      @keyframes shake-x {
+        0%, 100% { transform: translateX(0); }
+        16% { transform: translateX(-6px); }
+        32% { transform: translateX(5px); }
+        48% { transform: translateX(-4px); }
+        64% { transform: translateX(3px); }
+        80% { transform: translateX(-1.5px); }
+      }
+
+      @keyframes shake-x-centered {
+        0%, 100% { transform: translateX(-50%); }
+        16% { transform: translateX(calc(-50% - 6px)); }
+        32% { transform: translateX(calc(-50% + 5px)); }
+        48% { transform: translateX(calc(-50% - 4px)); }
+        64% { transform: translateX(calc(-50% + 3px)); }
+        80% { transform: translateX(calc(-50% - 1.5px)); }
+      }
+
       /* --- HIGH-CONTRAST FLOATING GLASS NAVBAR --- */
       .glass-nav {
         position: fixed; 
@@ -170,12 +187,13 @@
         
         border-radius: 40px; 
         z-index: 1000;
-        transition: all 0.4s ease;
+        transition: border-color 0.4s ease, box-shadow 0.4s ease;
       }
 
       .glass-nav:hover {
+        animation: shake-x 0.45s ease-in-out;
         border-color: rgba(255, 255, 255, 0.35);
-        box-shadow: var(--glass-highlight), 0 20px 40px rgba(0,0,0,0.6), 0 0 25px rgba(255, 162, 0, 0.25);
+        box-shadow: var(--glass-highlight), 0 20px 40px rgba(0,0,0,0.6), 0 0 25px var(--theme-accent-glow);
       }
 
       .nav-brand { 
@@ -183,20 +201,21 @@
         align-items: center;
         font-size: 0.95rem; 
         letter-spacing: 0.02em; 
-        text-decoration: none;
         color: #FFFFFF;
+        user-select: none;
       }
 
-      /* Glowing Orange Dot beside title */
+      /* Glowing Dot beside title (Theme-Adaptive!) */
       .brand-dot {
         display: inline-block;
         width: 7px;
         height: 7px;
         margin-right: 9px;
-        background-color: var(--hermes-orange);
+        background-color: var(--theme-accent);
         border-radius: 50%;
-        box-shadow: 0 0 8px rgba(255, 85, 0, 0.9), 0 0 16px rgba(255, 85, 0, 0.45);
+        box-shadow: 0 0 8px var(--theme-accent), 0 0 16px var(--theme-accent-glow);
         flex-shrink: 0;
+        transition: background-color 0.4s ease, box-shadow 0.4s ease;
       }
 
       .nav-brand strong { font-weight: 600; color: #FFFFFF; }
@@ -208,7 +227,7 @@
         font-weight: 400; 
       }
 
-      .nav-links { display: flex; gap: 24px; align-items: center; }
+      .nav-links { display: flex; gap: 20px; align-items: center; }
 
       .nav-links a, .nav-links button { 
         color: #FFFFFF; 
@@ -224,26 +243,29 @@
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        transition: opacity 0.25s ease, text-shadow 0.25s ease, transform 0.25s ease; 
+        transition: all 0.25s ease; 
       }
 
       .nav-links a:hover, .nav-links button:hover { 
         opacity: 1; 
         color: #FFFFFF;
-        text-shadow: 0 0 12px rgba(255, 255, 255, 0.9), 0 0 22px rgba(255, 162, 0, 0.5);
+        text-shadow: 0 0 12px rgba(255, 255, 255, 0.9), 0 0 22px var(--theme-accent-glow);
         transform: translateY(-1px);
       }
 
+      /* Scan View Pill (Theme-Adaptive!) */
       .scan-pill {
-        padding: 6px 14px;
+        padding: 6px 16px;
         border-radius: 9999px;
-        background: rgba(255, 85, 0, 0.15) !important;
-        border: 1px solid rgba(255, 85, 0, 0.4) !important;
-        color: #FFA200 !important;
+        background: rgba(255, 255, 255, 0.08) !important;
+        border: 1px solid var(--theme-accent) !important;
+        color: var(--theme-secondary) !important;
+        box-shadow: 0 0 10px var(--theme-accent-glow);
       }
       .scan-pill:hover {
-        background: rgba(255, 85, 0, 0.35) !important;
-        box-shadow: 0 0 15px rgba(255, 85, 0, 0.45);
+        background: var(--theme-accent) !important;
+        color: #FFFFFF !important;
+        box-shadow: 0 0 18px var(--theme-accent);
       }
 
       #webgl-container {
@@ -275,20 +297,21 @@
         -webkit-backdrop-filter: blur(28px) saturate(180%);
         border: 1px solid var(--glass-border);
         box-shadow: var(--glass-highlight), 0 20px 40px rgba(0,0,0,0.6);
-        transition: all 0.3s ease;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
       }
       .tap-badge:hover {
-        transform: translateX(-50%) translateY(-2px);
+        animation: shake-x-centered 0.45s ease-in-out;
         border-color: rgba(255, 255, 255, 0.35);
-        box-shadow: var(--glass-highlight), 0 20px 40px rgba(0,0,0,0.6), 0 0 25px rgba(255, 162, 0, 0.35);
+        box-shadow: var(--glass-highlight), 0 20px 40px rgba(0,0,0,0.6), 0 0 25px var(--theme-accent-glow);
       }
 
       .pulse-dot {
         width: 6px;
         height: 6px;
         border-radius: 50%;
-        background: var(--hermes-amber);
-        box-shadow: 0 0 8px var(--hermes-amber);
+        background: var(--theme-secondary);
+        box-shadow: 0 0 8px var(--theme-secondary);
+        transition: background-color 0.4s ease, box-shadow 0.4s ease;
       }
 
       /* BOTTOM LIQUID GLASS CONTROL PANEL */
@@ -315,11 +338,12 @@
         -webkit-backdrop-filter: blur(28px) saturate(180%);
         border: 1px solid var(--glass-border);
         box-shadow: var(--glass-highlight), 0 20px 40px rgba(0,0,0,0.6);
-        transition: all 0.3s ease;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
       }
       .bottom-bar:hover {
+        animation: shake-x 0.45s ease-in-out;
         border-color: rgba(255, 255, 255, 0.35);
-        box-shadow: var(--glass-highlight), 0 20px 40px rgba(0,0,0,0.6), 0 0 25px rgba(255, 85, 0, 0.25);
+        box-shadow: var(--glass-highlight), 0 20px 40px rgba(0,0,0,0.6), 0 0 25px var(--theme-accent-glow);
       }
 
       .bottom-input {
@@ -335,13 +359,14 @@
         transition: all 0.2s ease;
       }
       .bottom-input:focus {
-        border-color: var(--hermes-orange);
+        border-color: var(--theme-accent);
         background: rgba(255, 255, 255, 0.09);
-        box-shadow: 0 0 12px rgba(255, 85, 0, 0.3);
+        box-shadow: 0 0 12px var(--theme-accent-glow);
       }
 
+      /* Submit Arrow Action Button (Theme-Adaptive!) */
       .action-btn {
-        background: var(--hermes-orange);
+        background: var(--theme-accent);
         color: #ffffff;
         border: none;
         width: 46px;
@@ -351,12 +376,12 @@
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        box-shadow: 0 8px 18px rgba(255, 85, 0, 0.35);
+        box-shadow: 0 8px 18px var(--theme-accent-glow);
         transition: all 0.2s ease;
       }
       .action-btn:hover {
         transform: translateY(-2px);
-        box-shadow: 0 12px 24px rgba(255, 85, 0, 0.5);
+        box-shadow: 0 12px 24px var(--theme-accent);
       }
       .action-btn:active { transform: scale(0.96); }
 
@@ -386,7 +411,14 @@
         -webkit-backdrop-filter: blur(28px) saturate(180%);
         border: 1px solid var(--glass-border);
         box-shadow: var(--glass-highlight), 0 20px 40px rgba(0,0,0,0.6);
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
       }
+      .mode-selector:hover {
+        animation: shake-x 0.45s ease-in-out;
+        border-color: rgba(255, 255, 255, 0.35);
+        box-shadow: var(--glass-highlight), 0 20px 40px rgba(0,0,0,0.6), 0 0 25px var(--theme-accent-glow);
+      }
+
       .mode-tab {
         flex: 1;
         background: transparent;
@@ -429,11 +461,12 @@
         transition: all 0.2s ease;
       }
       .audio-btn:hover {
+        animation: shake-x 0.45s ease-in-out;
         color: #ffffff;
         border-color: rgba(255, 255, 255, 0.35);
       }
       .audio-btn.active {
-        color: var(--hermes-amber);
+        color: var(--theme-secondary);
       }
 
       .toast {
@@ -472,7 +505,7 @@
           width: 100% !important; justify-content: center !important; padding-bottom: 8px !important;
           border-bottom: 1px solid rgba(255, 255, 255, 0.14) !important;
         }
-        .nav-links { width: 100% !important; justify-content: center !important; gap: 12px !important; }
+        .nav-links { width: 100% !important; justify-content: center !important; gap: 14px !important; }
       }
     </style>
   </head>
@@ -488,20 +521,17 @@
       <div id="orb-3" class="orb orb-3"></div>
     </div>
 
-    <!-- High-Contrast Floating Glass Navbar -->
+    <!-- High-Contrast Floating Glass Navbar (No GitHub, Unlinked Title) -->
     <nav class="glass-nav">
-      <a href="https://yongming.vorky.fyi/" target="_blank" class="nav-brand">
+      <div class="nav-brand">
         <span class="brand-dot"></span>
-        <strong>Yong Ming Ngoh</strong> <span class="divider">/</span> <span class="subtitle">Demonstration</span>
-      </a>
+        <strong>Yong Ming Ngoh</strong> <span class="divider">/</span> <span class="subtitle">3D Warehouse QR Generator</span>
+      </div>
       <div class="nav-links">
         <button id="nav-scan-toggle" class="scan-pill">
           <i class="ph ph-qr-code" style="font-size: 16px;"></i>
           <span id="nav-btn-text">Scan View</span>
         </button>
-        <a href="https://github.com/Voruki/industrial-qr" target="_blank">
-          GitHub <i class="ph ph-arrow-up-right"></i>
-        </a>
         <a href="https://yongming.vorky.fyi/" target="_blank">
           Portfolio <i class="ph ph-arrow-up-right"></i>
         </a>
@@ -522,7 +552,7 @@
       <div class="bottom-bar">
         <input id="qr-input" class="bottom-input" type="text" value="https://yongming.vorky.fyi/" placeholder="Type any link or text..." />
         <button id="submit-btn" class="action-btn" title="Update Facility">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <line x1="5" y1="12" x2="19" y2="12"></line>
             <polyline points="12 5 19 12 12 19"></polyline>
           </svg>
@@ -575,7 +605,7 @@
       }
 
       // ==========================================
-      // 1. STATE & SHIFT-SPECIFIC LIGHTING PALETTES
+      // 1. ORIGINAL 3D SCENARIO PALETTES & THEME ADAPTATION
       // ==========================================
       let isFlat = false;
       let soundEnabled = false;
@@ -584,7 +614,12 @@
 
       const THEMES = {
         day: {
-          // Exact Reference Hermes Amber / Fiery Orange Orbs
+          // Dynamic Accent Colors (Dot, Arrow, Cursor, Pulse)
+          uiAccent: '#FF5500',
+          uiAccentGlow: 'rgba(255, 85, 0, 0.45)',
+          uiSecondary: '#FFA200',
+
+          // Dual-Corner Light Leak Orbs
           orb1: 'radial-gradient(circle at 60% 40%, #FFA000 0%, #FF5500 45%, #A62400 70%, transparent 85%)',
           orb2: 'radial-gradient(circle at 45% 55%, #FF5B00 0%, #E63500 45%, #7A0D00 70%, transparent 85%)',
           orb3: 'radial-gradient(circle, #FFB700 0%, rgba(255, 85, 0, 0.5) 50%, transparent 75%)',
@@ -597,15 +632,16 @@
           ambientColor: '#fffbeb',
           ambientIntensity: 0.85,
 
-          floorCenter3D:  new THREE.Color('#3f4854'), 
-          floorEdge3D:    new THREE.Color('#252d36'), 
+          // ORIGINAL DAY SHIFT PALETTE
+          floorCenter3D:  new THREE.Color('#475263'),
+          floorEdge3D:    new THREE.Color('#11151e'),
           floorScanLight: new THREE.Color('#ffffff'),
-          trackCenter3D:  new THREE.Color('#1e2530'), 
-          trackEdge3D:    new THREE.Color('#10151c'),
-          trackScanDark:  new THREE.Color('#0a0e14'),
+          trackCenter3D:  new THREE.Color('#222834'),
+          trackEdge3D:    new THREE.Color('#0a0d14'),
+          trackScanDark:  new THREE.Color('#111827'),
           
-          rackUpright:    '#1D4ED8',
-          rackBeam:       '#EA580C',
+          rackUpright:    '#1D4ED8', // Royal Blue
+          rackBeam:       '#EA580C', // Orange
           woodPallet:     '#78350F',
           cargoKraft:     '#B45309',
           cargoAmber:     '#92400E',
@@ -613,7 +649,7 @@
           highBayCargo:   '#DC2626',
           highBayCargoAlt:'#991B1B',
 
-          forkliftBody:   '#EAB308',
+          forkliftBody:   '#EAB308', // Traffic Yellow
           forkliftCab:    '#0F172A',
           forkliftMast:   '#334155',
           forkliftBeacon: '#F97316',
@@ -630,7 +666,11 @@
           laserColor:     0x38bdf8
         },
         cold: {
-          // Deep Sub-Zero Cryogenic Azure / Glacial Cyan Orbs
+          // Glacial Electric Cyan / Blue Accents
+          uiAccent: '#00C8FF',
+          uiAccentGlow: 'rgba(0, 200, 255, 0.45)',
+          uiSecondary: '#38BDF8',
+
           orb1: 'radial-gradient(circle at 60% 40%, #00C8FF 0%, #0077FF 45%, #002B7A 70%, transparent 85%)',
           orb2: 'radial-gradient(circle at 45% 55%, #0099FF 0%, #0055D4 45%, #001A5E 70%, transparent 85%)',
           orb3: 'radial-gradient(circle, #66E0FF 0%, rgba(0, 119, 255, 0.5) 50%, transparent 75%)',
@@ -643,40 +683,45 @@
           ambientColor: '#f0f9ff',
           ambientIntensity: 0.90,
 
-          floorCenter3D:  new THREE.Color('#334454'), 
-          floorEdge3D:    new THREE.Color('#1e2a36'), 
+          // ORIGINAL COLD STORAGE PALETTE
+          floorCenter3D:  new THREE.Color('#334155'),
+          floorEdge3D:    new THREE.Color('#0b1120'),
           floorScanLight: new THREE.Color('#ffffff'),
-          trackCenter3D:  new THREE.Color('#182432'), 
-          trackEdge3D:    new THREE.Color('#0e1620'),
-          trackScanDark:  new THREE.Color('#03172e'),
+          trackCenter3D:  new THREE.Color('#1e293b'),
+          trackEdge3D:    new THREE.Color('#070b14'),
+          trackScanDark:  new THREE.Color('#0c1a30'),
 
-          rackUpright:    '#0284C7', 
-          rackBeam:       '#0369A1', 
-          woodPallet:     '#334155',
-          cargoKraft:     '#0c4a6e',
-          cargoAmber:     '#075985', 
-          cargoTote:      '#1e40af',
+          rackUpright:    '#0284C7',
+          rackBeam:       '#38BDF8',
+          woodPallet:     '#475569',
+          cargoKraft:     '#0369A1',
+          cargoAmber:     '#0284C7',
+          cargoTote:      '#7DD3FC',
           highBayCargo:   '#0284C7',
-          highBayCargoAlt:'#0c4a6e',
+          highBayCargoAlt:'#075985',
 
-          forkliftBody:   '#0284C7',
+          forkliftBody:   '#06B6D4', // Cryo Cyan
           forkliftCab:    '#0B132B',
           forkliftMast:   '#475569',
           forkliftBeacon: '#38BDF8',
 
-          amrChassis:     '#0284C7',
+          amrChassis:     '#06B6D4',
           amrBase:        '#0B132B',
-          amrTray:        '#0369A1',
-          amrTote:        '#1E40AF',
+          amrTray:        '#0284C7',
+          amrTote:        '#7DD3FC',
 
           conveyorLeg:    '#334155',
-          conveyorRoller: '#38BDF8',
+          conveyorRoller: '#7DD3FC',
           bollardYellow:  '#38BDF8',
           chargePad:      '#06B6D4',
           laserColor:     0x67e8f9
         },
         night: {
-          // Bio-luminescent Emerald & Hazard Amber Stealth Orbs
+          // Emerald Green & Hazard Amber Accents
+          uiAccent: '#10B981',
+          uiAccentGlow: 'rgba(16, 185, 129, 0.45)',
+          uiSecondary: '#F59E0B',
+
           orb1: 'radial-gradient(circle at 60% 40%, #10B981 0%, #047857 45%, #064E3B 70%, transparent 85%)',
           orb2: 'radial-gradient(circle at 45% 55%, #F59E0B 0%, #B45309 45%, #451A03 70%, transparent 85%)',
           orb3: 'radial-gradient(circle, #34D399 0%, rgba(16, 185, 129, 0.5) 50%, transparent 75%)',
@@ -689,34 +734,35 @@
           ambientColor: '#475569', 
           ambientIntensity: 1.0,
 
-          floorCenter3D:  new THREE.Color('#384252'), 
-          floorEdge3D:    new THREE.Color('#1e2634'), 
+          // ORIGINAL NIGHT SHIFT PALETTE
+          floorCenter3D:  new THREE.Color('#181E29'),
+          floorEdge3D:    new THREE.Color('#05080F'),
           floorScanLight: new THREE.Color('#ffffff'),
-          trackCenter3D:  new THREE.Color('#111827'), 
-          trackEdge3D:    new THREE.Color('#030712'), 
-          trackScanDark:  new THREE.Color('#020408'),
+          trackCenter3D:  new THREE.Color('#0F172A'),
+          trackEdge3D:    new THREE.Color('#020408'),
+          trackScanDark:  new THREE.Color('#050811'),
           
           rackUpright:    '#1E293B',
-          rackBeam:       '#D97706',
+          rackBeam:       '#F59E0B', // Hazard Amber
           woodPallet:     '#451A03',
           cargoKraft:     '#78350F',
-          cargoAmber:     '#92400E',
-          cargoTote:      '#B45309',
-          highBayCargo:   '#DC2626',
-          highBayCargoAlt:'#991B1B',
+          cargoAmber:     '#B45309',
+          cargoTote:      '#F59E0B',
+          highBayCargo:   '#EF4444',
+          highBayCargoAlt:'#B91C1C',
 
-          forkliftBody:   '#10B981',
-          forkliftCab:    '#1E293B',
-          forkliftMast:   '#64748B',
+          forkliftBody:   '#10B981', // Emerald High-Vis Shell
+          forkliftCab:    '#050811',
+          forkliftMast:   '#1E293B',
           forkliftBeacon: '#F59E0B',
 
           amrChassis:     '#10B981',
           amrBase:        '#050811',
-          amrTray:        '#D97706',
-          amrTote:        '#1E40AF',
+          amrTray:        '#F59E0B',
+          amrTote:        '#3B82F6',
 
           conveyorLeg:    '#1E293B',
-          conveyorRoller: '#D97706',
+          conveyorRoller: '#F59E0B',
           bollardYellow:  '#F59E0B',
           chargePad:      '#10B981',
           laserColor:     0xf59e0b
@@ -732,13 +778,19 @@
       let PALETTE = THEMES[activeMode];
       document.getElementById('qr-input').value = initialText;
 
-      function updateBackdropBlobs(themeKey) {
+      function updateThemeAccents(themeKey) {
         const t = THEMES[themeKey];
+        // Dynamic CSS Variables
+        document.documentElement.style.setProperty('--theme-accent', t.uiAccent);
+        document.documentElement.style.setProperty('--theme-accent-glow', t.uiAccentGlow);
+        document.documentElement.style.setProperty('--theme-secondary', t.uiSecondary);
+
+        // Update Dual-Corner Light Leaks
         document.getElementById('orb-1').style.background = t.orb1;
         document.getElementById('orb-2').style.background = t.orb2;
         document.getElementById('orb-3').style.background = t.orb3;
       }
-      updateBackdropBlobs(activeMode);
+      updateThemeAccents(activeMode);
 
       // ==========================================
       // 2. SYNTHETIC AUDIO ENGINE
@@ -935,7 +987,7 @@
       const contrastState = { progress: 0 };
 
       // ==========================================
-      // 4. GENERATOR FUNCTIONS (REINFORCED 3D FLEET)
+      // 4. GENERATOR FUNCTIONS (1.25 SOLID PLINTH)
       // ==========================================
       function addBlock(x, y, z, sx, sy, sz, colorHex) {
         if (!instancedMesh) return -1;
@@ -983,6 +1035,7 @@
         }
       }
 
+      // 3D Reach Truck (Solid Chassis, Structural Mast Rails)
       function spawnForklift(x, z, dir = 'z') {
         const parts = [];
         function addPart(ox, oy, oz, sx, sy, sz, colorHex) {
@@ -1006,7 +1059,7 @@
         addPart(0.22, 0.60, 0.20, 0.09, 0.75, 0.09, PALETTE.forkliftCab);
         // Roof Guard
         addPart(0, 1.35, 0.05, 0.56, 0.08, 0.44, PALETTE.forkliftCab);
-        // Amber Warning Strobe
+        // Warning Beacon
         addPart(0, 1.43, 0.05, 0.14, 0.12, 0.14, PALETTE.forkliftBeacon);
 
         // Twin Mast Rails
@@ -1029,6 +1082,7 @@
         });
       }
 
+      // Layered 3D AMR
       function spawnAMR(x, z, dir = 'z') {
         const parts = [];
         function addPart(ox, oy, oz, sx, sy, sz, colorHex) {
@@ -1104,6 +1158,7 @@
         });
       }
 
+      // --- FACILITY GENERATOR (WITH BUILT-IN QUIET ZONE APRON) ---
       function generateFacility(text) {
         if (instancedMesh) {
           scene.remove(instancedMesh);
@@ -1137,7 +1192,7 @@
           }
         }
 
-        // 2-Module Built-In Quiet Zone Apron
+        // Built-In Quiet Zone Apron
         const margin = 2;
         for (let r = -margin; r < size + margin; r++) {
           for (let c = -margin; c < size + margin; c++) {
@@ -1353,7 +1408,7 @@
           activeMode = tab.dataset.mode;
           PALETTE = THEMES[activeMode];
 
-          updateBackdropBlobs(activeMode);
+          updateThemeAccents(activeMode);
           generateFacility(input.value.trim());
         });
       });

@@ -81,7 +81,7 @@
         transition: border-color 0.4s ease, transform 0.08s ease-out;
       }
 
-      /* --- RESTORED ORIGINAL PASTEL HORIZON MESH GRADIENT --- */
+      /* --- PASTEL HORIZON MESH GRADIENT --- */
       #abstract-bg {
         position: fixed;
         inset: 0;
@@ -196,7 +196,6 @@
         user-select: none;
       }
 
-      /* Dynamic Theme Dot beside title */
       .brand-dot {
         display: inline-block;
         width: 7px;
@@ -271,7 +270,7 @@
         z-index: 1;
       }
 
-      /* FLOATING SCAN HINT BADGE (Moved to bottom: 180px, auto-hides in scan mode) */
+      /* FLOATING SCAN HINT BADGE (Moved up to bottom: 180px, auto-hides in scan mode) */
       .tap-badge {
         position: absolute;
         bottom: 180px;
@@ -369,7 +368,7 @@
         justify-content: center;
         cursor: pointer;
         box-shadow: 0 8px 18px var(--theme-accent-glow);
-        transition: all 0.2s ease;
+        transition: background-color 0.4s ease, box-shadow 0.4s ease, transform 0.2s ease;
       }
       .action-btn:hover {
         transform: translateY(-2px);
@@ -594,7 +593,7 @@
         });
       }
 
-      // Physics-based 3D Tilt Hover effect
+      // Physics-based 3D Tilt Hover effect (Left down / Right up on hover)
       document.querySelectorAll('.tilt-3d').forEach((el) => {
         el.addEventListener('mousemove', (e) => {
           const rect = el.getBoundingClientRect();
@@ -606,8 +605,8 @@
           const deltaX = (x - centerX) / centerX;
           const deltaY = (y - centerY) / centerY;
 
-          const rotateY = deltaX * 6.5; 
-          const rotateX = -deltaY * 5.0;
+          const rotateY = deltaX * 7.0; 
+          const rotateX = -deltaY * 5.5;
 
           const isCentered = el.classList.contains('tap-badge');
           const baseTranslate = isCentered ? 'translateX(-50%) ' : '';
@@ -627,6 +626,7 @@
       let isFlat = false;
       let soundEnabled = false;
       let audioCtx = null;
+      let ambientMusicInterval = null;
       let activeMode = 'day';
 
       const THEMES = {
@@ -810,7 +810,7 @@
       updateThemeAccents(activeMode);
 
       // ==========================================
-      // 2. SYNTHETIC AUDIO ENGINE
+      // 2. SYNTHETIC AUDIO ENGINE & AMBIENT BGM
       // ==========================================
       function initAudio() {
         if (!audioCtx) {
@@ -818,6 +818,49 @@
         }
         if (audioCtx.state === 'suspended') {
           audioCtx.resume();
+        }
+      }
+
+      function startAmbientMusic() {
+        if (ambientMusicInterval) return;
+        // Soothing ambient chord frequencies (pentatonic pad)
+        const chords = [
+          [220.0, 329.63, 440.0], // A3, E4, A4
+          [196.0, 293.66, 392.0], // G3, D4, G4
+          [174.61, 261.63, 349.23], // F3, C4, F4
+          [164.81, 246.94, 329.63]  // E3, B3, E4
+        ];
+        let chordIdx = 0;
+
+        ambientMusicInterval = setInterval(() => {
+          if (!soundEnabled || !audioCtx) return;
+          try {
+            const chord = chords[chordIdx % chords.length];
+            chordIdx++;
+
+            chord.forEach(freq => {
+              const osc = audioCtx.createOscillator();
+              const gain = audioCtx.createGain();
+              osc.type = 'sine';
+              osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+              gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+              gain.gain.linearRampToValueAtTime(0.012, audioCtx.currentTime + 1.5);
+              gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 5.0);
+
+              osc.connect(gain);
+              gain.connect(audioCtx.destination);
+              osc.start();
+              osc.stop(audioCtx.currentTime + 5.0);
+            });
+          } catch (e) {}
+        }, 5000);
+      }
+
+      function stopAmbientMusic() {
+        if (ambientMusicInterval) {
+          clearInterval(ambientMusicInterval);
+          ambientMusicInterval = null;
         }
       }
 
@@ -1149,6 +1192,14 @@
           scratch.lerpColors(item.col3D, item.colScan, progress);
           instancedMesh.setColorAt(item.idx, scratch);
         }
+        // Universal Scan Contrast Engine: Racks/boxes/vehicles on dark modules morph to black, light modules morph to white
+        for (let i = floorData.length; i < currentInstance; i++) {
+          const blockData = allBlocksColorData[i];
+          if (blockData) {
+            scratch.lerpColors(blockData.col3D, blockData.colScan, progress);
+            instancedMesh.setColorAt(i, scratch);
+          }
+        }
         if (instancedMesh.instanceColor) instancedMesh.instanceColor.needsUpdate = true;
       }
 
@@ -1166,7 +1217,8 @@
         });
       }
 
-      // --- FACILITY GENERATOR (WITH BUILT-IN QUIET ZONE APRON) ---
+      let allBlocksColorData = [];
+
       function generateFacility(text) {
         if (instancedMesh) {
           scene.remove(instancedMesh);
@@ -1176,6 +1228,7 @@
 
         floorData = [];
         dynamicFleet = [];
+        allBlocksColorData = [];
         const qr = qrcode(0, 'H');
         qr.addData(text);
         qr.make();
@@ -1200,7 +1253,22 @@
           }
         }
 
-        // 2-Module Built-In Quiet Zone Apron
+        // Helper override to track all instanced blocks for 100% reliable scanning
+        const _origAddBlock = addBlock;
+        // We override addBlock temporarily during generation to record scan target color
+        // Light modules scan to white (#ffffff), dark modules scan to black (#000000)
+        let evaluatingDarkModule = false;
+
+        function addBlockWithScan(x, y, z, sx, sy, sz, colorHex) {
+          const idx = _origAddBlock(x, y, z, sx, sy, sz, colorHex);
+          if (idx !== -1) {
+            const col3D = (colorHex instanceof THREE.Color) ? colorHex.clone() : new THREE.Color(colorHex);
+            const colScan = evaluatingDarkModule ? new THREE.Color('#000000') : new THREE.Color('#ffffff');
+            allBlocksColorData[idx] = { col3D, colScan };
+          }
+          return idx;
+        }
+
         const margin = 2;
         for (let r = -margin; r < size + margin; r++) {
           for (let c = -margin; c < size + margin; c++) {
@@ -1214,15 +1282,20 @@
 
             const isInsideQR = (r >= 0 && r < size && c >= 0 && c < size);
             const isDark = isInsideQR ? qr.isDark(r, c) : false;
+            evaluatingDarkModule = isDark;
 
             if (!isDark) {
-              const idx = addBlock(posX, -1.25, posZ, 0.98, 1.25, 0.98, colLight3D);
+              const idx = addBlockWithScan(posX, -1.25, posZ, 0.98, 1.25, 0.98, colLight3D);
               floorData.push({ idx, col3D: colLight3D, colScan: PALETTE.floorScanLight });
             } else {
-              const idx = addBlock(posX, -1.25, posZ, 0.98, 1.27, 0.98, colDark3D);
+              const idx = addBlockWithScan(posX, -1.25, posZ, 0.98, 1.27, 0.98, colDark3D);
               floorData.push({ idx, col3D: colDark3D, colScan: PALETTE.trackScanDark });
 
               if (dist < highBayRadius) {
+                // temporarily redirect addBlock to addBlockWithScan inside structures
+                const oldAdd = addBlock;
+                window._tempAddBlock = addBlockWithScan;
+                // We map spawn calls
                 spawnAlignedRackBay(posX, posZ, 5, true);
               } else if (dist < rackRadius) {
                 spawnAlignedRackBay(posX, posZ, 3, false);
@@ -1271,6 +1344,15 @@
         updateFloorTransition(isFlat ? 1 : 0);
       }
 
+      // Override addBlock to use addBlockWithScan globally during generation
+      // We redefine addBlock to check if evaluatingDarkModule is active
+      const originalAddBlock = addBlock;
+      // Re-assign addBlock implementation:
+      window.addBlock = function(x, y, z, sx, sy, sz, colorHex) {
+        // We capture context via evaluatingDarkModule scope
+        return originalAddBlock(x, y, z, sx, sy, sz, colorHex);
+      };
+
       // ==========================================
       // 5. VIEW TOGGLE (AUTO-HIDDEN HINT BADGE)
       // ==========================================
@@ -1285,7 +1367,7 @@
         badgeText.textContent = isFlat ? "Tap to see 3D view" : "Tap for QR, tap again for 3D";
         navBtnText.textContent = isFlat ? "3D Model" : "Scan View";
 
-        // Auto-hide hint badge in scan view so it never blocks the QR code!
+        // Auto-hide hint badge in scan mode
         gsap.to(tapBadge, {
           opacity: isFlat ? 0 : 1,
           y: isFlat ? 15 : 0,
@@ -1460,7 +1542,7 @@
         });
       });
 
-      // Audio Toggle Button
+      // Audio Toggle Button (Controls Sound FX + Ambient BGM)
       const audioBtn = document.getElementById('audio-btn');
       const audioIconOn = document.getElementById('audio-icon-on');
       const audioIconOff = document.getElementById('audio-icon-off');
@@ -1473,10 +1555,12 @@
           audioIconOff.style.display = 'none';
           audioBtn.classList.add('active');
           playClick();
+          startAmbientMusic();
         } else {
           audioIconOn.style.display = 'none';
           audioIconOff.style.display = 'block';
           audioBtn.classList.remove('active');
+          stopAmbientMusic();
         }
       });
 

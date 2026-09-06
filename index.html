@@ -654,7 +654,6 @@
           trackCenter3D:  new THREE.Color('#1e2530'), 
           trackEdge3D:    new THREE.Color('#10151c'),
           
-          // Theme-colored scannable tones for Day Shift (Rust Amber & Warm Butter-Yellow)
           darkScanColor:  new THREE.Color('#9a3412'),
           lightScanColor: new THREE.Color('#fef08a'),
           
@@ -707,7 +706,6 @@
           trackCenter3D:  new THREE.Color('#182432'), 
           trackEdge3D:    new THREE.Color('#0e1620'),
 
-          // Theme-colored scannable tones for Cold Storage (Deep Cryo Sapphire & Frost Ice-Blue)
           darkScanColor:  new THREE.Color('#0369a1'),
           lightScanColor: new THREE.Color('#e0f2fe'),
 
@@ -760,7 +758,6 @@
           trackCenter3D:  new THREE.Color('#0F172A'), 
           trackEdge3D:    new THREE.Color('#020408'), 
 
-          // Theme-colored scannable tones for Night Shift (Deep Emerald & Luminous Mint)
           darkScanColor:  new THREE.Color('#064e3b'),
           lightScanColor: new THREE.Color('#a7f3d0'),
           
@@ -851,7 +848,7 @@
                 osc.type = 'triangle';
                 osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
 
-                // Lowered volume peak to 0.012 for soft, pleasant background playback
+                // Lowered volume peak to 0.012 for soft background playback
                 gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
                 gain.gain.linearRampToValueAtTime(0.012, audioCtx.currentTime + 0.1);
                 gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 1.8);
@@ -1070,7 +1067,6 @@
         const col = (colorHex instanceof THREE.Color) ? colorHex.clone() : new THREE.Color(colorHex);
         instancedMesh.setColorAt(idx, col);
 
-        // Map scan colors to theme-matched dark & light scannable tones
         const colScan = isDarkModule ? PALETTE.darkScanColor : PALETTE.lightScanColor;
         blocksData[idx] = { col3D: col.clone(), colScan: colScan.clone() };
 
@@ -1198,7 +1194,6 @@
         addBlock(x + offset, 0.05, z + offset, 0.14, 0.70, 0.14, PALETTE.bollardYellow, isDark);
       }
 
-      // Universal transition loop covering ALL blocks (floors, racks, boxes, vehicles)
       function updateFloorTransition(progress) {
         if (!instancedMesh) return;
         const scratch = new THREE.Color();
@@ -1595,7 +1590,6 @@
               dummy.position.set(curX, curY, curZ);
               dummy.scale.set(part.sx, part.sy, part.sz);
               dummy.rotation.set(0, 0, 0);
-              dummy.updateManager = true;
               dummy.updateMatrix();
               instancedMesh.setMatrixAt(part.idx, dummy.matrix);
             }

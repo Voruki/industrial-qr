@@ -43,6 +43,7 @@
         transition: background 1.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.4s ease;
       }
 
+      /* Blob 1: Large primary floating studio pool */
       .blob-1 {
         width: 68vw;
         height: 68vw;
@@ -53,6 +54,7 @@
         animation: floatBlob1 22s infinite alternate ease-in-out;
       }
 
+      /* Blob 2: Secondary top-right pastel accent flare */
       .blob-2 {
         width: 60vw;
         height: 60vw;
@@ -63,6 +65,7 @@
         animation: floatBlob2 26s infinite alternate ease-in-out;
       }
 
+      /* Blob 3: Deep ambient fill warmth */
       .blob-3 {
         width: 75vw;
         height: 75vw;
@@ -357,7 +360,7 @@
 
     <script>
       // ==========================================
-      // 1. STATE & SHIFT-SPECIFIC LIGHTING PALETTES
+      // 1. STATE & CALIBRATED SHIFT PALETTES
       // ==========================================
       let isFlat = false;
       let soundEnabled = false;
@@ -373,7 +376,6 @@
           vignette: 'radial-gradient(ellipse at 50% 45%, rgba(67, 20, 7, 0.42) 0%, rgba(154, 52, 18, 0.20) 42%, rgba(254, 240, 138, 0.65) 75%, #fde047 100%)',
           dustColor: 0xb45309,
 
-          // ☀️ Warm Golden Sunlight Reflections in 3D
           sunColor: '#fff1dc',
           sunIntensity: 2.4,
           fillColor: '#fed7aa',
@@ -381,7 +383,6 @@
           ambientColor: '#fffbeb',
           ambientIntensity: 0.85,
 
-          // Reinforced Medium Slate-Grey Concrete Slab
           floorCenter3D:  new THREE.Color('#3f4854'), 
           floorEdge3D:    new THREE.Color('#252d36'), 
           floorScanLight: new THREE.Color('#ffffff'),
@@ -422,43 +423,42 @@
           vignette: 'radial-gradient(ellipse at 50% 45%, rgba(8, 47, 73, 0.45) 0%, rgba(3, 105, 161, 0.18) 42%, rgba(186, 230, 253, 0.65) 75%, #7dd3fc 100%)',
           dustColor: 0x0284c7,
 
-          // ❄️ Glacial Cyan Frost Light Reflections in 3D
           sunColor: '#e0f2fe',
-          sunIntensity: 2.0,
+          sunIntensity: 2.2,
           fillColor: '#38bdf8',
-          fillIntensity: 0.45,
+          fillIntensity: 0.50,
           ambientColor: '#f0f9ff',
-          ambientIntensity: 0.85,
+          ambientIntensity: 0.90,
 
-          // Reinforced Cool Bluish-Grey Concrete Slab
           floorCenter3D:  new THREE.Color('#334454'), 
           floorEdge3D:    new THREE.Color('#1e2a36'), 
           floorScanLight: new THREE.Color('#ffffff'),
           trackCenter3D:  new THREE.Color('#182432'), 
           trackEdge3D:    new THREE.Color('#0e1620'),
-          trackScanDark:  new THREE.Color('#0a111a'),
-          
-          rackUpright:    '#0284C7',
-          rackBeam:       '#38BDF8',
-          woodPallet:     '#475569',
-          cargoKraft:     '#0369A1',
-          cargoAmber:     '#0284C7',
-          cargoTote:      '#7DD3FC',
-          highBayCargo:   '#0284C7',
-          highBayCargoAlt:'#075985',
+          trackScanDark:  new THREE.Color('#03172e'), // Deep navy in scan mode (High contrast!)
 
-          forkliftBody:   '#06B6D4',
+          // High-Contrast Deep Arctic Blue Palettes (Guarantees instant scanning!)
+          rackUpright:    '#0369A1', 
+          rackBeam:       '#0284C7', 
+          woodPallet:     '#475569',
+          cargoKraft:     '#0c4a6e', // Deep oceanic carton (Low luminance)
+          cargoAmber:     '#075985', 
+          cargoTote:      '#1e40af', // Deep royal cryo tote (Replaces light #7DD3FC that washed out!)
+          highBayCargo:   '#0369A1',
+          highBayCargoAlt:'#0c4a6e',
+
+          forkliftBody:   '#0284C7',
           forkliftCab:    '#0B132B',
           forkliftMast:   '#475569',
           forkliftBeacon: '#38BDF8',
 
-          amrChassis:     '#06B6D4',
+          amrChassis:     '#0284C7',
           amrBase:        '#0B132B',
-          amrTray:        '#0284C7',
-          amrTote:        '#38BDF8',
+          amrTray:        '#0369A1',
+          amrTote:        '#1E40AF',
 
           conveyorLeg:    '#334155',
-          conveyorRoller: '#7DD3FC',
+          conveyorRoller: '#38BDF8',
           bollardYellow:  '#38BDF8',
           chargePad:      '#06B6D4',
           laserColor:     0x67e8f9
@@ -471,20 +471,19 @@
           vignette: 'radial-gradient(ellipse at 50% 45%, transparent 35%, rgba(2, 6, 23, 0.65) 80%, #020617 100%)',
           dustColor: 0x6ee7b7,
 
-          // 🌙 High-Lux Silvery Moonlight in 3D
-          sunColor: '#c7dfff',
-          sunIntensity: 2.3,
-          fillColor: '#60a5fa',
-          fillIntensity: 0.70,
-          ambientColor: '#1e293b',
-          ambientIntensity: 0.85,
+          // 🌙 Bright Lunar Moonlight Rig (Eliminates muddy darkness!)
+          sunColor: '#e2e8f0', // Crisp luminous silver moonlight
+          sunIntensity: 2.8,   // High-lux moonlight
+          fillColor: '#93c5fd', // Bright moonlight fill
+          fillIntensity: 0.85,
+          ambientColor: '#475569', // Bright slate ambient in 3D
+          ambientIntensity: 1.0,
 
-          // Reinforced Dark Charcoal Concrete Floor Slab
-          floorCenter3D:  new THREE.Color('#2d3748'), 
-          floorEdge3D:    new THREE.Color('#1a202c'), 
+          floorCenter3D:  new THREE.Color('#384252'), 
+          floorEdge3D:    new THREE.Color('#1e2634'), 
           floorScanLight: new THREE.Color('#ffffff'),
-          trackCenter3D:  new THREE.Color('#1f2937'), 
-          trackEdge3D:    new THREE.Color('#111827'),
+          trackCenter3D:  new THREE.Color('#111827'), 
+          trackEdge3D:    new THREE.Color('#030712'), 
           trackScanDark:  new THREE.Color('#020408'),
           
           rackUpright:    '#1E293B',
@@ -614,7 +613,6 @@
       const isoPos = new THREE.Vector3(48.0, 46.0, 48.0);
       const isoTarget = new THREE.Vector3(0.0, -3.8, 0.0);
 
-      // Telephoto Overhead Scan Position (Pulls far up with small FOV to eliminate rack parallax leaning!)
       const flatPos = new THREE.Vector3(0.0, 380.0, 2.501);
       const flatTarget = new THREE.Vector3(0.0, 0.0, 2.5);
 
@@ -670,7 +668,7 @@
       fillLight.position.set(-30, 20, -30);
       scene.add(fillLight);
 
-      // --- PROCEDURAL SOFT GAUSSIAN TEXTURE ---
+      // Procedural Soft Gaussian Texture
       function createSoftParticleTexture() {
         const canvas = document.createElement('canvas');
         canvas.width = 64;
@@ -686,7 +684,6 @@
         return new THREE.CanvasTexture(canvas);
       }
 
-      // --- SUBTLE ATMOSPHERIC DUST MOTES ---
       const dustCount = 130;
       const dustGeo = new THREE.BufferGeometry();
       const dustPositions = new Float32Array(dustCount * 3);
@@ -708,7 +705,6 @@
       const dustParticles = new THREE.Points(dustGeo, dustMat);
       scene.add(dustParticles);
 
-      // Lidar Laser Plane
       const laserGeo = new THREE.PlaneGeometry(36, 0.45);
       const laserMat = new THREE.MeshBasicMaterial({
         color: PALETTE.laserColor,
@@ -722,7 +718,6 @@
       laserPlane.position.y = 0.35;
       scene.add(laserPlane);
 
-      // Instanced System State
       let instancedMesh = null;
       const dummy = new THREE.Object3D();
       const tempColor = new THREE.Color();
@@ -789,7 +784,7 @@
           const rsz = (dir === 'x') ? sx : sz;
 
           const idx = addBlock(x + rx, oy, z + rz, rsx, sy, rsz, colorHex);
-          parts.push({ ox: rx, oy: oy, oz: rz, sx: rsx, sy: sy, sz: rsz, idx });
+          parts.push({ ox: rx, oy: oy, oz: rz, sx: rsx, sy: sz, rsz, idx });
         }
 
         addPart(0, 0.08, 0.12, 0.52, 0.45, 0.42, PALETTE.forkliftBody);
@@ -939,11 +934,9 @@
             const colDark3D  = new THREE.Color().lerpColors(PALETTE.trackCenter3D, PALETTE.trackEdge3D, normDist * 0.95);
 
             if (!isDark) {
-              // 1.25 THICK REINFORCED CONCRETE BASE PLINTH
               const idx = addBlock(posX, -1.25, posZ, 0.98, 1.25, 0.98, colLight3D);
               floorData.push({ idx, col3D: colLight3D, colScan: PALETTE.floorScanLight });
             } else {
-              // 1.27 THICK GUIDE SLAB
               const idx = addBlock(posX, -1.25, posZ, 0.98, 1.27, 0.98, colDark3D);
               floorData.push({ idx, col3D: colDark3D, colScan: PALETTE.trackScanDark });
 
@@ -981,15 +974,15 @@
         if (instancedMesh.instanceColor) instancedMesh.instanceColor.needsUpdate = true;
         scene.add(instancedMesh);
 
-        // Update Theme-Specific Dynamic Lights & Reflection Tones
-        gsap.to(sunLight.color, { r: new THREE.Color(PALETTE.sunColor).r, g: new THREE.Color(PALETTE.sunColor).g, b: new THREE.Color(PALETTE.sunColor).b, duration: 1.2 });
-        gsap.to(sunLight, { intensity: isFlat ? 0.0 : PALETTE.sunIntensity, duration: 1.2 });
-
-        gsap.to(fillLight.color, { r: new THREE.Color(PALETTE.fillColor).r, g: new THREE.Color(PALETTE.fillColor).g, b: new THREE.Color(PALETTE.fillColor).b, duration: 1.2 });
-        gsap.to(fillLight, { intensity: isFlat ? 0.0 : PALETTE.fillIntensity, duration: 1.2 });
-
-        gsap.to(ambientLight.color, { r: new THREE.Color(PALETTE.ambientColor).r, g: new THREE.Color(PALETTE.ambientColor).g, b: new THREE.Color(PALETTE.ambientColor).b, duration: 1.2 });
-        gsap.to(ambientLight, { intensity: isFlat ? 1.55 : PALETTE.ambientIntensity, duration: 1.2 });
+        // Update Dynamic Lights
+        if (!isFlat) {
+          gsap.to(sunLight.color, { r: new THREE.Color(PALETTE.sunColor).r, g: new THREE.Color(PALETTE.sunColor).g, b: new THREE.Color(PALETTE.sunColor).b, duration: 1.2 });
+          gsap.to(sunLight, { intensity: PALETTE.sunIntensity, duration: 1.2 });
+          gsap.to(fillLight.color, { r: new THREE.Color(PALETTE.fillColor).r, g: new THREE.Color(PALETTE.fillColor).g, b: new THREE.Color(PALETTE.fillColor).b, duration: 1.2 });
+          gsap.to(fillLight, { intensity: PALETTE.fillIntensity, duration: 1.2 });
+          gsap.to(ambientLight.color, { r: new THREE.Color(PALETTE.ambientColor).r, g: new THREE.Color(PALETTE.ambientColor).g, b: new THREE.Color(PALETTE.ambientColor).b, duration: 1.2 });
+          gsap.to(ambientLight, { intensity: PALETTE.ambientIntensity, duration: 1.2 });
+        }
 
         laserMat.color.setHex(PALETTE.laserColor);
         dustMat.color.setHex(PALETTE.dustColor);
@@ -998,7 +991,7 @@
       }
 
       // ==========================================
-      // 5. VIEW TOGGLE & CAMERA CENTERING
+      // 5. VIEW TOGGLE (SCAN FIX: PURE WHITE SCAN LIGHT)
       // ==========================================
       const tapBadge = document.getElementById('tap-badge');
       const badgeText = document.getElementById('badge-text');
@@ -1014,7 +1007,6 @@
         controls.enabled = false;
         playServoHum();
 
-        // 1. Move Camera Position
         gsap.to(camera.position, {
           x: destPos.x,
           y: destPos.y,
@@ -1023,7 +1015,7 @@
           ease: "power3.inOut"
         });
 
-        // 2. Telephoto Zoom Transition (Eliminates perspective parallax in top view!)
+        // Telephoto Overhead Camera (Eliminates rack leaning parallax)
         gsap.to(camera, {
           fov: isFlat ? 9.0 : 38.0,
           duration: 1.2,
@@ -1031,7 +1023,6 @@
           onUpdate: () => camera.updateProjectionMatrix()
         });
 
-        // 3. Move Camera Orbit Target
         gsap.to(controls.target, {
           x: destTarget.x,
           y: destTarget.y,
@@ -1047,7 +1038,6 @@
           }
         });
 
-        // 4. Floor Contrast Interpolation
         gsap.to(contrastState, {
           progress: isFlat ? 1 : 0,
           duration: 1.2,
@@ -1055,7 +1045,6 @@
           onUpdate: () => updateFloorTransition(contrastState.progress)
         });
 
-        // 5. Specular Reflection Kill in Scan Mode (Stays high-gloss in 3D!)
         gsap.to(unitMaterial, {
           roughness: isFlat ? 0.98 : 0.35,
           metalness: isFlat ? 0.00 : 0.16,
@@ -1063,23 +1052,28 @@
           ease: "power2.inOut"
         });
 
-        // 6. SHADOW KILL ONLY DURING SCAN VIEW:
-        // Turns off castShadow and direct sunlight to prevent any shadow bleed on white modules!
+        // SHADOW & COLOR KILL ONLY IN SCAN MODE:
+        // Ensures the QR background floor is brilliant, pure white across all themes!
         if (isFlat) {
           sunLight.castShadow = false;
           fillLight.castShadow = false;
-          gsap.to(sunLight, { intensity: 0.0, duration: 1.0 });
-          gsap.to(fillLight, { intensity: 0.0, duration: 1.0 });
-          gsap.to(ambientLight, { intensity: 1.55, duration: 1.0 }); // Pure flat ambient overhead light
+          gsap.to(sunLight, { intensity: 0.0, duration: 0.8 });
+          gsap.to(fillLight, { intensity: 0.0, duration: 0.8 });
+          // Force pure neutral white lighting so night mode is never dim/muddy!
+          gsap.to(ambientLight.color, { r: 1.0, g: 1.0, b: 1.0, duration: 0.8 });
+          gsap.to(ambientLight, { intensity: 1.60, duration: 0.8 });
         } else {
           sunLight.castShadow = true;
           fillLight.castShadow = true;
+          gsap.to(sunLight.color, { r: new THREE.Color(PALETTE.sunColor).r, g: new THREE.Color(PALETTE.sunColor).g, b: new THREE.Color(PALETTE.sunColor).b, duration: 1.2 });
           gsap.to(sunLight, { intensity: PALETTE.sunIntensity, duration: 1.2 });
+          gsap.to(fillLight.color, { r: new THREE.Color(PALETTE.fillColor).r, g: new THREE.Color(PALETTE.fillColor).g, b: new THREE.Color(PALETTE.fillColor).b, duration: 1.2 });
           gsap.to(fillLight, { intensity: PALETTE.fillIntensity, duration: 1.2 });
+          gsap.to(ambientLight.color, { r: new THREE.Color(PALETTE.ambientColor).r, g: new THREE.Color(PALETTE.ambientColor).g, b: new THREE.Color(PALETTE.ambientColor).b, duration: 1.2 });
           gsap.to(ambientLight, { intensity: PALETTE.ambientIntensity, duration: 1.2 });
         }
 
-        // 7. Snap Fleet to Exact Cell Centers
+        // Snap Fleet to Exact Cell Centers
         if (isFlat && instancedMesh) {
           for (let f = 0; f < dynamicFleet.length; f++) {
             const unit = dynamicFleet[f];
@@ -1221,7 +1215,6 @@
           controls.update();
         }
 
-        // Delicate, soft dust motes drift
         if (dustParticles) {
           const positions = dustGeo.attributes.position.array;
           for (let i = 0; i < dustPositions.length; i += 3) {

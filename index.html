@@ -244,7 +244,7 @@
         transform: translateY(-1px);
       }
 
-      /* Translucent Semi-Glass Scan View Button (Photo 1 Fix: Crystal Legibility!) */
+      /* Translucent Semi-Glass Scan View Button */
       .scan-pill {
         padding: 7px 18px;
         border-radius: 9999px;
@@ -271,7 +271,7 @@
         z-index: 1;
       }
 
-      /* FLOATING SCAN HINT BADGE (Moved to bottom: 180px - completely separated from search input!) */
+      /* FLOATING SCAN HINT BADGE (Moved to bottom: 180px, auto-hides in scan mode) */
       .tap-badge {
         position: absolute;
         bottom: 180px;
@@ -292,7 +292,7 @@
         -webkit-backdrop-filter: blur(32px) saturate(210%);
         border: 1px solid var(--glass-border);
         box-shadow: var(--glass-highlight), 0 18px 36px rgba(0,0,0,0.35);
-        transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.4, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+        transition: opacity 0.3s ease, transform 0.2s cubic-bezier(0.2, 0.8, 0.4, 1), border-color 0.3s ease, box-shadow 0.3s ease;
       }
       .tap-badge:hover {
         border-color: rgba(255, 255, 255, 0.45);
@@ -308,7 +308,7 @@
         transition: background-color 0.4s ease, box-shadow 0.4s ease;
       }
 
-      /* BOTTOM LIQUID GLASS CONTROL PANEL */
+      /* BOTTOM CONTROL PANEL */
       .bottom-control-panel {
         position: absolute;
         bottom: 22px;
@@ -530,10 +530,10 @@
 
     <div id="toast" class="toast">Snapshot saved & link copied!</div>
 
-    <!-- Floating Hint Badge (Lifted cleanly above input bar!) -->
+    <!-- Floating Hint Badge (Auto-hides in scan mode) -->
     <div id="tap-badge" class="tap-badge tilt-3d">
       <span class="pulse-dot"></span>
-      <span id="badge-text">Tap the warehouse to see QR code</span>
+      <span id="badge-text">Tap for QR, tap again for 3D</span>
     </div>
 
     <!-- Bottom Liquid Glass Control Stack with 3D Tilt Physics -->
@@ -594,7 +594,7 @@
         });
       }
 
-      // Physics-based 3D Tilt for all Liquid Glass Bars
+      // Physics-based 3D Tilt Hover effect
       document.querySelectorAll('.tilt-3d').forEach((el) => {
         el.addEventListener('mousemove', (e) => {
           const rect = el.getBoundingClientRect();
@@ -603,11 +603,9 @@
           const centerX = rect.width / 2;
           const centerY = rect.height / 2;
 
-          // Normalized mouse offset (-1 to 1)
           const deltaX = (x - centerX) / centerX;
           const deltaY = (y - centerY) / centerY;
 
-          // Mouse on left pushes left side down, lifts right side up
           const rotateY = deltaX * 6.5; 
           const rotateX = -deltaY * 5.0;
 
@@ -1054,7 +1052,6 @@
         }
       }
 
-      // 3D Reach Truck (Solid Chassis, Structural Mast Rails)
       function spawnForklift(x, z, dir = 'z') {
         const parts = [];
         function addPart(ox, oy, oz, sx, sy, sz, colorHex) {
@@ -1067,30 +1064,23 @@
           parts.push({ ox: rx, oy: oy, oz: rz, sx: rsx, sy: sy, sz: rsz, idx });
         }
 
-        // Heavy chassis body
-        addPart(0, 0.05, 0.05, 0.62, 0.55, 0.58, PALETTE.forkliftBody);
-        addPart(0, 0.05, 0.28, 0.58, 0.40, 0.16, PALETTE.forkliftCab);
+        addPart(0, 0.08, 0.12, 0.52, 0.45, 0.42, PALETTE.forkliftBody);
+        addPart(0, 0.05, 0.30, 0.50, 0.28, 0.14, PALETTE.forkliftCab);
 
-        // 4 Cab Pillars
-        addPart(-0.22, 0.60, -0.10, 0.09, 0.75, 0.09, PALETTE.forkliftCab);
-        addPart(0.22, 0.60, -0.10, 0.09, 0.75, 0.09, PALETTE.forkliftCab);
-        addPart(-0.22, 0.60, 0.20, 0.09, 0.75, 0.09, PALETTE.forkliftCab);
-        addPart(0.22, 0.60, 0.20, 0.09, 0.75, 0.09, PALETTE.forkliftCab);
-        // Roof Guard
-        addPart(0, 1.35, 0.05, 0.56, 0.08, 0.44, PALETTE.forkliftCab);
-        // Warning Beacon
-        addPart(0, 1.43, 0.05, 0.14, 0.12, 0.14, PALETTE.forkliftBeacon);
+        addPart(-0.20, 0.53, -0.04, 0.05, 1.05, 0.05, PALETTE.forkliftCab);
+        addPart(0.20, 0.53, -0.04, 0.05, 1.05, 0.05, PALETTE.forkliftCab);
+        addPart(-0.20, 0.53, 0.22, 0.05, 1.05, 0.05, PALETTE.forkliftCab);
+        addPart(0.20, 0.53, 0.22, 0.05, 1.05, 0.05, PALETTE.forkliftCab);
+        addPart(0, 1.58, 0.09, 0.46, 0.05, 0.42, PALETTE.forkliftCab);
+        addPart(0, 1.63, 0.09, 0.12, 0.10, 0.12, PALETTE.forkliftBeacon);
 
-        // Twin Mast Rails
-        addPart(-0.16, 0.05, -0.22, 0.09, 1.65, 0.09, PALETTE.forkliftMast);
-        addPart(0.16, 0.05, -0.22, 0.09, 1.65, 0.09, PALETTE.forkliftMast);
-        addPart(0, 0.90, -0.22, 0.32, 0.08, 0.06, PALETTE.forkliftMast);
-        addPart(0, 1.55, -0.22, 0.32, 0.08, 0.06, PALETTE.forkliftMast);
+        addPart(-0.15, 0.05, -0.16, 0.06, 1.80, 0.06, PALETTE.forkliftMast);
+        addPart(0.15, 0.05, -0.16, 0.06, 1.80, 0.06, PALETTE.forkliftMast);
+        addPart(0, 1.40, -0.16, 0.30, 0.06, 0.04, PALETTE.forkliftMast);
 
-        // Forks & Pallet
-        addPart(0, 0.18, -0.26, 0.44, 0.08, 0.08, PALETTE.forkliftCab);
-        addPart(0, 0.20, -0.38, 0.46, 0.08, 0.28, PALETTE.woodPallet);
-        addPart(0, 0.28, -0.38, 0.38, 0.38, 0.24, PALETTE.cargoKraft);
+        addPart(0, 0.20, -0.22, 0.42, 0.06, 0.10, PALETTE.forkliftCab);
+        addPart(0, 0.22, -0.32, 0.44, 0.08, 0.32, PALETTE.woodPallet);
+        addPart(0, 0.30, -0.32, 0.38, 0.44, 0.28, PALETTE.cargoKraft);
 
         dynamicFleet.push({
           baseX: x, baseZ: z, dir: dir,
@@ -1101,7 +1091,6 @@
         });
       }
 
-      // Layered 3D AMR
       function spawnAMR(x, z, dir = 'z') {
         const parts = [];
         function addPart(ox, oy, oz, sx, sy, sz, colorHex) {
@@ -1211,7 +1200,7 @@
           }
         }
 
-        // Built-In Quiet Zone Apron
+        // 2-Module Built-In Quiet Zone Apron
         const margin = 2;
         for (let r = -margin; r < size + margin; r++) {
           for (let c = -margin; c < size + margin; c++) {
@@ -1283,7 +1272,7 @@
       }
 
       // ==========================================
-      // 5. VIEW TOGGLE (BULLETPROOF SCAN ENGINE)
+      // 5. VIEW TOGGLE (AUTO-HIDDEN HINT BADGE)
       // ==========================================
       const tapBadge = document.getElementById('tap-badge');
       const badgeText = document.getElementById('badge-text');
@@ -1293,8 +1282,16 @@
       function toggleView() {
         initAudio();
         isFlat = !isFlat;
-        badgeText.textContent = isFlat ? "Tap to see 3D view" : "Tap the warehouse to see QR code";
+        badgeText.textContent = isFlat ? "Tap to see 3D view" : "Tap for QR, tap again for 3D";
         navBtnText.textContent = isFlat ? "3D Model" : "Scan View";
+
+        // Auto-hide hint badge in scan view so it never blocks the QR code!
+        gsap.to(tapBadge, {
+          opacity: isFlat ? 0 : 1,
+          y: isFlat ? 15 : 0,
+          duration: 0.3,
+          pointerEvents: isFlat ? 'none' : 'auto'
+        });
 
         const destPos = isFlat ? flatPos : isoPos;
         const destTarget = isFlat ? flatTarget : isoTarget;

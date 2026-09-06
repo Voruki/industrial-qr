@@ -654,7 +654,6 @@
           uiAccentGlow: 'rgba(255, 85, 0, 0.45)',
           uiSecondary: '#FFA200',
 
-          // QR Icon Gradient Stops for Day Shift
           iconGrad1: '#FF5500',
           iconGrad2: '#FFA200',
 
@@ -711,7 +710,6 @@
           uiAccentGlow: 'rgba(0, 200, 255, 0.45)',
           uiSecondary: '#38BDF8',
 
-          // QR Icon Gradient Stops for Cold Storage
           iconGrad1: '#00C8FF',
           iconGrad2: '#0077FF',
 
@@ -768,7 +766,6 @@
           uiAccentGlow: 'rgba(16, 185, 129, 0.45)',
           uiSecondary: '#34D399',
 
-          // QR Icon Gradient Stops for Night Shift
           iconGrad1: '#10B981',
           iconGrad2: '#34D399',
 
@@ -844,13 +841,11 @@
         document.getElementById('blob-3').style.background = t.blob3;
         document.getElementById('bg-vignette').style.background = t.vignette;
 
-        // Update dust particle color and size
         if (dustMat) {
           dustMat.color.setHex(t.dustColor);
-          dustMat.size = 1.2; // Larger, clearly visible particles
+          dustMat.size = 1.2;
         }
 
-        // Update Scan QR Icon Gradient Stops
         const stop1 = document.getElementById('gradStop1');
         const stop2 = document.getElementById('gradStop2');
         if (stop1 && stop2) {
@@ -1066,7 +1061,7 @@
       }
       dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPositions, 3));
       const dustMat = new THREE.PointsMaterial({
-        size: 1.2, // Larger, clearly visible floating particles
+        size: 1.2,
         map: createSoftParticleTexture(),
         color: PALETTE.dustColor,
         transparent: true,
